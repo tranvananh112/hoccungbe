@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+</head>
+
+<body>
+    <h1>Test Page</h1>
+    <button id="testBtn">Click me</button>
+    <div id="result"></div>
+
+    <script>
+        console.log('Test script loaded');
+        document.getElementById('testBtn').onclick = function () {
+            document.getElementById('result').textContent = 'Button works!';
+            alert('Success!');
+        };
+    </script>
+</body>
+
+</html>
