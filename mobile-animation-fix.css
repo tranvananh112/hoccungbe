@@ -1,0 +1,230 @@
+/* ========================================
+   FIX ANIMATION NHÁY LOẠN TRÊN MOBILE
+   Tắt/giảm animations gây lag
+   ======================================== */
+
+/* Detect mobile và tắt animations nặng */
+@media (max-width: 768px),
+(hover: none) and (pointer: coarse) {
+
+    /* TẮT HOÀN TOÀN các animation nặng */
+    .nav-logo,
+    .hero-mascot,
+    .theme-icon-home,
+    .word-image,
+    .bee-body,
+    .icon-float,
+    .icon-glow {
+        animation: none !important;
+    }
+
+    /* Giảm animation cho letter slots */
+    .letter-slot.empty {
+        animation: slotPulseSlow 3s infinite !important;
+    }
+
+    @keyframes slotPulseSlow {
+
+        0%,
+        100% {
+            border-color: var(--mint);
+        }
+
+        50% {
+            border-color: var(--orange);
+        }
+    }
+
+    /* Giảm animation cho draggable letters */
+    .draggable-letter {
+        animation: none !important;
+    }
+
+    /* TẮT animation khi đang kéo (gây nháy nhiều nhất) */
+    .drag-clone {
+        animation: none !important;
+    }
+
+    /* Giảm character animations */
+    .animated-character .character-emoji {
+        animation: characterBounceSlow 1s ease-in-out 3 !important;
+        /* Chỉ bounce 3 lần rồi dừng */
+    }
+
+    @keyframes characterBounceSlow {
+
+        0%,
+        100% {
+            transform: translateY(0) scale(1);
+        }
+
+        50% {
+            transform: translateY(-20px) scale(1.05);
+        }
+    }
+
+    /* Tắt tất cả character animations phức tạp */
+    .anim-walk,
+    .anim-run,
+    .anim-jump,
+    .anim-fly,
+    .anim-swim,
+    .anim-bounce,
+    .anim-spin,
+    .anim-wave,
+    .anim-shake,
+    .anim-flutter,
+    .anim-waddle,
+    .anim-peck,
+    .anim-drive,
+    .anim-bloom,
+    .anim-sway,
+    .anim-twinkle,
+    .anim-float,
+    .anim-steam {
+        animation: simpleBounce 0.8s ease-in-out 2 !important;
+        /* Chỉ bounce 2 lần */
+    }
+
+    @keyframes simpleBounce {
+
+        0%,
+        100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+    }
+
+    /* Giảm confetti */
+    .confetti,
+    .confetti-advanced {
+        display: none !important;
+        /* Tắt hoàn toàn confetti trên mobile */
+    }
+
+    /* Tắt floating icons background */
+    .floating-icon {
+        animation: none !important;
+        opacity: 0.3 !important;
+    }
+
+    /* Giảm popup animations */
+    .popup-character {
+        animation: characterDanceSlow 1s ease-in-out 2 !important;
+    }
+
+    @keyframes characterDanceSlow {
+
+        0%,
+        100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    /* Tắt hover effects gây lag */
+    .nav-item:hover,
+    .game-btn:hover,
+    .avatar-btn:hover,
+    .theme-card-home:hover {
+        transform: none !important;
+    }
+
+    /* Giảm transition times */
+    * {
+        transition-duration: 0.15s !important;
+    }
+
+    /* Tắt box-shadow animations */
+    .user-coins:hover,
+    .user-stars:hover,
+    .user-avatar:hover {
+        box-shadow: none !important;
+        transform: none !important;
+    }
+
+    /* Tối ưu scroll performance */
+    .words-learned-list,
+    .icon-picker,
+    .shop-items-grid,
+    .custom-words-list {
+        -webkit-overflow-scrolling: touch;
+        will-change: scroll-position;
+    }
+
+    /* Tắt 3D transforms gây lag */
+    .game-btn::before {
+        display: none !important;
+    }
+
+    /* Giảm shadow effects */
+    .main-navbar,
+    .game-display,
+    .word-slots,
+    .letters-pool {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    }
+}
+
+/* Tối ưu cho thiết bị cực yếu */
+@media (max-width: 480px) {
+
+    /* Tắt GẦN NHƯ TẤT CẢ animations */
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    /* Chỉ giữ lại animations quan trọng */
+    .page.active {
+        animation: fadeInFast 0.2s ease !important;
+    }
+
+    @keyframes fadeInFast {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    .letter-slot.filled {
+        animation: popInFast 0.3s ease !important;
+    }
+
+    @keyframes popInFast {
+        0% {
+            transform: scale(0.8);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+}
+
+/* Tối ưu cho reduce motion preference */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* Force GPU acceleration cho smooth scrolling */
+.page,
+.main-content,
+.game-area {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}

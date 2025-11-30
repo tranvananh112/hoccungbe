@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* ========================================
    TRANSITION FIX - Chuyển câu mượt đơn giản
    Chỉ dùng CSS, không cần JavaScript phức tạp
@@ -32,4 +33,40 @@
     .letters-pool {
         transition-duration: 0.15s;
     }
+=======
+/* ========================================
+   TRANSITION FIX - Chuyển câu mượt đơn giản
+   Chỉ dùng CSS, không cần JavaScript phức tạp
+   ======================================== */
+
+/* Tối ưu rendering với GPU */
+.game-display,
+.word-slots,
+.letters-pool {
+    will-change: opacity;
+    transition: opacity 0.2s ease;
+}
+
+/* Fade effect khi chuyển câu */
+.game-display.loading,
+.word-slots.loading,
+.letters-pool.loading {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+/* Smooth page transitions */
+.page {
+    transition: opacity 0.25s ease;
+}
+
+/* Tối ưu cho mobile */
+@media (max-width: 768px) {
+
+    .game-display,
+    .word-slots,
+    .letters-pool {
+        transition-duration: 0.15s;
+    }
+>>>>>>> 24c03eda35bab541d2f3fd43d47c2f7b5555ba3f
 }
