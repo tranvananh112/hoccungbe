@@ -30,21 +30,10 @@
             }
         }
 
-        // Disable heavy animations
-        document.body.classList.add('reduce-motion');
+        // Add mobile class để CSS tự động tối ưu
+        document.body.classList.add('mobile-optimized');
 
-        // Tắt animations gây nháy
-        console.log('📱 Disabling heavy animations for mobile...');
-
-        // Tắt animation cho các elements gây lag
-        var heavyAnimElements = document.querySelectorAll(
-            '.nav-logo, .hero-mascot, .theme-icon-home, .word-image, ' +
-            '.bee-body, .icon-float, .icon-glow, .draggable-letter'
-        );
-
-        heavyAnimElements.forEach(function (el) {
-            el.style.animation = 'none';
-        });
+        console.log('📱 Mobile animations optimized via CSS');
     }
 
     // Prevent zoom on double tap

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Tất Cả Giọng Nói</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+
+        .voice-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .voice-item.vietnamese {
+            border-color: #4caf50;
+            background: #e8f5e9;
+        }
+
+        .voice-item.microsoft {
+            border-color: #2196f3;
+            background: #e3f2fd;
+        }
+
+        .voice-info {
+            flex: 1;
+        }
+
+        .voice-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        .voice-lang {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .voice-details {
+            color: #999;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #FF9F43, #FF6B6B);
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .test-text {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-family: inherit;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-num {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .recommended {
+            background: #fff3cd !important;
+            border-color: #ffc107 !important;
+        }
+
+        .recommended::before {
+            content: '⭐ ';
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🔊 Test Tất Cả Giọng Nói</h1>
+
+        <div class="info">
+            <strong>📌 Hướng dẫn:</strong>
+            <ul>
+                <li>Trang này hiển thị TẤT CẢ giọng nói có sẵn trên trình duyệt của bạn</li>
+                <li>Giọng <strong style="color: #4caf50;">màu xanh</strong> = Tiếng Việt</li>
+                <li>Giọng <strong style="color: #2196f3;">màu xanh dương</strong> = Microsoft (Edge)</li>
+                <li>Giọng <strong style="color: #ffc107;">màu vàng ⭐</strong> = Được khuyên dùng</li>
+                <li>Click nút "Test" để nghe thử từng giọng</li>
+            </ul>
+        </div>
+
+        <div class="stats" id="stats"></div>
+
+        <div class="test-section">
+            <h2>🎤 Test Giọng Nói</h2>
+            <textarea class="test-text" id="testText"
+                rows="3">Xin chào! Đây là giọng đọc tiếng Việt. Con hãy học chữ cùng cô nhé!</textarea>
+            <button onclick="testAllVietnamese()">🔊 Test Tất Cả Giọng Việt</button>
+        </div>
+
+        <div class="test-section">
+            <h2>📋 Danh Sách Giọng Nói</h2>
+            <div id="voicesList"></div>
+        </div>
+    </div>
+
+    <script>
+        let voices = [];
+        let currentUtterance = null;
+
+        function loadVoices() {
+            voices = speechSynthesis.getVoices();
+            console.log('📊 Total voices:', voices.length);
+
+            if (voices.length > 0) {
+                displayStats();
+                displayVoices();
+            }
+        }
+
+        function displayStats() {
+            const vietnamese = voices.filter(v => v.lang.startsWith('vi'));
+            const microsoft = voices.filter(v => v.name.includes('Microsoft'));
+            const google = voices.filter(v => v.name.includes('Google'));
+            const local = voices.filter(v => v.localService);
+
+            const statsHTML = `
+                <div class="stat-box">
+                    <div class="stat-num">${voices.length}</div>
+                    <div class="stat-label">Tổng số giọng</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num">${vietnamese.length}</div>
+                    <div class="stat-label">Giọng Tiếng Việt</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num">${microsoft.length}</div>
+                    <div class="stat-label">Microsoft (Edge)</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num">${google.length}</div>
+                    <div class="stat-label">Google</div>
+                </div>
+            `;
+            document.getElementById('stats').innerHTML = statsHTML;
+        }
+
+        function displayVoices() {
+            const voicesList = document.getElementById('voicesList');
+
+            // Sắp xếp: Tiếng Việt trước, Microsoft trước, local trước
+            const sortedVoices = [...voices].sort((a, b) => {
+                const aVi = a.lang.startsWith('vi') ? 1 : 0;
+                const bVi = b.lang.startsWith('vi') ? 1 : 0;
+                if (aVi !== bVi) return bVi - aVi;
+
+                const aMs = a.name.includes('Microsoft') ? 1 : 0;
+                const bMs = b.name.includes('Microsoft') ? 1 : 0;
+                if (aMs !== bMs) return bMs - aMs;
+
+                const aLocal = a.localService ? 1 : 0;
+                const bLocal = b.localService ? 1 : 0;
+                return bLocal - aLocal;
+            });
+
+            voicesList.innerHTML = sortedVoices.map((voice, index) => {
+                const isVietnamese = voice.lang.startsWith('vi');
+                const isMicrosoft = voice.name.includes('Microsoft');
+                const isRecommended = isVietnamese && (
+                    voice.name.includes('Hoa') ||
+                    voice.name.includes('Microsoft') ||
+                    voice.name.includes('Google')
+                );
+
+                let classes = 'voice-item';
+                if (isVietnamese) classes += ' vietnamese';
+                if (isMicrosoft) classes += ' microsoft';
+                if (isRecommended) classes += ' recommended';
+
+                return `
+                    <div class="${classes}">
+                        <div class="voice-info">
+                            <div class="voice-name">${voice.name}</div>
+                            <div class="voice-lang">
+                                🌍 ${voice.lang} 
+                                ${voice.localService ? '💻 Local' : '☁️ Online'}
+                                ${voice.default ? '⭐ Default' : ''}
+                            </div>
+                            <div class="voice-details">
+                                URI: ${voice.voiceURI}
+                            </div>
+                        </div>
+                        <button onclick="testVoice(${index})">🔊 Test</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function testVoice(index) {
+            const voice = voices[index];
+            const text = document.getElementById('testText').value;
+
+            // Stop current speech
+            speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.voice = voice;
+            utterance.lang = voice.lang;
+            utterance.rate = 0.95;
+            utterance.pitch = 1.2;
+            utterance.volume = 1.0;
+
+            utterance.onstart = () => {
+                console.log('▶️ Playing:', voice.name);
+            };
+
+            utterance.onend = () => {
+                console.log('✅ Finished:', voice.name);
+            };
+
+            utterance.onerror = (e) => {
+                console.error('❌ Error:', voice.name, e);
+            };
+
+            currentUtterance = utterance;
+            speechSynthesis.speak(utterance);
+        }
+
+        function testAllVietnamese() {
+            const vietnamese = voices.filter(v => v.lang.startsWith('vi'));
+            const text = document.getElementById('testText').value;
+
+            if (vietnamese.length === 0) {
+                alert('❌ Không tìm thấy giọng tiếng Việt!');
+                return;
+            }
+
+            speechSynthesis.cancel();
+
+            let index = 0;
+            function playNext() {
+                if (index >= vietnamese.length) {
+                    console.log('✅ Đã test xong tất cả giọng Việt!');
+                    return;
+                }
+
+                const voice = vietnamese[index];
+                console.log(`🔊 Testing ${index + 1}/${vietnamese.length}: ${voice.name}`);
+
+                const utterance = new SpeechSynthesisUtterance(
+                    `Giọng số ${index + 1}: ${voice.name}. ${text}`
+                );
+                utterance.voice = voice;
+                utterance.lang = voice.lang;
+                utterance.rate = 0.95;
+                utterance.pitch = 1.2;
+
+                utterance.onend = () => {
+                    index++;
+                    setTimeout(playNext, 500); // Delay 500ms giữa các giọng
+                };
+
+                utterance.onerror = () => {
+                    index++;
+                    setTimeout(playNext, 500);
+                };
+
+                speechSynthesis.speak(utterance);
+            }
+
+            playNext();
+        }
+
+        // Load voices
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = loadVoices;
+        }
+        loadVoices();
+        setTimeout(loadVoices, 500);
+        setTimeout(loadVoices, 1000);
+
+        console.log('✅ Test page loaded');
+        console.log('Browser:', navigator.userAgent);
+    </script>
+</body>
+
+</html>

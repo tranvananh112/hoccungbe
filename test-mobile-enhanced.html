@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Test Mobile Enhanced</title>
+    <link rel="stylesheet" href="styles.css?v=18">
+    <link rel="stylesheet" href="mobile-enhanced.css?v=1">
+    <style>
+        body {
+            padding: 20px;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .test-section {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-section h2 {
+            margin-top: 0;
+            color: #FF6B6B;
+        }
+
+        .test-btn {
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 1.1rem;
+            font-family: inherit;
+            font-weight: 700;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #FF9F43, #FF6B6B);
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+
+        .test-btn:active {
+            transform: scale(0.95) translateY(3px);
+        }
+
+        .demo-letters {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            padding: 20px;
+            background: linear-gradient(135deg, #E6E6FA, #FFB6C1);
+            border-radius: 20px;
+            min-height: 120px;
+        }
+
+        .demo-letter {
+            width: 65px;
+            height: 65px;
+            background: linear-gradient(135deg, #FFE66D, #FFD93D);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 900;
+            color: #8B4513;
+            cursor: grab;
+            box-shadow: 0 5px 0 #D4A017, 0 8px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s;
+            user-select: none;
+            touch-action: none;
+        }
+
+        .demo-letter:active {
+            transform: scale(1.25);
+            cursor: grabbing;
+        }
+
+        .demo-slots {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        .demo-slot {
+            width: 60px;
+            height: 70px;
+            background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
+            border: 5px dashed #98D8C8;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            font-weight: 800;
+            transition: all 0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .demo-slot.highlight {
+            transform: scale(1.4) translateY(-8px);
+            border-color: #FF6B6B;
+            border-style: solid;
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.3), rgba(255, 159, 67, 0.3));
+            box-shadow: 0 0 30px rgba(255, 107, 107, 0.8);
+        }
+
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .log-entry {
+            margin: 5px 0;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 5px;
+        }
+
+        .status.success {
+            background: #98D8C8;
+            color: #333;
+        }
+
+        .status.error {
+            background: #FF6B6B;
+            color: white;
+        }
+
+        .status.info {
+            background: #74B9FF;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 style="text-align: center; color: #FF6B6B;">🎨 Test Mobile Enhanced</h1>
+
+    <!-- Audio Test -->
+    <div class="test-section">
+        <h2>🔊 Audio Test</h2>
+        <button class="test-btn" onclick="testUnlockAudio()">🔓 Unlock Audio</button>
+        <button class="test-btn" onclick="testSpeak()">🗣️ Speak Vietnamese</button>
+        <button class="test-btn" onclick="testLetterSound()">🔤 Letter Sound (A)</button>
+        <button class="test-btn" onclick="testStopSound()">⏹️ Stop Sound</button>
+        <button class="test-btn" onclick="testSoundEffect()">🎵 Sound Effect</button>
+        <button class="test-btn" onclick="testHaptic()">📳 Haptic Feedback</button>
+        <div id="audioStatus"></div>
+    </div>
+
+    <!-- Drag & Drop Test -->
+    <div class="test-section">
+        <h2>👆 Drag & Drop Test</h2>
+        <div class="demo-slots">
+            <div class="demo-slot" data-char="M">?</div>
+            <div class="demo-slot" data-char="È">?</div>
+            <div class="demo-slot" data-char="O">?</div>
+        </div>
+        <div class="demo-letters">
+            <div class="demo-letter draggable-letter" data-char="M">M</div>
+            <div class="demo-letter draggable-letter" data-char="È">È</div>
+            <div class="demo-letter draggable-letter" data-char="O">O</div>
+            <div class="demo-letter draggable-letter" data-char="A">A</div>
+            <div class="demo-letter draggable-letter" data-char="B">B</div>
+        </div>
+        <p style="text-align: center; color: #666;">Kéo chữ cái vào ô đúng để ghép từ "MÈO"</p>
+    </div>
+
+    <!-- Gestures Test -->
+    <div class="test-section">
+        <h2>✋ Gestures Test</h2>
+        <button class="test-btn" id="longPressBtn">👆 Long Press Me</button>
+        <button class="test-btn" id="doubleTapBtn">👆👆 Double Tap Me</button>
+        <div id="gestureStatus"></div>
+    </div>
+
+    <!-- Performance Test -->
+    <div class="test-section">
+        <h2>⚡ Performance Test</h2>
+        <button class="test-btn" onclick="testDeviceInfo()">📱 Device Info</button>
+        <button class="test-btn" onclick="testFPS()">📊 Show FPS</button>
+        <button class="test-btn" onclick="testMemory()">💾 Memory Info</button>
+        <div id="performanceStatus"></div>
+    </div>
+
+    <!-- Animation Test -->
+    <div class="test-section">
+        <h2>🎨 Animation Test</h2>
+        <button class="test-btn" onclick="testConfetti()">🎉 Confetti</button>
+        <button class="test-btn" onclick="testCharacterAnimation()">🐱 Character Animation</button>
+        <button class="test-btn" onclick="testParticleBurst()">💥 Particle Burst</button>
+        <div id="animationStatus"></div>
+    </div>
+
+    <!-- Log -->
+    <div class="test-section">
+        <h2>📝 Console Log</h2>
+        <button class="test-btn" onclick="clearLog()">🗑️ Clear Log</button>
+        <div class="log" id="logContainer"></div>
+    </div>
+
+    <!-- Confetti Container -->
+    <div id="confettiContainer" style="position:fixed;inset:0;pointer-events:none;z-index:9999;"></div>
+
+    <!-- Scripts -->
+    <script src="mobile-audio-enhanced.js?v=1"></script>
+    <script src="mobile-gestures.js?v=1"></script>
+    <script src="mobile-performance.js?v=1"></script>
+    <script src="animations.js?v=20"></script>
+
+    <script>
+        // Log helper
+        function log(message, type = 'info') {
+            var logContainer = document.getElementById('logContainer');
+            var entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = new Date().toLocaleTimeString() + ' - ' + message;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('logContainer').innerHTML = '';
+        }
+
+        function showStatus(containerId, message, type = 'info') {
+            var container = document.getElementById(containerId);
+            var status = document.createElement('span');
+            status.className = 'status ' + type;
+            status.textContent = message;
+            container.innerHTML = '';
+            container.appendChild(status);
+        }
+
+        // Audio Tests
+        async function testUnlockAudio() {
+            try {
+                await MobileAudioEnhanced.unlock();
+                log('✅ Audio unlocked successfully');
+                showStatus('audioStatus', '✅ Audio Unlocked', 'success');
+            } catch (e) {
+                log('❌ Audio unlock failed: ' + e);
+                showStatus('audioStatus', '❌ Failed', 'error');
+            }
+        }
+
+        async function testSpeak() {
+            try {
+                await MobileAudioEnhanced.speak('Xin chào bé yêu! Chúc bé học tốt!', {
+                    rate: 0.95,
+                    pitch: 1.4,
+                    volume: 1.0
+                });
+                log('✅ Speech completed');
+                showStatus('audioStatus', '✅ Speech OK', 'success');
+            } catch (e) {
+                log('❌ Speech failed: ' + e);
+                showStatus('audioStatus', '❌ Failed', 'error');
+            }
+        }
+
+        function testLetterSound() {
+            MobileAudioEnhanced.startLetterSound('A');
+            log('🔊 Letter sound started (A)');
+            showStatus('audioStatus', '🔊 Playing...', 'info');
+        }
+
+        function testStopSound() {
+            MobileAudioEnhanced.stopLetterSound();
+            log('⏹️ Letter sound stopped');
+            showStatus('audioStatus', '⏹️ Stopped', 'info');
+        }
+
+        function testSoundEffect() {
+            MobileAudioEnhanced.playSound('success');
+            log('🎵 Sound effect played');
+            showStatus('audioStatus', '🎵 Sound OK', 'success');
+        }
+
+        function testHaptic() {
+            MobileAudioEnhanced.haptic('medium');
+            log('📳 Haptic feedback triggered');
+            showStatus('audioStatus', '📳 Haptic OK', 'success');
+        }
+
+        // Gesture Tests
+        var longPressBtn = document.getElementById('longPressBtn');
+        longPressBtn.addEventListener('longpress', function (e) {
+            log('👆 Long press detected!');
+            showStatus('gestureStatus', '👆 Long Press!', 'success');
+            MobileAudioEnhanced.haptic('medium');
+        });
+
+        var doubleTapBtn = document.getElementById('doubleTapBtn');
+        doubleTapBtn.addEventListener('doubletap', function (e) {
+            log('👆👆 Double tap detected!');
+            showStatus('gestureStatus', '👆👆 Double Tap!', 'success');
+            MobileAudioEnhanced.haptic('light');
+        });
+
+        // Performance Tests
+        function testDeviceInfo() {
+            var info = MobilePerformance.detectDevicePerformance();
+            log('📱 Device: ' + info.cores + ' cores, ' + info.memory + 'GB RAM');
+            log('⚡ Low-end: ' + info.isLowEnd);
+            showStatus('performanceStatus',
+                '📱 ' + info.cores + ' cores, ' + info.memory + 'GB',
+                info.isLowEnd ? 'error' : 'success');
+        }
+
+        function testFPS() {
+            log('📊 FPS monitor enabled (check top-right corner)');
+            showStatus('performanceStatus', '📊 FPS Monitor ON', 'info');
+        }
+
+        function testMemory() {
+            if (performance.memory) {
+                var used = Math.round(performance.memory.usedJSHeapSize / 1048576);
+                var total = Math.round(performance.memory.totalJSHeapSize / 1048576);
+                log('💾 Memory: ' + used + 'MB / ' + total + 'MB');
+                showStatus('performanceStatus', '💾 ' + used + 'MB / ' + total + 'MB', 'info');
+            } else {
+                log('⚠️ Memory API not available');
+                showStatus('performanceStatus', '⚠️ Not Available', 'error');
+            }
+        }
+
+        // Animation Tests
+        function testConfetti() {
+            if (window.GameAnimations) {
+                GameAnimations.createAdvancedConfetti();
+                log('🎉 Confetti created');
+                showStatus('animationStatus', '🎉 Confetti!', 'success');
+            } else {
+                log('❌ GameAnimations not loaded');
+                showStatus('animationStatus', '❌ Not Available', 'error');
+            }
+        }
+
+        function testCharacterAnimation() {
+            if (window.GameAnimations) {
+                // Create container if not exists
+                var container = document.getElementById('characterAnimationContainer');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'characterAnimationContainer';
+                    container.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9998;pointer-events:none;';
+                    document.body.appendChild(container);
+                }
+
+                GameAnimations.playCharacterAnimation('🐱', 'Mèo');
+                log('🐱 Character animation played');
+                showStatus('animationStatus', '🐱 Animation!', 'success');
+            } else {
+                log('❌ GameAnimations not loaded');
+                showStatus('animationStatus', '❌ Not Available', 'error');
+            }
+        }
+
+        function testParticleBurst() {
+            if (window.GameAnimations) {
+                GameAnimations.createParticleBurst(
+                    window.innerWidth / 2,
+                    window.innerHeight / 2,
+                    '#FFD700'
+                );
+                log('💥 Particle burst created');
+                showStatus('animationStatus', '💥 Burst!', 'success');
+            } else {
+                log('❌ GameAnimations not loaded');
+                showStatus('animationStatus', '❌ Not Available', 'error');
+            }
+        }
+
+        // Initial log
+        log('🚀 Test page loaded');
+        log('📱 Device: ' + (MobileAudioEnhanced.isMobile ? 'Mobile' : 'Desktop'));
+        log('🍎 iOS: ' + (MobileAudioEnhanced.isIOS ? 'Yes' : 'No'));
+    </script>
+</body>
+
+</html>

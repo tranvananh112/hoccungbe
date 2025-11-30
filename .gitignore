@@ -1,0 +1,42 @@
+# Documentation files (có thể xóa nếu không cần)
+*.md
+!README.md
+
+# Test files
+test-*.html
+test-*.js
+
+# Backup files
+*.backup.js
+*.backup.css
+*.backup.html
+
+# SQL setup files (đã chạy rồi)
+*.sql
+
+# Temporary files
+*.tmp
+*.temp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Node modules (nếu có)
+node_modules/
+
+# Environment variables
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build files (nếu có)
+dist/
+build/

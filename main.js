@@ -173,20 +173,38 @@
     if (window.speechSynthesis) {
       cachedVoices = window.speechSynthesis.getVoices();
       if (cachedVoices.length > 0) {
-        // ✅ ƯU TIÊN: Google tiếng Việt (giọng ban đầu)
+        // ✅ ƯU TIÊN 1: Microsoft Hoa (giọng cô gái Edge - TỐT NHẤT!)
         preferredVoice = cachedVoices.find(function (v) {
-          return v.name.includes('Google') && v.lang.startsWith('vi');
+          return (v.name.includes('Microsoft Hoa') || v.name.includes('Hoa')) && v.lang.startsWith('vi');
         });
 
         if (preferredVoice) {
-          console.log('✅ Giọng chính:', preferredVoice.name);
+          console.log('✅ Giọng chính (Microsoft Hoa):', preferredVoice.name);
         } else {
-          // Fallback: Tìm giọng Việt bất kỳ
+          // ✅ ƯU TIÊN 2: Bất kỳ giọng Microsoft tiếng Việt
           preferredVoice = cachedVoices.find(function (v) {
-            return v.lang.startsWith('vi');
+            return v.name.includes('Microsoft') && v.lang.startsWith('vi');
           });
+
           if (preferredVoice) {
-            console.log('⚠️ Dùng giọng Việt:', preferredVoice.name);
+            console.log('✅ Giọng Microsoft:', preferredVoice.name);
+          } else {
+            // ✅ ƯU TIÊN 3: Google tiếng Việt
+            preferredVoice = cachedVoices.find(function (v) {
+              return v.name.includes('Google') && v.lang.startsWith('vi');
+            });
+
+            if (preferredVoice) {
+              console.log('⚠️ Giọng Google:', preferredVoice.name);
+            } else {
+              // Fallback: Tìm giọng Việt bất kỳ
+              preferredVoice = cachedVoices.find(function (v) {
+                return v.lang.startsWith('vi');
+              });
+              if (preferredVoice) {
+                console.log('⚠️ Dùng giọng Việt:', preferredVoice.name);
+              }
+            }
           }
         }
       }
@@ -241,7 +259,10 @@
         callback();
       };
       utterance.onerror = function (e) {
-        console.error('❌ Lỗi đọc:', e);
+        // Chỉ log lỗi nếu không phải 'interrupted'
+        if (e.error !== 'interrupted') {
+          console.error('❌ Lỗi đọc:', e);
+        }
         callback();
       };
     }
@@ -295,7 +316,10 @@
       };
 
       utterance.onerror = function (e) {
-        console.error('❌ Lỗi phát âm:', e);
+        // Chỉ log lỗi nếu không phải 'interrupted' (lỗi bình thường khi user tương tác nhanh)
+        if (e.error !== 'interrupted') {
+          console.error('❌ Lỗi phát âm:', e);
+        }
       };
 
       currentLetterUtterance = utterance;
@@ -909,51 +933,70 @@
 
   // ========== GAME LOGIC ==========
   function loadWord() {
-    // Kiểm tra custom lesson trước
-    if (gameState.customLesson && gameState.customLesson.words) {
-      loadCustomLessonWord();
-      return;
-    }
+    // ✨ Thêm loading class để fade out
+    var gameDisplay = document.querySelector('.game-display');
+    var wordSlots = document.getElementById('wordSlots');
+    var lettersPool = document.getElementById('lettersPool');
 
-    // Lấy từ theo chủ đề
-    var themeData = window.WordThemes && window.WordThemes[gameState.currentTheme];
-    if (!themeData) themeData = wordData;
+    if (gameDisplay) gameDisplay.classList.add('loading');
+    if (wordSlots) wordSlots.classList.add('loading');
+    if (lettersPool) lettersPool.classList.add('loading');
 
-    var words = themeData['level' + gameState.currentLevel];
-    if (!words) return;
+    // ✅ Sử dụng requestAnimationFrame thay vì setTimeout (mượt hơn)
+    requestAnimationFrame(function () {
+      // Kiểm tra custom lesson trước
+      if (gameState.customLesson && gameState.customLesson.words) {
+        loadCustomLessonWord();
+        return;
+      }
 
-    // CHỌN TỪ THÔNG MINH: Ưu tiên từ mới, tránh lặp lại
-    currentWord = selectSmartWord(words);
-    if (!currentWord) {
-      // Nếu đã học hết, reset và bắt đầu lại
-      gameState.currentWordIndex = 0;
-      currentWord = words[0];
-    }
+      // Lấy từ theo chủ đề
+      var themeData = window.WordThemes && window.WordThemes[gameState.currentTheme];
+      if (!themeData) themeData = wordData;
 
-    console.log('Loading word:', currentWord.word);
+      var words = themeData['level' + gameState.currentLevel];
+      if (!words) return;
 
-    var gameLevel = document.getElementById('gameLevel');
-    var gameWordNum = document.getElementById('gameWordNum');
-    var gameTotalWords = document.getElementById('gameTotalWords');
-    var gameStars = document.getElementById('gameStars');
-    var wordImage = document.getElementById('wordImage');
-    var imageLabel = document.getElementById('imageLabel');
-    var instructionText = document.getElementById('instructionText');
+      // CHỌN TỪ THÔNG MINH: Ưu tiên từ mới, tránh lặp lại
+      currentWord = selectSmartWord(words);
+      if (!currentWord) {
+        // Nếu đã học hết, reset và bắt đầu lại
+        gameState.currentWordIndex = 0;
+        currentWord = words[0];
+      }
 
-    if (gameLevel) gameLevel.textContent = gameState.currentLevel;
-    if (gameWordNum) gameWordNum.textContent = gameState.currentWordIndex + 1;
-    if (gameTotalWords) gameTotalWords.textContent = words.length;
-    if (gameStars) gameStars.textContent = gameState.totalStars;
-    if (wordImage) wordImage.textContent = currentWord.image;
-    if (imageLabel) imageLabel.textContent = currentWord.label;
-    if (instructionText) instructionText.textContent = 'Bé hãy ghép chữ: ' + currentWord.label + ' nhé! 💪';
+      console.log('Loading word:', currentWord.word);
 
-    renderSlots();
-    renderLetters();
+      var gameLevel = document.getElementById('gameLevel');
+      var gameWordNum = document.getElementById('gameWordNum');
+      var gameTotalWords = document.getElementById('gameTotalWords');
+      var gameStars = document.getElementById('gameStars');
+      var wordImage = document.getElementById('wordImage');
+      var imageLabel = document.getElementById('imageLabel');
+      var instructionText = document.getElementById('instructionText');
 
-    // ✅ Phát âm NGAY LẬP TỨC với prefix THÔNG MINH
-    var sentence = getSmartSentence(currentWord, themeData);
-    speakVietnamese(sentence);
+      if (gameLevel) gameLevel.textContent = gameState.currentLevel;
+      if (gameWordNum) gameWordNum.textContent = gameState.currentWordIndex + 1;
+      if (gameTotalWords) gameTotalWords.textContent = words.length;
+      if (gameStars) gameStars.textContent = gameState.totalStars;
+      if (wordImage) wordImage.textContent = currentWord.image;
+      if (imageLabel) imageLabel.textContent = currentWord.label;
+      if (instructionText) instructionText.textContent = 'Bé hãy ghép chữ: ' + currentWord.label + ' nhé! 💪';
+
+      renderSlots();
+      renderLetters();
+
+      // ✨ Remove loading class ngay sau khi render
+      requestAnimationFrame(function () {
+        if (gameDisplay) gameDisplay.classList.remove('loading');
+        if (wordSlots) wordSlots.classList.remove('loading');
+        if (lettersPool) lettersPool.classList.remove('loading');
+      });
+
+      // ✅ Phát âm NGAY LẬP TỨC với prefix THÔNG MINH
+      var sentence = getSmartSentence(currentWord, themeData);
+      speakVietnamese(sentence);
+    });
   }
 
   function loadCustomLessonWord() {
@@ -1003,33 +1046,42 @@
   function renderSlots() {
     var container = document.getElementById('wordSlots');
     if (!container) return;
-    container.innerHTML = '';
+
+    // ✅ TỐI ƯU: Sử dụng DocumentFragment
+    var fragment = document.createDocumentFragment();
 
     // Lấy text từ word hoặc sentence
     var text = currentWord.word || currentWord.sentence || '';
     var chars = text.split('');
 
+    // ✅ Tạo tất cả elements trong fragment
     for (var i = 0; i < chars.length; i++) {
       var char = chars[i];
       if (char === ' ') {
         var space = document.createElement('div');
         space.className = 'letter-slot space';
-        container.appendChild(space);
+        fragment.appendChild(space);
       } else {
         var slot = document.createElement('div');
         slot.className = 'letter-slot empty';
         slot.setAttribute('data-index', i);
         slot.setAttribute('data-char', char);
         slot.textContent = '?';
-        container.appendChild(slot);
+        fragment.appendChild(slot);
       }
     }
+
+    // ✅ Clear và append 1 lần (giảm reflow)
+    container.innerHTML = '';
+    container.appendChild(fragment);
   }
 
   function renderLetters() {
     var container = document.getElementById('lettersPool');
     if (!container) return;
-    container.innerHTML = '';
+
+    // ✅ TỐI ƯU: Sử dụng DocumentFragment để giảm reflow
+    var fragment = document.createDocumentFragment();
 
     // Lấy text từ word hoặc sentence
     var text = currentWord.word || currentWord.sentence || '';
@@ -1043,39 +1095,37 @@
 
     var allChars = shuffle(wordChars.concat(extras));
 
-    // ✅ Đợi container render xong để lấy kích thước chính xác
-    setTimeout(function () {
-      // ✅ RẢI RÁC chữ cái trên màn hình - TÍNH TOÁN CHÍNH XÁC
-      var containerWidth = container.clientWidth;
-      var containerHeight = container.clientHeight;
+    // ✅ Lấy kích thước TRƯỚC khi clear (tránh reflow)
+    var containerWidth = container.clientWidth || 800;
+    var containerHeight = container.clientHeight || 140;
+    var letterSize = window.innerWidth < 768 ? 50 : 60;
+    var padding = 15;
+    var safeWidth = containerWidth - (padding * 2) - letterSize;
+    var safeHeight = containerHeight - (padding * 2) - letterSize - 10;
 
-      // Kích thước chữ cái (responsive)
-      var letterSize = window.innerWidth < 768 ? 50 : 60;
-      var padding = 15; // Padding an toàn từ mép
-      var usedPositions = [];
+    // ✅ Clear sau khi lấy kích thước
+    container.innerHTML = '';
 
-      // Tính vùng an toàn - ĐẢM BẢO chữ KHÔNG BỊ CHE
-      var safeWidth = containerWidth - (padding * 2) - letterSize;
-      var safeHeight = containerHeight - (padding * 2) - letterSize - 10; // Thêm 10px an toàn
+    // ✅ TỐI ƯU: Tạo tất cả elements trong fragment (1 lần reflow)
+    var usedPositions = [];
+    for (var i = 0; i < allChars.length; i++) {
+      var char = allChars[i];
+      var letter = document.createElement('div');
+      letter.className = 'draggable-letter';
+      letter.textContent = char;
+      letter.setAttribute('data-char', char);
 
-      console.log('Container:', containerWidth, 'x', containerHeight, 'Letter size:', letterSize);
+      // ✅ Tìm vị trí ngẫu nhiên
+      var position = findRandomPosition(safeWidth, safeHeight, letterSize, usedPositions, padding);
+      letter.style.left = position.x + 'px';
+      letter.style.top = position.y + 'px';
+      usedPositions.push(position);
 
-      for (var i = 0; i < allChars.length; i++) {
-        var char = allChars[i];
-        var letter = document.createElement('div');
-        letter.className = 'draggable-letter';
-        letter.textContent = char;
-        letter.setAttribute('data-char', char);
+      fragment.appendChild(letter);
+    }
 
-        // ✅ Tìm vị trí ngẫu nhiên không trùng lặp TRONG VÙNG AN TOÀN
-        var position = findRandomPosition(safeWidth, safeHeight, letterSize, usedPositions, padding);
-        letter.style.left = position.x + 'px';
-        letter.style.top = position.y + 'px';
-        usedPositions.push(position);
-
-        container.appendChild(letter);
-      }
-    }, 50); // Delay nhỏ để container render xong
+    // ✅ Append 1 lần duy nhất (giảm reflow)
+    container.appendChild(fragment);
   }
 
   // ✅ Tìm vị trí ngẫu nhiên - RẢI NGANG GIỐNG BAN ĐẦU

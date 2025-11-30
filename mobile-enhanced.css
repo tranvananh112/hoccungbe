@@ -1,0 +1,592 @@
+/* ========================================
+   MOBILE ENHANCED - Nâng cấp giao diện mobile
+   Hiệu ứng mượt mà 60fps, animations chuyên nghiệp
+   ======================================== */
+
+/* ========== HARDWARE ACCELERATION ========== */
+* {
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    -webkit-perspective: 1000;
+}
+
+/* ========== SMOOTH ANIMATIONS ========== */
+@media (max-width: 768px) {
+
+    /* Tối ưu transitions cho mobile */
+    .nav-item,
+    .game-btn,
+    .draggable-letter,
+    .letter-slot,
+    .btn-play-big {
+        transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+            box-shadow 0.2s ease,
+            background 0.2s ease !important;
+        will-change: transform;
+    }
+
+    /* ========== ENHANCED DRAG & DROP ========== */
+    .draggable-letter {
+        width: 65px !important;
+        height: 65px !important;
+        font-size: 2.2rem !important;
+        box-shadow: 0 6px 0 #D4A017, 0 10px 20px rgba(0, 0, 0, 0.25) !important;
+        transform: translateZ(0);
+    }
+
+    .draggable-letter:active {
+        transform: scale(1.25) translateZ(0) !important;
+        box-shadow: 0 10px 0 #D4A017, 0 20px 40px rgba(255, 215, 0, 0.6) !important;
+        transition: transform 0.1s ease !important;
+    }
+
+    .drag-clone {
+        width: 100px !important;
+        height: 100px !important;
+        font-size: 3rem !important;
+        box-shadow: 0 25px 70px rgba(255, 107, 107, 0.7),
+            0 0 40px rgba(255, 159, 67, 0.9) !important;
+        animation: dragPulse 0.3s infinite alternate,
+            dragGlow 0.5s infinite alternate !important;
+        filter: brightness(1.3) drop-shadow(0 0 20px rgba(255, 159, 67, 0.8));
+    }
+
+    @keyframes dragPulse {
+        0% {
+            transform: scale(1.2) rotate(-3deg);
+        }
+
+        100% {
+            transform: scale(1.35) rotate(3deg);
+        }
+    }
+
+    @keyframes dragGlow {
+        0% {
+            filter: brightness(1.2) drop-shadow(0 0 15px rgba(255, 159, 67, 0.6));
+        }
+
+        100% {
+            filter: brightness(1.5) drop-shadow(0 0 30px rgba(255, 107, 107, 0.9));
+        }
+    }
+
+    /* ========== LETTER SLOTS ENHANCED ========== */
+    .letter-slot {
+        width: 60px !important;
+        height: 70px !important;
+        font-size: 2.2rem !important;
+        border-width: 5px !important;
+        transition: all 0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+    }
+
+    .letter-slot.highlight {
+        transform: scale(1.4) translateY(-8px) !important;
+        border-color: var(--coral) !important;
+        border-style: solid !important;
+        background: linear-gradient(135deg, rgba(255, 107, 107, 0.3), rgba(255, 159, 67, 0.3)) !important;
+        box-shadow: 0 0 30px rgba(255, 107, 107, 0.8),
+            0 10px 25px rgba(0, 0, 0, 0.3),
+            inset 0 0 20px rgba(255, 255, 255, 0.5) !important;
+        animation: slotGlow 0.5s infinite alternate !important;
+    }
+
+    @keyframes slotGlow {
+        0% {
+            box-shadow: 0 0 25px rgba(255, 107, 107, 0.6),
+                0 8px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        100% {
+            box-shadow: 0 0 40px rgba(255, 107, 107, 1),
+                0 12px 30px rgba(0, 0, 0, 0.35),
+                inset 0 0 25px rgba(255, 255, 255, 0.7);
+        }
+    }
+
+    .letter-slot.filled {
+        animation: popInMobile 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+    }
+
+    @keyframes popInMobile {
+        0% {
+            transform: scale(0.2) rotate(-180deg);
+            opacity: 0;
+        }
+
+        60% {
+            transform: scale(1.3) rotate(10deg);
+        }
+
+        80% {
+            transform: scale(0.9) rotate(-5deg);
+        }
+
+        100% {
+            transform: scale(1) rotate(0deg);
+            opacity: 1;
+        }
+    }
+
+    /* ========== WORD IMAGE ANIMATIONS ========== */
+    .word-image {
+        font-size: 120px !important;
+        animation: mobileWiggle 3s ease-in-out infinite,
+            mobileBounce 2s ease-in-out infinite !important;
+        filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.2));
+    }
+
+    @keyframes mobileWiggle {
+
+        0%,
+        100% {
+            transform: rotate(-5deg) scale(1);
+        }
+
+        25% {
+            transform: rotate(5deg) scale(1.05);
+        }
+
+        50% {
+            transform: rotate(-3deg) scale(1.1);
+        }
+
+        75% {
+            transform: rotate(3deg) scale(1.05);
+        }
+    }
+
+    @keyframes mobileBounce {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-15px);
+        }
+    }
+
+    /* ========== BUTTONS ENHANCED ========== */
+    .game-btn {
+        min-width: 120px !important;
+        padding: 16px 24px !important;
+        font-size: 1.1rem !important;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    .game-btn:active {
+        transform: scale(0.92) translateY(3px) !important;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .btn-play-big {
+        padding: 20px 45px !important;
+        font-size: 1.5rem !important;
+        box-shadow: 0 8px 0 #c0392b, 0 12px 30px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .btn-play-big:active {
+        transform: translateY(5px) scale(0.95) !important;
+        box-shadow: 0 3px 0 #c0392b, 0 5px 15px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    /* ========== SUCCESS POPUP ENHANCED ========== */
+    .success-popup.show .popup-content {
+        animation: mobilePopupIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+    }
+
+    @keyframes mobilePopupIn {
+        0% {
+            transform: scale(0.3) rotate(-180deg);
+            opacity: 0;
+        }
+
+        60% {
+            transform: scale(1.15) rotate(10deg);
+        }
+
+        80% {
+            transform: scale(0.95) rotate(-5deg);
+        }
+
+        100% {
+            transform: scale(1) rotate(0deg);
+            opacity: 1;
+        }
+    }
+
+    .popup-character {
+        font-size: 100px !important;
+        animation: mobileCharacterDance 0.6s infinite !important;
+    }
+
+    @keyframes mobileCharacterDance {
+
+        0%,
+        100% {
+            transform: rotate(-15deg) scale(1);
+        }
+
+        25% {
+            transform: rotate(15deg) scale(1.15);
+        }
+
+        50% {
+            transform: rotate(-10deg) scale(1.2);
+        }
+
+        75% {
+            transform: rotate(10deg) scale(1.15);
+        }
+    }
+
+    /* ========== CONFETTI ENHANCED ========== */
+    .confetti,
+    .confetti-advanced {
+        width: 15px !important;
+        height: 15px !important;
+        animation: mobileConfettiFall 3.5s linear forwards !important;
+    }
+
+    @keyframes mobileConfettiFall {
+        0% {
+            transform: translateY(-100px) rotate(0deg) scale(0);
+            opacity: 0;
+        }
+
+        10% {
+            opacity: 1;
+            transform: translateY(0) rotate(180deg) scale(1);
+        }
+
+        100% {
+            transform: translateY(calc(100vh + 50px)) rotate(1080deg) scale(0.5);
+            opacity: 0;
+        }
+    }
+
+    /* ========== CELEBRATION OVERLAY ========== */
+    .celebration-overlay {
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+
+    .celebration-content {
+        animation: celebrationBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+    }
+
+    @keyframes celebrationBounce {
+        0% {
+            transform: scale(0) rotate(-180deg);
+            opacity: 0;
+        }
+
+        60% {
+            transform: scale(1.2) rotate(10deg);
+        }
+
+        80% {
+            transform: scale(0.9) rotate(-5deg);
+        }
+
+        100% {
+            transform: scale(1) rotate(0deg);
+            opacity: 1;
+        }
+    }
+
+    .celebration-title {
+        font-size: 2.5rem !important;
+        animation: titlePulse 1s infinite alternate !important;
+    }
+
+    @keyframes titlePulse {
+        0% {
+            transform: scale(1);
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        100% {
+            transform: scale(1.1);
+            text-shadow: 0 0 40px rgba(255, 215, 0, 1),
+                0 0 60px rgba(255, 159, 67, 0.8);
+        }
+    }
+
+    /* ========== FLOATING ANIMATIONS ========== */
+    .celebration-animals {
+        animation: animalsFloat 2s ease-in-out infinite !important;
+    }
+
+    @keyframes animalsFloat {
+
+        0%,
+        100% {
+            transform: translateY(0) rotate(-5deg);
+        }
+
+        50% {
+            transform: translateY(-20px) rotate(5deg);
+        }
+    }
+
+    /* ========== NAVIGATION ENHANCED ========== */
+    .nav-item {
+        min-width: 60px !important;
+        min-height: 60px !important;
+    }
+
+    .nav-item:active {
+        transform: scale(0.9) translateY(2px) !important;
+    }
+
+    .nav-icon {
+        font-size: 28px !important;
+        transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+    }
+
+    .nav-item:active .nav-icon {
+        transform: scale(1.3) rotate(15deg) !important;
+    }
+
+    /* ========== TOUCH FEEDBACK ========== */
+    .touchable {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .touchable::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .touchable:active::after {
+        width: 300px;
+        height: 300px;
+    }
+
+    /* ========== LEVEL BOXES ENHANCED ========== */
+    .level-box {
+        transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+    }
+
+    .level-box:active {
+        transform: scale(0.95) translateY(5px) !important;
+    }
+
+    .level-badge {
+        font-size: 50px !important;
+        animation: badgeFloat 3s ease-in-out infinite !important;
+    }
+
+    @keyframes badgeFloat {
+
+        0%,
+        100% {
+            transform: translateY(0) rotate(-10deg);
+        }
+
+        50% {
+            transform: translateY(-15px) rotate(10deg);
+        }
+    }
+
+    /* ========== THEME CARDS ENHANCED ========== */
+    .theme-card-home {
+        transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+    }
+
+    .theme-card-home:active {
+        transform: scale(0.92) !important;
+    }
+
+    .theme-icon-home {
+        font-size: 3.5em !important;
+        animation: themeIconFloat 3s ease-in-out infinite !important;
+    }
+
+    @keyframes themeIconFloat {
+
+        0%,
+        100% {
+            transform: translateY(0) scale(1);
+        }
+
+        50% {
+            transform: translateY(-12px) scale(1.1);
+        }
+    }
+
+    /* ========== LOADING SCREEN ENHANCED ========== */
+    .loading-bee {
+        font-size: 80px !important;
+        animation: loadingBeeFloat 2s ease-in-out infinite !important;
+    }
+
+    @keyframes loadingBeeFloat {
+
+        0%,
+        100% {
+            transform: translateY(0) rotate(-10deg) scale(1);
+        }
+
+        25% {
+            transform: translateY(-20px) rotate(5deg) scale(1.1);
+        }
+
+        50% {
+            transform: translateY(-30px) rotate(0deg) scale(1.15);
+        }
+
+        75% {
+            transform: translateY(-20px) rotate(-5deg) scale(1.1);
+        }
+    }
+
+    .loading-progress {
+        animation: loadingPulse 1.5s ease-in-out infinite !important;
+    }
+
+    @keyframes loadingPulse {
+
+        0%,
+        100% {
+            transform: scaleX(0.3);
+            opacity: 0.5;
+        }
+
+        50% {
+            transform: scaleX(1);
+            opacity: 1;
+        }
+    }
+
+    /* ========== SMOOTH SCROLLING ========== */
+    .page {
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
+
+    /* ========== REDUCE MOTION FOR ACCESSIBILITY ========== */
+    @media (prefers-reduced-motion: reduce) {
+
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+
+    /* ========== HAPTIC FEEDBACK VISUAL ========== */
+    @keyframes hapticPulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(255, 159, 67, 0.7);
+        }
+
+        100% {
+            box-shadow: 0 0 0 20px rgba(255, 159, 67, 0);
+        }
+    }
+
+    .haptic-feedback {
+        animation: hapticPulse 0.4s ease-out !important;
+    }
+
+    /* ========== PERFORMANCE OPTIMIZATIONS ========== */
+    .letters-pool,
+    .word-slots,
+    .game-display {
+        transform: translateZ(0);
+        backface-visibility: hidden;
+        perspective: 1000px;
+    }
+
+    /* ========== GESTURE HINTS ========== */
+    .drag-hint {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 3rem;
+        opacity: 0;
+        pointer-events: none;
+        animation: dragHintPulse 2s infinite;
+    }
+
+    @keyframes dragHintPulse {
+
+        0%,
+        100% {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.8);
+        }
+
+        50% {
+            opacity: 0.6;
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+    }
+
+    /* ========== IMPROVED TOUCH TARGETS ========== */
+    .avatar-btn,
+    .sticker-pick,
+    .icon-option {
+        min-width: 55px !important;
+        min-height: 55px !important;
+        font-size: 32px !important;
+    }
+
+    /* ========== CELEBRATION STARS ========== */
+    .celebration-stars {
+        font-size: 3rem !important;
+        animation: starsRotate 3s linear infinite !important;
+    }
+
+    @keyframes starsRotate {
+        0% {
+            transform: rotate(0deg) scale(1);
+        }
+
+        50% {
+            transform: rotate(180deg) scale(1.2);
+        }
+
+        100% {
+            transform: rotate(360deg) scale(1);
+        }
+    }
+
+}
+
+/* ========== LANDSCAPE MODE ========== */
+@media (max-width: 768px) and (orientation: landscape) {
+    .word-image {
+        font-size: 80px !important;
+    }
+
+    .game-info-bar {
+        padding: 8px 20px !important;
+    }
+
+    .letter-slot {
+        width: 50px !important;
+        height: 60px !important;
+    }
+
+    .draggable-letter {
+        width: 55px !important;
+        height: 55px !important;
+    }
+}
