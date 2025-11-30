@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamestva Admin Pro - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="admin-pro-styles.css?v=1">
+</head>
+
+<body>
+    <div class="admin-container">
+        <!-- Login Screen -->
+        <div class="admin-login" id="adminLogin">
+            <div class="login-box">
+                <div class="login-logo">🔐</div>
+                <h1>Admin Dashboard</h1>
+                <form id="adminLoginForm">
+                    <input type="text" id="adminUsername" placeholder="Username" required>
+                    <input type="password" id="adminPassword" placeholder="Password" required>
+                    <button type="submit">Đăng nhập</button>
+                </form>
+                <div class="error-msg" id="loginError"></div>
+                <a href="auth.html" class="back-link">← Quay lại trang chủ</a>
+            </div>
+        </div>
+
+        <!-- Dashboard Pro -->
+        <div class="admin-dashboard-pro" id="adminDashboard" style="display: none;">
+
+            <!-- Sidebar -->
+            <aside class="admin-sidebar">
+                <div class="sidebar-header">
+                    <div class="logo">
+                        <i class="fas fa-gamepad"></i>
+                        <span>Gamestva</span>
+                    </div>
+                    <button class="sidebar-toggle" id="sidebarToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <a href="#" class="nav-item active" data-tab="overview">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Tổng quan</span>
+                    </a>
+                    <a href="#" class="nav-item" data-tab="users">
+                        <i class="fas fa-users"></i>
+                        <span>Người dùng</span>
+                        <span class="badge" id="usersBadge">0</span>
+                    </a>
+                    <a href="#" class="nav-item" data-tab="devices">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>Thiết bị</span>
+                    </a>
+                    <a href="#" class="nav-item" data-tab="activity">
+                        <i class="fas fa-bolt"></i>
+                        <span>Hoạt động</span>
+                    </a>
+                    <a href="#" class="nav-item" data-tab="stats">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Thống kê</span>
+                    </a>
+                    <a href="#" class="nav-item" data-tab="settings">
+                        <i class="fas fa-cog"></i>
+                        <span>Cài đặt</span>
+                    </a>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <div class="admin-profile">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <div class="profile-info">
+                            <div class="profile-name">Admin</div>
+                            <div class="profile-role">Super Admin</div>
+                        </div>
+                    </div>
+                    <button class="btn-logout-sidebar" id="btnLogoutSidebar">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="admin-main">
+                <!-- Top Bar -->
+                <header class="top-bar">
+                    <div class="top-bar-left">
+                        <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <div class="page-title">
+                            <h1 id="pageTitle">Tổng quan</h1>
+                            <p id="pageSubtitle">Chào mừng trở lại, Admin!</p>
+                        </div>
+                    </div>
+                    <div class="top-bar-right">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Tìm kiếm..." id="globalSearch">
+                        </div>
+                        <button class="icon-btn" id="btnNotifications">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-dot"></span>
+                        </button>
+                        <button class="icon-btn" id="btnRefresh" title="Làm mới">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button class="icon-btn" id="btnTheme" title="Đổi theme">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                        <button class="btn-logout" id="btnLogout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Đăng xuất</span>
+                        </button>
+                    </div>
+                </header>
+
+                <!-- Overview Tab -->
+                <div class="admin-content active" id="contentOverview">
+                    <div class="admin-stats-grid">
+                        <div class="stat-card-large">
+                            <div class="stat-icon">👥</div>
+                            <div class="stat-value" id="totalUsers">0</div>
+                            <div class="stat-label">Tổng người dùng</div>
+                        </div>
+                        <div class="stat-card-large highlight-green">
+                            <div class="stat-icon">🟢</div>
+                            <div class="stat-value" id="onlineNow">0</div>
+                            <div class="stat-label">Đang online</div>
+                            <div class="stat-sublabel">Realtime</div>
+                        </div>
+                        <div class="stat-card-large">
+                            <div class="stat-icon">🎮</div>
+                            <div class="stat-value" id="activeToday">0</div>
+                            <div class="stat-label">Hoạt động hôm nay</div>
+                        </div>
+                        <div class="stat-card-large">
+                            <div class="stat-icon">⭐</div>
+                            <div class="stat-value" id="totalStars">0</div>
+                            <div class="stat-label">Tổng sao</div>
+                        </div>
+                        <div class="stat-card-large">
+                            <div class="stat-icon">💰</div>
+                            <div class="stat-value" id="totalCoins">0</div>
+                            <div class="stat-label">Tổng xu</div>
+                        </div>
+                        <div class="stat-card-large">
+                            <div class="stat-icon">📱</div>
+                            <div class="stat-value" id="totalSessions">0</div>
+                            <div class="stat-label">Sessions hôm nay</div>
+                        </div>
+                    </div>
+
+                    <div class="charts-row">
+                        <div class="chart-card">
+                            <h3>📊 Thiết bị truy cập</h3>
+                            <div class="device-breakdown" id="deviceBreakdown">
+                                <p style="text-align: center; color: #999;">Đang tải...</p>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h3>🌐 Trình duyệt</h3>
+                            <div class="browser-breakdown" id="browserBreakdown">
+                                <p style="text-align: center; color: #999;">Đang tải...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="online-devices-section">
+                        <h3>🟢 Thiết bị đang online (<span id="onlineCount">0</span>)</h3>
+                        <div class="online-devices-list" id="onlineDevicesList">
+                            <p style="text-align: center; color: #999;">Đang tải...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users Tab -->
+                <div class="admin-content" id="contentUsers">
+                    <div class="users-filters">
+                        <input type="text" id="userSearch" placeholder="🔍 Tìm kiếm user..." />
+                        <select id="userFilter">
+                            <option value="all">Tất cả</option>
+                            <option value="online">Đang online</option>
+                            <option value="today">Hoạt động hôm nay</option>
+                            <option value="week">Hoạt động tuần này</option>
+                        </select>
+                    </div>
+                    <div class="users-section">
+                        <div class="users-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Tên</th>
+                                        <th>Email</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thiết bị</th>
+                                        <th>Lần cuối</th>
+                                        <th>Tiến độ</th>
+                                        <th>Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTableBody">
+                                    <tr>
+                                        <td colspan="7" style="text-align: center;">Đang tải...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Devices Tab -->
+                <div class="admin-content" id="contentDevices">
+                    <div class="devices-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon">📱</div>
+                            <div class="stat-value" id="mobileCount">0</div>
+                            <div class="stat-label">Mobile</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">💻</div>
+                            <div class="stat-value" id="desktopCount">0</div>
+                            <div class="stat-label">Desktop</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📟</div>
+                            <div class="stat-value" id="tabletCount">0</div>
+                            <div class="stat-label">Tablet</div>
+                        </div>
+                    </div>
+                    <div class="devices-list" id="devicesList">
+                        <p style="text-align: center; color: #999;">Đang tải...</p>
+                    </div>
+                </div>
+
+                <!-- Activity Tab -->
+                <div class="admin-content" id="contentActivity">
+                    <div class="activity-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon">🎮</div>
+                            <div class="stat-value" id="totalGames">0</div>
+                            <div class="stat-label">Games hôm nay</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📚</div>
+                            <div class="stat-value" id="totalWords">0</div>
+                            <div class="stat-label">Từ học hôm nay</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⏱️</div>
+                            <div class="stat-value" id="avgDuration">0</div>
+                            <div class="stat-label">Thời gian TB (phút)</div>
+                        </div>
+                    </div>
+                    <div class="activity-feed-container">
+                        <h3>📋 Hoạt động gần đây</h3>
+                        <div class="activity-feed" id="activityFeed">
+                            <p style="text-align: center; color: #999;">Đang tải...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Tab -->
+                <div class="admin-content" id="contentStats">
+                    <div class="timeline-controls">
+                        <select id="timelineRange">
+                            <option value="7">7 ngày qua</option>
+                            <option value="14">14 ngày qua</option>
+                            <option value="30" selected>30 ngày qua</option>
+                        </select>
+                        <button class="btn-calculate-stats" id="btnCalculateStats">🔄 Tính toán lại</button>
+                    </div>
+                    <div class="timeline-chart" id="timelineChart">
+                        <p style="text-align: center; color: #999;">Đang tải...</p>
+                    </div>
+                    <div class="timeline-table-container">
+                        <div class="timeline-table" id="timelineTable">
+                            <p style="text-align: center; color: #999;">Đang tải...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div class="admin-content" id="contentSettings">
+                    <div class="settings-section">
+                        <h2>⚙️ Cài đặt hệ thống</h2>
+                        <p style="text-align: center; color: #999; padding: 40px;">Tính năng đang được phát triển...</p>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- User Detail Modal -->
+    <div class="modal" id="userDetailModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModal">&times;</span>
+            <h2 id="modalTitle">👤 Chi tiết người dùng</h2>
+
+            <div class="user-info" id="userInfo"></div>
+
+            <div class="user-detail-grid">
+                <div class="user-info-card">
+                    <h3>📋 Thông tin cơ bản</h3>
+                    <div id="userBasicInfo"></div>
+                </div>
+                <div class="user-stats-card">
+                    <h3>📊 Thống kê</h3>
+                    <div id="userStatsInfo"></div>
+                </div>
+            </div>
+
+            <div class="modal-tabs">
+                <button class="modal-tab active" data-tab="devices">📱 Thiết bị</button>
+                <button class="modal-tab" data-tab="sessions">🕐 Sessions</button>
+                <button class="modal-tab" data-tab="activity">🎮 Hoạt động</button>
+                <button class="modal-tab" data-tab="notes">📝 Ghi chú</button>
+                <button class="modal-tab" data-tab="actions">⚙️ Hành động</button>
+            </div>
+
+            <div class="modal-tab-content active" id="tabDevices">
+                <h3>📱 Thiết bị của user</h3>
+                <div id="userDevicesList">
+                    <p style="text-align: center; color: #999;">Đang tải...</p>
+                </div>
+            </div>
+
+            <div class="modal-tab-content" id="tabSessions">
+                <h3>🕐 Lịch sử sessions (20 gần nhất)</h3>
+                <div id="userSessionsList">
+                    <p style="text-align: center; color: #999;">Đang tải...</p>
+                </div>
+            </div>
+
+            <div class="modal-tab-content" id="tabActivity">
+                <h3>🎮 Hoạt động chi tiết (50 gần nhất)</h3>
+                <div class="activity-list" id="userActivityList">
+                    <p style="text-align: center; color: #999;">Đang tải...</p>
+                </div>
+            </div>
+
+            <div class="modal-tab-content" id="tabNotes">
+                <h3>📝 Ghi chú của Admin</h3>
+                <textarea id="noteInput" placeholder="Nhập ghi chú về user này..." rows="3"></textarea>
+                <button class="btn-add-note" id="btnAddNote">➕ Thêm ghi chú</button>
+                <div class="notes-list" id="notesList">
+                    <p style="text-align: center; color: #999;">Chưa có ghi chú nào</p>
+                </div>
+            </div>
+
+            <div class="modal-tab-content" id="tabActions">
+                <h3>⚙️ Hành động quản trị</h3>
+                <div class="admin-actions">
+                    <button class="btn-reset-password" id="btnResetPassword">
+                        🔑 Gửi email đặt lại mật khẩu
+                    </button>
+                    <p class="action-note">⚠️ User sẽ nhận email để đặt lại mật khẩu. Admin không thể xem mật khẩu cũ vì
+                        lý do bảo mật.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js?v=30"></script>
+    <script src="admin-enhanced.js?v=2"></script>
+</body>
+
+</html>

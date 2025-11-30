@@ -1,0 +1,184 @@
+/* ========================================
+   SNOW EFFECT - Hiệu ứng tuyết rơi nhẹ nhàng
+   ======================================== */
+
+/* Container cho tuyết */
+.snow-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: hidden;
+}
+
+/* Bông tuyết */
+.snowflake {
+    position: absolute;
+    top: -10px;
+    color: white;
+    font-size: 1em;
+    font-family: Arial, sans-serif;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+    animation: snowfall linear infinite, swing 3s ease-in-out infinite;
+    opacity: 0.8;
+}
+
+/* Animation rơi với rung động qua lại */
+@keyframes snowfall {
+    0% {
+        transform: translateY(0) translateX(0) rotate(0deg);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 0.8;
+        transform: translateY(10vh) translateX(-10px) rotate(36deg);
+    }
+
+    20% {
+        transform: translateY(20vh) translateX(10px) rotate(72deg);
+    }
+
+    30% {
+        transform: translateY(30vh) translateX(-15px) rotate(108deg);
+    }
+
+    40% {
+        transform: translateY(40vh) translateX(15px) rotate(144deg);
+    }
+
+    50% {
+        transform: translateY(50vh) translateX(-20px) rotate(180deg);
+    }
+
+    60% {
+        transform: translateY(60vh) translateX(20px) rotate(216deg);
+    }
+
+    70% {
+        transform: translateY(70vh) translateX(-15px) rotate(252deg);
+    }
+
+    80% {
+        transform: translateY(80vh) translateX(15px) rotate(288deg);
+    }
+
+    90% {
+        opacity: 0.8;
+        transform: translateY(90vh) translateX(-10px) rotate(324deg);
+    }
+
+    100% {
+        transform: translateY(100vh) translateX(0) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Animation rung động nhẹ tại chỗ */
+@keyframes swing {
+
+    0%,
+    100% {
+        transform: translateX(0) rotate(0deg) scale(1);
+    }
+
+    25% {
+        transform: translateX(-8px) rotate(-8deg) scale(1.05);
+    }
+
+    50% {
+        transform: translateX(0) rotate(0deg) scale(1);
+    }
+
+    75% {
+        transform: translateX(8px) rotate(8deg) scale(1.05);
+    }
+}
+
+/* Các kích thước bông tuyết khác nhau */
+.snowflake:nth-child(3n) {
+    font-size: 0.8em;
+    animation-duration: 12s, 2.5s;
+}
+
+.snowflake:nth-child(3n+1) {
+    font-size: 1.2em;
+    animation-duration: 15s, 3s;
+}
+
+.snowflake:nth-child(3n+2) {
+    font-size: 1em;
+    animation-duration: 18s, 3.5s;
+}
+
+/* Độ trễ khác nhau */
+.snowflake:nth-child(5n) {
+    animation-delay: 0s;
+}
+
+.snowflake:nth-child(5n+1) {
+    animation-delay: 1s;
+}
+
+.snowflake:nth-child(5n+2) {
+    animation-delay: 2s;
+}
+
+.snowflake:nth-child(5n+3) {
+    animation-delay: 3s;
+}
+
+.snowflake:nth-child(5n+4) {
+    animation-delay: 4s;
+}
+
+/* Vị trí ngang khác nhau */
+.snowflake:nth-child(7n) {
+    left: 10%;
+}
+
+.snowflake:nth-child(7n+1) {
+    left: 20%;
+}
+
+.snowflake:nth-child(7n+2) {
+    left: 30%;
+}
+
+.snowflake:nth-child(7n+3) {
+    left: 40%;
+}
+
+.snowflake:nth-child(7n+4) {
+    left: 50%;
+}
+
+.snowflake:nth-child(7n+5) {
+    left: 60%;
+}
+
+.snowflake:nth-child(7n+6) {
+    left: 70%;
+}
+
+/* Tuyết rơi chậm hơn trên mobile để tiết kiệm pin */
+@media (max-width: 768px) {
+    .snowflake {
+        animation-duration: 20s !important;
+    }
+
+    /* Ẩn một số bông tuyết trên mobile */
+    .snowflake:nth-child(n+21) {
+        display: none;
+    }
+}
+
+/* Tắt hiệu ứng nếu người dùng prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .snow-container {
+        display: none;
+    }
+}

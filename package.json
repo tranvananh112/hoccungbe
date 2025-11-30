@@ -1,0 +1,13 @@
+{
+  "name": "hoc-doc-danh-van-gamestva",
+  "version": "1.0.0",
+  "description": "Game ghép chữ học đọc tiếng Việt cho bé 3-7 tuổi",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["vietnamese", "kids", "education", "spelling", "game"],
+  "author": "",
+  "license": "MIT"
+}
