@@ -66,43 +66,90 @@
         e.preventDefault();
         hideMessages();
 
-        const name = document.getElementById('registerName').value;
-        const email = document.getElementById('registerEmail').value;
+        const name = document.getElementById('registerName').value.trim();
+        const email = document.getElementById('registerEmail').value.trim().toLowerCase();
         const password = document.getElementById('registerPassword').value;
         const confirmPassword = document.getElementById('registerConfirmPassword').value;
         const submitBtn = this.querySelector('.btn-submit');
 
-        // Validate
-        if (password !== confirmPassword) {
-            showError('Mật khẩu xác nhận không khớp!');
+        // Validate name
+        if (!name || name.length < 2) {
+            showError('Tên phải có ít nhất 2 ký tự!');
             return;
         }
 
+        // Validate email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            showError('Email không hợp lệ!');
+            return;
+        }
+
+        // Validate password
         if (password.length < 6) {
             showError('Mật khẩu phải có ít nhất 6 ký tự!');
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            showError('Mật khẩu xác nhận không khớp!');
             return;
         }
 
         submitBtn.disabled = true;
         submitBtn.textContent = '⏳ Đang đăng ký...';
 
-        const result = await window.SupabaseConfig.signUp(email, password, {
-            full_name: name,
-            role: 'parent'
-        });
+        try {
+            const result = await window.SupabaseConfig.signUp(email, password, {
+                full_name: name,
+                role: 'parent',
+                email: email
+            });
 
-        if (result.success) {
-            showSuccess('Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.');
-            registerForm.reset();
-            submitBtn.disabled = false;
-            submitBtn.textContent = '📝 Đăng ký';
+            if (result.success) {
+                // Kiểm tra xem có cần confirm email không
+                const needsConfirmation = result.data?.user?.identities?.length === 0;
 
-            // Switch to login tab after 3 seconds
-            setTimeout(() => {
-                document.querySelector('[data-tab="login"]').click();
-            }, 3000);
-        } else {
-            showError(result.error || 'Đăng ký thất bại. Email có thể đã được sử dụng.');
+                if (needsConfirmation) {
+                    showSuccess('Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.');
+                } else {
+                    showSuccess('Đăng ký thành công! Bạn có thể đăng nhập ngay.');
+                }
+
+                registerForm.reset();
+                submitBtn.disabled = false;
+                submitBtn.textContent = '📝 Đăng ký';
+
+                // Switch to login tab after 3 seconds
+                setTimeout(() => {
+                    document.querySelector('[data-tab="login"]').click();
+                }, 3000);
+            } else {
+                // Xử lý các loại lỗi cụ thể
+                let errorMsg = 'Đăng ký thất bại. ';
+
+                if (result.error.includes('already registered') || result.error.includes('already exists')) {
+                    errorMsg += 'Email này đã được đăng ký. Vui lòng đăng nhập hoặc dùng email khác.';
+                } else if (result.error.includes('invalid email')) {
+                    errorMsg += 'Email không hợp lệ.';
+                } else if (result.error.includes('weak password')) {
+                    errorMsg += 'Mật khẩu quá yếu. Vui lòng dùng mật khẩu mạnh hơn.';
+                } else if (result.error.includes('500') || result.error.includes('Internal')) {
+                    errorMsg += 'Lỗi server. Vui lòng thử lại sau hoặc liên hệ admin.';
+                } else {
+                    errorMsg += result.error;
+                }
+
+                showError(errorMsg);
+                submitBtn.disabled = false;
+                submitBtn.textContent = '📝 Đăng ký';
+
+                // Log lỗi để debug
+                console.error('❌ Signup error:', result.error);
+            }
+        } catch (error) {
+            console.error('❌ Signup exception:', error);
+            showError('Lỗi không xác định. Vui lòng thử lại sau.');
             submitBtn.disabled = false;
             submitBtn.textContent = '📝 Đăng ký';
         }
