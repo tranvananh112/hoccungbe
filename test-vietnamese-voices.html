@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Giọng Việt Nam</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .info-box {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .info-box h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .info-box ul {
+            margin-left: 20px;
+            color: #555;
+        }
+
+        .info-box li {
+            margin: 5px 0;
+        }
+
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+        }
+
+        .test-section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .voice-item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .voice-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .voice-item.recommended {
+            border-color: #4CAF50;
+            background: #f1f8f4;
+        }
+
+        .voice-info {
+            flex: 1;
+        }
+
+        .voice-name {
+            font-weight: bold;
+            color: #333;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .voice-lang {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .voice-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+
+        .voice-badge.best {
+            background: #FF6B6B;
+        }
+
+        .voice-badge.good {
+            background: #4CAF50;
+        }
+
+        .voice-badge.ok {
+            background: #FFA726;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .test-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            margin-bottom: 15px;
+            font-family: inherit;
+        }
+
+        .test-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .controls label {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .controls input[type="range"] {
+            width: 100%;
+        }
+
+        .value-display {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .no-voices {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎤 Test Giọng Việt Nam</h1>
+        <p class="subtitle">Kiểm tra và chọn giọng đọc tốt nhất cho ứng dụng</p>
+
+        <div class="info-box">
+            <h3>📋 Thứ tự ưu tiên giọng:</h3>
+            <ul>
+                <li><strong>1. Microsoft HoaiMy Online</strong> - Giọng nữ Việt chuẩn nhất, tự nhiên nhất</li>
+                <li><strong>2. Microsoft Linh Online</strong> - Giọng nữ Việt tốt, dễ nghe</li>
+                <li><strong>3. Google Vietnamese Female</strong> - Giọng Google nữ Việt</li>
+                <li><strong>4. Giọng Việt khác</strong> - Các giọng Việt có sẵn khác</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>🎯 Test Giọng Đọc</h2>
+
+            <textarea class="test-input" id="testText" rows="3"
+                placeholder="Nhập văn bản để test...">Chào bé yêu! Hôm nay mình cùng học chữ nào! Bé giỏi lắm!</textarea>
+
+            <div class="controls">
+                <label>
+                    Tốc độ (Rate): <span class="value-display" id="rateValue">1.2</span>
+                    <input type="range" id="rateSlider" min="0.5" max="2" step="0.1" value="1.2">
+                </label>
+                <label>
+                    Cao độ (Pitch): <span class="value-display" id="pitchValue">1.15</span>
+                    <input type="range" id="pitchSlider" min="0.5" max="2" step="0.05" value="1.15">
+                </label>
+                <label>
+                    Âm lượng: <span class="value-display" id="volumeValue">1.0</span>
+                    <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1.0">
+                </label>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔊 Danh sách giọng có sẵn</h2>
+            <div id="voicesList" class="loading">Đang tải giọng...</div>
+        </div>
+    </div>
+
+    <script>
+        let voices = [];
+        let selectedVoice = null;
+
+        // Load voices
+        function loadVoices() {
+            voices = speechSynthesis.getVoices();
+            console.log('Loaded voices:', voices.length);
+
+            if (voices.length > 0) {
+                displayVoices();
+            }
+        }
+
+        // Display voices
+        function displayVoices() {
+            const container = document.getElementById('voicesList');
+
+            // Filter Vietnamese voices
+            const vietnameseVoices = voices.filter(v =>
+                v.lang.startsWith('vi') ||
+                v.name.toLowerCase().includes('vietnam') ||
+                v.name.toLowerCase().includes('việt')
+            );
+
+            if (vietnameseVoices.length === 0) {
+                container.innerHTML = '<div class="no-voices">❌ Không tìm thấy giọng Việt Nam nào!</div>';
+                return;
+            }
+
+            // Sort by priority
+            vietnameseVoices.sort((a, b) => {
+                const getPriority = (voice) => {
+                    const name = voice.name.toLowerCase();
+                    if (name.includes('hoaimy') || name.includes('hoai my')) return 1;
+                    if (name.includes('linh') && name.includes('online')) return 2;
+                    if (name.includes('google') && name.includes('vietnam')) return 3;
+                    if (name.includes('linh')) return 4;
+                    return 5;
+                };
+                return getPriority(a) - getPriority(b);
+            });
+
+            container.innerHTML = '';
+
+            vietnameseVoices.forEach((voice, index) => {
+                const div = document.createElement('div');
+                div.className = 'voice-item';
+
+                // Add recommended class for top voices
+                if (index === 0) {
+                    div.classList.add('recommended');
+                }
+
+                // Determine badge
+                let badge = '';
+                const name = voice.name.toLowerCase();
+                if (name.includes('hoaimy') || name.includes('hoai my')) {
+                    badge = '<span class="voice-badge best">CHUẨN NHẤT ⭐</span>';
+                } else if (name.includes('linh') && name.includes('online')) {
+                    badge = '<span class="voice-badge good">TỐT ✓</span>';
+                } else if (name.includes('google')) {
+                    badge = '<span class="voice-badge ok">OK</span>';
+                }
+
+                div.innerHTML = `
+                    <div class="voice-info">
+                        <div class="voice-name">${voice.name} ${badge}</div>
+                        <div class="voice-lang">Ngôn ngữ: ${voice.lang} | ${voice.localService ? 'Local' : 'Online'}</div>
+                    </div>
+                    <button onclick="testVoice(${index})">🔊 Test</button>
+                `;
+
+                container.appendChild(div);
+            });
+
+            // Auto-select best voice
+            selectedVoice = vietnameseVoices[0];
+            console.log('✅ Giọng được chọn:', selectedVoice.name);
+        }
+
+        // Test voice
+        function testVoice(index) {
+            const vietnameseVoices = voices.filter(v =>
+                v.lang.startsWith('vi') ||
+                v.name.toLowerCase().includes('vietnam') ||
+                v.name.toLowerCase().includes('việt')
+            );
+
+            const voice = vietnameseVoices[index];
+            const text = document.getElementById('testText').value;
+            const rate = parseFloat(document.getElementById('rateSlider').value);
+            const pitch = parseFloat(document.getElementById('pitchSlider').value);
+            const volume = parseFloat(document.getElementById('volumeSlider').value);
+
+            speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.voice = voice;
+            utterance.rate = rate;
+            utterance.pitch = pitch;
+            utterance.volume = volume;
+            utterance.lang = 'vi-VN';
+
+            console.log('Testing voice:', voice.name);
+            console.log('Rate:', rate, 'Pitch:', pitch, 'Volume:', volume);
+
+            speechSynthesis.speak(utterance);
+        }
+
+        // Update slider values
+        document.getElementById('rateSlider').addEventListener('input', (e) => {
+            document.getElementById('rateValue').textContent = e.target.value;
+        });
+
+        document.getElementById('pitchSlider').addEventListener('input', (e) => {
+            document.getElementById('pitchValue').textContent = e.target.value;
+        });
+
+        document.getElementById('volumeSlider').addEventListener('input', (e) => {
+            document.getElementById('volumeValue').textContent = e.target.value;
+        });
+
+        // Initialize
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = loadVoices;
+        }
+
+        loadVoices();
+        setTimeout(loadVoices, 500);
+        setTimeout(loadVoices, 1000);
+    </script>
+</body>
+
+</html>

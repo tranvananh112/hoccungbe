@@ -4,11 +4,18 @@
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://translate.google.com;">
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://translate.google.com https://*.supabase.co https://api.ipify.org;">
   <title>Học Đọc - Đánh Vần Gamestva</title>
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="description" content="Game ghép chữ học đọc tiếng Việt cho bé 3-7 tuổi">
+
+  <!-- Mobile optimizations -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#667eea">
+  <meta name="format-detection" content="telephone=no">
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐝</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,10 +23,24 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Fredoka:wght@300;400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=16">
+  <link rel="stylesheet" href="styles.css?v=18">
+  <link rel="stylesheet" href="responsive-fix.css?v=4">
+  <link rel="stylesheet" href="layout-fix.css?v=4">
+  <link rel="stylesheet" href="nav-fix.css?v=1">
 </head>
 
 <body>
+  <!-- LOADING SCREEN -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="loading-content">
+      <div class="loading-bee">🐝</div>
+      <div class="loading-text">Đang tải...</div>
+      <div class="loading-bar">
+        <div class="loading-progress"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- THANH ĐIỀU HƯỚNG CHÍNH -->
   <nav class="main-navbar" id="mainNavbar">
     <div class="nav-brand">
@@ -51,6 +72,9 @@
     </div>
 
     <div class="nav-user">
+      <button class="audio-unlock-btn" id="audioUnlockBtn" title="Bật âm thanh">
+        🔇
+      </button>
       <span class="user-coins">🪙 <span id="navCoins">0</span></span>
       <span class="user-stars">⭐ <span id="navStars">0</span></span>
       <span class="user-avatar" id="navAvatar">🐝</span>
@@ -89,12 +113,22 @@
         </button>
       </div>
 
+      <!-- Chọn chủ đề -->
+      <div class="theme-selection">
+        <h2>📚 Chọn chủ đề học</h2>
+        <p class="theme-subtitle">Chủ đề hiện tại: <span id="currentThemeName">Động vật</span> <span
+            id="currentThemeIcon">🐾</span></p>
+        <div class="themes-grid-home" id="themesGridHome">
+          <!-- Themes sẽ được tạo bằng JS -->
+        </div>
+      </div>
+
       <!-- Chọn cấp độ -->
       <div class="level-selection">
         <h2>Chọn cấp độ</h2>
         <div class="level-grid">
           <div class="level-box level-1" data-level="1">
-            <div class="level-badge">🌱</div>
+            <div class="level-badge">�</div>
             <h3>Cấp 1</h3>
             <p>Từ 2-3 chữ</p>
             <span class="level-example">ba, mẹ, cá...</span>
@@ -103,7 +137,7 @@
             </div>
           </div>
           <div class="level-box level-2" data-level="2">
-            <div class="level-badge">🌿</div>
+            <div class="level-badge">�</div>>
             <h3>Cấp 2</h3>
             <p>Từ 4+ chữ</p>
             <span class="level-example">con voi, bầu trời...</span>
@@ -438,7 +472,7 @@
 
   <!-- BÉ ONG MASCOT -->
   <div class="bee-mascot" id="beeMascot">
-    <div class="bee-body">🐝</div>
+    <div class="bee-body bee-character">🐝</div>
     <div class="bee-speech" id="beeSpeech">Chào bé yêu! 🌸</div>
   </div>
 
@@ -458,14 +492,49 @@
     </div>
   </div>
 
-  <script src="word-themes.js?v=18"></script>
-  <script src="sentence-data.js?v=18"></script>
-  <script src="shop-data.js?v=18"></script>
-  <script src="parent-controls.js?v=18"></script>
-  <script src="parent-page.js?v=18"></script>
-  <script src="sound-effects.js?v=18"></script>
-  <script src="animations.js?v=18"></script>
-  <script src="main.js?v=18"></script>
+  <!-- AUDIO WELCOME MODAL -->
+  <div class="audio-welcome-modal" id="audioWelcomeModal">
+    <div class="audio-welcome-box">
+      <div class="audio-icon">🔊</div>
+      <h2>Chào bé yêu! 👋</h2>
+      <p>Nhấn nút bên dưới để bật âm thanh và bắt đầu học nhé!</p>
+      <button class="btn-enable-audio" id="btnEnableAudio">
+        🔊 Bật âm thanh
+      </button>
+      <button class="btn-skip-audio" id="btnSkipAudio">
+        Bỏ qua
+      </button>
+    </div>
+  </div>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js?v=30"></script>
+  <script src="tracking-helper.js?v=1"></script>
+  <script src="auto-tracking.js?v=1"></script>
+
+  <script src="mobile-optimizer.js?v=21"></script>
+  <script src="audio-manager.js?v=24"></script>
+  <script src="word-themes.js?v=21"></script>
+  <script src="sentence-data.js?v=20"></script>
+  <!-- CELEBRATION OVERLAY - Hiệu ứng chuyển câu -->
+  <div class="celebration-overlay" id="celebrationOverlay">
+    <div class="celebration-content">
+      <div class="celebration-title" id="celebrationTitle">🎉 Giỏi lắm! 🎉</div>
+      <div class="celebration-animals" id="celebrationAnimals"></div>
+      <div class="celebration-message" id="celebrationMessage">Chuẩn bị câu tiếp theo...</div>
+      <div class="celebration-stars">⭐✨⭐✨⭐</div>
+      <div class="countdown-timer" id="countdownTimer"></div>
+    </div>
+  </div>
+
+  <script src="shop-data.js?v=20"></script>
+  <script src="parent-controls.js?v=20"></script>
+  <script src="parent-page.js?v=20"></script>
+  <script src="sound-effects.js?v=20"></script>
+  <script src="animal-sounds.js?v=1"></script>
+  <script src="animations.js?v=20"></script>
+  <script src="main.js?v=32"></script>
 </body>
 
 </html>

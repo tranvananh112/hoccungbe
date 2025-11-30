@@ -10,9 +10,20 @@
     // ========== SOUND GENERATOR ==========
     function createSoundEffect(type, volume) {
         volume = volume || 0.3;
+
+        // Unlock audio nếu cần
+        if (window.AudioManager) {
+            window.AudioManager.unlock();
+        }
+
         try {
             var AudioContext = window.AudioContext || window.webkitAudioContext;
             var ctx = new AudioContext();
+
+            // Resume nếu bị suspend
+            if (ctx.state === 'suspended') {
+                ctx.resume();
+            }
 
             switch (type) {
                 case 'applause':

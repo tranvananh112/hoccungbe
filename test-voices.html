@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Giọng Đọc Tiếng Việt</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .test-box {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .test-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            font-family: inherit;
+        }
+
+        .test-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #FF9F43, #FF6B6B);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .voice-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .voice-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .voice-item:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .voice-item.female {
+            background: linear-gradient(135deg, #ffeef8, #fff5f8);
+            border-color: #ff69b4;
+        }
+
+        .voice-item.recommended {
+            background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+            border-color: #4caf50;
+        }
+
+        .voice-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .voice-lang {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .voice-tags {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .tag-female {
+            background: #ff69b4;
+            color: white;
+        }
+
+        .tag-recommended {
+            background: #4caf50;
+            color: white;
+        }
+
+        .tag-default {
+            background: #ffc107;
+            color: white;
+        }
+
+        .tag-vi {
+            background: #2196f3;
+            color: white;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+        }
+
+        .info-box h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .info-box ul {
+            margin-left: 20px;
+            color: #333;
+        }
+
+        .info-box li {
+            margin: 5px 0;
+        }
+
+        .status {
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .emoji {
+            font-size: 3rem;
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎤 Test Giọng Đọc Tiếng Việt</h1>
+        <p class="subtitle">Tìm giọng nữ dịu dàng phù hợp cho trẻ em</p>
+
+        <div class="test-box">
+            <h2>🎵 Test Nhanh</h2>
+            <input type="text" class="test-input" id="testText"
+                value="Xin chào các bé! Hôm nay chúng ta cùng học đánh vần nhé!" placeholder="Nhập câu muốn test...">
+
+            <div class="btn-group">
+                <button class="btn-primary" onclick="testTTSServer()">
+                    🎵 TTS Server (Google)
+                </button>
+                <button class="btn-secondary" onclick="testBestVoice()">
+                    ⭐ Giọng Tốt Nhất
+                </button>
+                <button class="btn-secondary" onclick="loadAllVoices()">
+                    📋 Xem Tất Cả Giọng
+                </button>
+            </div>
+
+            <div id="status"></div>
+        </div>
+
+        <div class="test-box">
+            <div class="info-box">
+                <h3>💡 Giọng Nữ Tiếng Việt Được Khuyến Nghị:</h3>
+                <ul>
+                    <li><strong>Chrome/Edge:</strong> "Google tiếng Việt" hoặc "Microsoft Linh/An Online"</li>
+                    <li><strong>Windows:</strong> "Linh" hoặc "An" (cài đặt trong Windows Settings)</li>
+                    <li><strong>macOS/iOS:</strong> "Ting-Ting" hoặc "Sin-Ji"</li>
+                    <li><strong>Android:</strong> Cài đặt "Google Text-to-Speech" và tải giọng Việt</li>
+                </ul>
+            </div>
+
+            <h2>🎤 Danh Sách Giọng Có Sẵn</h2>
+            <div id="voiceList" class="voice-list"></div>
+        </div>
+
+        <div class="test-box">
+            <h2>📊 Thông Tin Hệ Thống</h2>
+            <div id="systemInfo"></div>
+        </div>
+    </div>
+
+    <script>
+        let voices = [];
+        let preferredVoice = null;
+
+        // Load voices
+        function loadVoices() {
+            voices = speechSynthesis.getVoices();
+
+            if (voices.length === 0) {
+                setTimeout(loadVoices, 100);
+                return;
+            }
+
+            // Tìm giọng nữ Việt Nam tốt nhất
+            const femaleVoiceNames = [
+                'Google tiếng Việt',
+                'Microsoft Linh Online',
+                'Microsoft An Online',
+                'Linh',
+                'An',
+                'Ting-Ting',
+                'Sin-Ji'
+            ];
+
+            for (let name of femaleVoiceNames) {
+                const voice = voices.find(v =>
+                    v.name.includes(name) && v.lang.startsWith('vi')
+                );
+                if (voice) {
+                    preferredVoice = voice;
+                    break;
+                }
+            }
+
+            if (!preferredVoice) {
+                preferredVoice = voices.find(v => v.lang.startsWith('vi'));
+            }
+
+            showSystemInfo();
+        }
+
+        // Test TTS Server
+        function testTTSServer() {
+            const text = document.getElementById('testText').value;
+            showStatus('⏳ Đang phát âm với TTS Server (Google)...', 'info');
+
+            const audio = new Audio('/api/tts?text=' + encodeURIComponent(text));
+
+            audio.addEventListener('canplaythrough', function () {
+                audio.play().then(() => {
+                    showStatus('✅ Đang phát âm với TTS Server!', 'success');
+                }).catch(e => {
+                    showStatus('❌ Không thể play: ' + e.message, 'warning');
+                });
+            });
+
+            audio.addEventListener('error', function () {
+                showStatus('❌ TTS Server không khả dụng. Vui lòng chạy: node server.js', 'warning');
+            });
+        }
+
+        // Test best voice
+        function testBestVoice() {
+            const text = document.getElementById('testText').value;
+
+            if (!preferredVoice) {
+                showStatus('⚠️ Không tìm thấy giọng tiếng Việt!', 'warning');
+                return;
+            }
+
+            showStatus('⏳ Đang phát âm với: ' + preferredVoice.name, 'info');
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.voice = preferredVoice;
+            utterance.lang = 'vi-VN';
+            utterance.rate = 0.85;
+            utterance.pitch = 1.15;
+            utterance.volume = 1;
+
+            utterance.onstart = function () {
+                showStatus('✅ Đang phát âm với: ' + preferredVoice.name, 'success');
+            };
+
+            utterance.onend = function () {
+                showStatus('✅ Hoàn tất! Giọng: ' + preferredVoice.name, 'success');
+            };
+
+            speechSynthesis.speak(utterance);
+        }
+
+        // Test specific voice
+        function testVoice(voice) {
+            const text = document.getElementById('testText').value;
+
+            showStatus('⏳ Đang phát âm với: ' + voice.name, 'info');
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.voice = voice;
+            utterance.lang = voice.lang;
+            utterance.rate = 0.85;
+            utterance.pitch = 1.15;
+            utterance.volume = 1;
+
+            utterance.onstart = function () {
+                showStatus('✅ Đang phát âm với: ' + voice.name, 'success');
+            };
+
+            speechSynthesis.speak(utterance);
+        }
+
+        // Load all voices
+        function loadAllVoices() {
+            const container = document.getElementById('voiceList');
+            container.innerHTML = '';
+
+            if (voices.length === 0) {
+                container.innerHTML = '<p>Đang tải giọng...</p>';
+                setTimeout(loadAllVoices, 500);
+                return;
+            }
+
+            // Lọc và sắp xếp
+            const viVoices = voices.filter(v => v.lang.startsWith('vi'));
+            const otherVoices = voices.filter(v => !v.lang.startsWith('vi'));
+
+            // Hiển thị giọng Việt trước
+            viVoices.forEach(voice => {
+                const isFemale = ['Linh', 'An', 'Ting', 'Sin', 'Google'].some(name =>
+                    voice.name.includes(name)
+                );
+                const isRecommended = preferredVoice && voice.name === preferredVoice.name;
+
+                const div = document.createElement('div');
+                div.className = 'voice-item';
+                if (isFemale) div.classList.add('female');
+                if (isRecommended) div.classList.add('recommended');
+
+                div.innerHTML = `
+                    <div class="voice-name">${voice.name}</div>
+                    <div class="voice-lang">${voice.lang}</div>
+                    <div class="voice-tags">
+                        ${isRecommended ? '<span class="tag tag-recommended">⭐ Khuyến nghị</span>' : ''}
+                        ${isFemale ? '<span class="tag tag-female">👩 Giọng nữ</span>' : ''}
+                        ${voice.default ? '<span class="tag tag-default">Mặc định</span>' : ''}
+                        <span class="tag tag-vi">🇻🇳 Tiếng Việt</span>
+                    </div>
+                `;
+
+                div.onclick = () => testVoice(voice);
+                container.appendChild(div);
+            });
+
+            // Hiển thị giọng khác (nếu muốn)
+            if (otherVoices.length > 0 && viVoices.length === 0) {
+                const warning = document.createElement('div');
+                warning.className = 'status status-warning';
+                warning.textContent = '⚠️ Không tìm thấy giọng tiếng Việt. Hiển thị giọng khác:';
+                container.appendChild(warning);
+
+                otherVoices.slice(0, 10).forEach(voice => {
+                    const div = document.createElement('div');
+                    div.className = 'voice-item';
+                    div.innerHTML = `
+                        <div class="voice-name">${voice.name}</div>
+                        <div class="voice-lang">${voice.lang}</div>
+                    `;
+                    div.onclick = () => testVoice(voice);
+                    container.appendChild(div);
+                });
+            }
+        }
+
+        // Show system info
+        function showSystemInfo() {
+            const info = document.getElementById('systemInfo');
+            info.innerHTML = `
+                <div class="status status-info">
+                    <strong>Tổng số giọng:</strong> ${voices.length}<br>
+                    <strong>Giọng tiếng Việt:</strong> ${voices.filter(v => v.lang.startsWith('vi')).length}<br>
+                    <strong>Giọng được chọn:</strong> ${preferredVoice ? preferredVoice.name : 'Không có'}<br>
+                    <strong>Trình duyệt:</strong> ${navigator.userAgent.split(' ').pop()}<br>
+                    <strong>Ngôn ngữ:</strong> ${navigator.language}
+                </div>
+            `;
+        }
+
+        // Show status
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.innerHTML = `<div class="status status-${type}">${message}</div>`;
+        }
+
+        // Init
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = loadVoices;
+        }
+        loadVoices();
+
+        window.addEventListener('load', function () {
+            setTimeout(loadVoices, 500);
+            setTimeout(loadAllVoices, 1000);
+        });
+    </script>
+</body>
+
+</html>

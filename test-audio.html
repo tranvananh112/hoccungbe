@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Audio System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .test-box {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            color: #333;
+        }
+
+        button {
+            padding: 12px 24px;
+            margin: 8px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #FF9F43, #FF6B6B);
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .status {
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+
+        input {
+            padding: 10px;
+            margin: 5px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            width: 300px;
+        }
+
+        .emoji {
+            font-size: 3rem;
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔊 Test Hệ Thống Âm Thanh</h1>
+    <div class="emoji">🐝</div>
+
+    <div class="test-box">
+        <h2>1️⃣ Test TTS Server</h2>
+        <p>Kiểm tra xem TTS server có đang chạy không</p>
+        <button onclick="testTTSServer()">🎵 Test TTS Server</button>
+        <div id="ttsServerStatus"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>2️⃣ Test Web Speech API</h2>
+        <p>Kiểm tra Web Speech API của trình duyệt</p>
+        <button onclick="testWebSpeech()">🗣️ Test Web Speech</button>
+        <button onclick="listVoices()">📋 List Voices</button>
+        <div id="webSpeechStatus"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>3️⃣ Test Custom Text</h2>
+        <p>Nhập text để test phát âm</p>
+        <input type="text" id="customText" placeholder="Nhập text tiếng Việt..." value="Xin chào bé yêu">
+        <br>
+        <button onclick="testCustomTTS()">🎤 TTS Server</button>
+        <button onclick="testCustomWebSpeech()">🗣️ Web Speech</button>
+        <div id="customStatus"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>4️⃣ Test Audio Manager</h2>
+        <p>Kiểm tra Audio Manager (cho mobile)</p>
+        <button onclick="testAudioManager()">📱 Test Audio Manager</button>
+        <div id="audioManagerStatus"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>5️⃣ System Info</h2>
+        <button onclick="showSystemInfo()">ℹ️ Show System Info</button>
+        <div id="systemInfo"></div>
+    </div>
+
+    <script>
+        function showStatus(elementId, message, type) {
+            const el = document.getElementById(elementId);
+            el.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        // Test 1: TTS Server
+        function testTTSServer() {
+            showStatus('ttsServerStatus', '⏳ Đang kiểm tra TTS Server...', 'info');
+
+            const testUrl = '/api/tts?text=xin chào';
+            const audio = new Audio(testUrl);
+
+            audio.addEventListener('canplaythrough', function () {
+                showStatus('ttsServerStatus', '✅ TTS Server hoạt động tốt!<br>URL: ' + testUrl, 'success');
+                audio.play().catch(e => {
+                    showStatus('ttsServerStatus', '⚠️ TTS Server OK nhưng không thể play: ' + e.message, 'warning');
+                });
+            });
+
+            audio.addEventListener('error', function (e) {
+                showStatus('ttsServerStatus',
+                    '❌ TTS Server không khả dụng!<br>' +
+                    'Lỗi: ' + (audio.error ? audio.error.message : 'Unknown') + '<br>' +
+                    '💡 Đảm bảo đang chạy: <code>node server.js</code><br>' +
+                    '💡 Mở từ: <code>http://localhost:3001</code>',
+                    'error'
+                );
+            });
+        }
+
+        // Test 2: Web Speech API
+        function testWebSpeech() {
+            if (!window.speechSynthesis) {
+                showStatus('webSpeechStatus', '❌ Trình duyệt không hỗ trợ Web Speech API', 'error');
+                return;
+            }
+
+            showStatus('webSpeechStatus', '⏳ Đang test Web Speech API...', 'info');
+
+            const utterance = new SpeechSynthesisUtterance('Xin chào bé yêu');
+            utterance.lang = 'vi-VN';
+            utterance.rate = 0.9;
+            utterance.pitch = 1.1;
+
+            utterance.onstart = function () {
+                showStatus('webSpeechStatus', '✅ Web Speech API hoạt động!<br>Đang phát âm...', 'success');
+            };
+
+            utterance.onend = function () {
+                showStatus('webSpeechStatus', '✅ Web Speech API hoạt động tốt!', 'success');
+            };
+
+            utterance.onerror = function (e) {
+                showStatus('webSpeechStatus', '❌ Lỗi Web Speech API: ' + e.error, 'error');
+            };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // List voices
+        function listVoices() {
+            if (!window.speechSynthesis) {
+                showStatus('webSpeechStatus', '❌ Không có speechSynthesis', 'error');
+                return;
+            }
+
+            const voices = window.speechSynthesis.getVoices();
+
+            if (voices.length === 0) {
+                showStatus('webSpeechStatus', '⚠️ Chưa load được voices. Thử lại sau 1s...', 'warning');
+                setTimeout(listVoices, 1000);
+                return;
+            }
+
+            const viVoices = voices.filter(v => v.lang.startsWith('vi'));
+            const allVoices = voices.map(v =>
+                `${v.name} (${v.lang}) ${v.default ? '⭐' : ''}`
+            ).join('<br>');
+
+            showStatus('webSpeechStatus',
+                `<strong>Tổng số voices: ${voices.length}</strong><br>` +
+                `<strong>Vietnamese voices: ${viVoices.length}</strong><br><br>` +
+                (viVoices.length > 0 ?
+                    '<strong>Vietnamese:</strong><br>' + viVoices.map(v => v.name).join('<br>') + '<br><br>' :
+                    '⚠️ Không có giọng tiếng Việt<br><br>'
+                ) +
+                '<details><summary>All voices</summary>' + allVoices + '</details>',
+                'info'
+            );
+        }
+
+        // Test 3: Custom text
+        function testCustomTTS() {
+            const text = document.getElementById('customText').value;
+            if (!text) {
+                showStatus('customStatus', '⚠️ Vui lòng nhập text', 'warning');
+                return;
+            }
+
+            showStatus('customStatus', '⏳ Đang phát âm với TTS Server...', 'info');
+
+            const audio = new Audio('/api/tts?text=' + encodeURIComponent(text));
+
+            audio.addEventListener('canplaythrough', function () {
+                audio.play().then(() => {
+                    showStatus('customStatus', '✅ Đang phát âm: "' + text + '"', 'success');
+                }).catch(e => {
+                    showStatus('customStatus', '❌ Không thể play: ' + e.message, 'error');
+                });
+            });
+
+            audio.addEventListener('error', function () {
+                showStatus('customStatus', '❌ TTS Server không khả dụng', 'error');
+            });
+        }
+
+        function testCustomWebSpeech() {
+            const text = document.getElementById('customText').value;
+            if (!text) {
+                showStatus('customStatus', '⚠️ Vui lòng nhập text', 'warning');
+                return;
+            }
+
+            if (!window.speechSynthesis) {
+                showStatus('customStatus', '❌ Web Speech API không khả dụng', 'error');
+                return;
+            }
+
+            showStatus('customStatus', '⏳ Đang phát âm với Web Speech...', 'info');
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'vi-VN';
+            utterance.rate = 0.9;
+            utterance.pitch = 1.1;
+
+            utterance.onend = function () {
+                showStatus('customStatus', '✅ Đã phát âm: "' + text + '"', 'success');
+            };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Test 4: Audio Manager
+        function testAudioManager() {
+            if (!window.AudioManager) {
+                showStatus('audioManagerStatus', '⚠️ AudioManager chưa load (chỉ có trong game)', 'warning');
+                return;
+            }
+
+            showStatus('audioManagerStatus', '✅ AudioManager đã load!', 'success');
+        }
+
+        // Test 5: System Info
+        function showSystemInfo() {
+            const info = {
+                'User Agent': navigator.userAgent,
+                'Platform': navigator.platform,
+                'Language': navigator.language,
+                'Online': navigator.onLine,
+                'Speech Synthesis': !!window.speechSynthesis,
+                'Audio Context': !!(window.AudioContext || window.webkitAudioContext),
+                'Current URL': window.location.href,
+                'Protocol': window.location.protocol,
+                'Host': window.location.host
+            };
+
+            const html = Object.keys(info).map(key =>
+                `<strong>${key}:</strong> ${info[key]}`
+            ).join('<br>');
+
+            showStatus('systemInfo', html, 'info');
+        }
+
+        // Auto load voices
+        if (window.speechSynthesis) {
+            speechSynthesis.onvoiceschanged = function () {
+                console.log('Voices loaded:', speechSynthesis.getVoices().length);
+            };
+        }
+
+        // Welcome message
+        window.addEventListener('load', function () {
+            console.log('🔊 Audio Test Page Loaded');
+            console.log('Current URL:', window.location.href);
+            console.log('Protocol:', window.location.protocol);
+
+            if (window.location.protocol === 'file:') {
+                alert('⚠️ Đang mở từ file://\nTTS Server sẽ không hoạt động!\n\nVui lòng mở từ: http://localhost:3001/test-audio.html');
+            }
+        });
+    </script>
+</body>
+
+</html>

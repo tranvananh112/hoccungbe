@@ -49,7 +49,9 @@
     wordProgress: {},
     stickers: [],
     ownedCharacters: ['🐝'], // Nhân vật đã sở hữu
-    settings: { volume: 80 }
+    settings: { volume: 80 },
+    sentencesCompleted: {}, // Theo dõi câu đã làm: { "sentence_text": timestamp }
+    wordsCompleted: {} // Theo dõi từ đã làm: { "word_text": timestamp }
   };
 
   var currentWord = null;
@@ -64,8 +66,29 @@
 
   function saveGame() {
     try {
+      // Cleanup: Xóa các câu/từ đã làm quá 24 giờ để tiết kiệm bộ nhớ
+      cleanupOldCompletions();
       localStorage.setItem('gamestva', JSON.stringify(gameState));
     } catch (e) { console.error('Save error:', e); }
+  }
+
+  function cleanupOldCompletions() {
+    var now = Date.now();
+    var DAY_MS = 24 * 60 * 60 * 1000;
+
+    // Cleanup sentences
+    for (var key in gameState.sentencesCompleted) {
+      if (now - gameState.sentencesCompleted[key] > DAY_MS) {
+        delete gameState.sentencesCompleted[key];
+      }
+    }
+
+    // Cleanup words
+    for (var key in gameState.wordsCompleted) {
+      if (now - gameState.wordsCompleted[key] > DAY_MS) {
+        delete gameState.wordsCompleted[key];
+      }
+    }
   }
 
   function loadGame() {
@@ -108,7 +131,7 @@
     } catch (e) { }
   }
 
-  function speakVietnamese(text, priority) {
+  function speakVietnamese(text, priority, callback) {
     if (!text) return;
     var vol = gameState.settings.volume / 100;
 
@@ -117,37 +140,216 @@
       currentAudio = null;
     }
 
-    if (audioCache[text]) {
-      var audio = audioCache[text];
-      audio.volume = vol;
-      audio.currentTime = 0;
-      currentAudio = audio;
-      audio.play().catch(function () { });
+    // ✅ ƯU TIÊN: Dùng Web Speech API (hoạt động trên mọi thiết bị)
+    // Giọng Microsoft Edge nữ Việt Nam sẽ được ưu tiên
+    useBrowserTTS(text, vol, callback);
+  }
+
+  // Kiểm tra TTS có khả dụng không
+  function checkTTSAvailability() {
+    if (window.speechSynthesis) {
+      console.log('✅ Hệ thống giọng đọc: Google tiếng Việt');
+
+      // Đợi voices load xong
+      setTimeout(function () {
+        if (preferredVoice) {
+          console.log('🎤 Giọng:', preferredVoice.name);
+          console.log('⚡ Tốc độ: Bình thường (1.0x)');
+          console.log('💝 Giọng nữ Việt Nam');
+        } else {
+          console.error('❌ KHÔNG TÌM THẤY GIỌNG VIỆT!');
+        }
+      }, 1000);
+    } else {
+      console.error('❌ Trình duyệt không hỗ trợ Web Speech API');
+    }
+  }
+
+  // Fallback: Sử dụng Web Speech API của trình duyệt
+  var cachedVoices = [];
+  var preferredVoice = null;
+
+  function loadVoices() {
+    if (window.speechSynthesis) {
+      cachedVoices = window.speechSynthesis.getVoices();
+      if (cachedVoices.length > 0) {
+        // ✅ ƯU TIÊN: Google tiếng Việt (giọng ban đầu)
+        preferredVoice = cachedVoices.find(function (v) {
+          return v.name.includes('Google') && v.lang.startsWith('vi');
+        });
+
+        if (preferredVoice) {
+          console.log('✅ Giọng chính:', preferredVoice.name);
+        } else {
+          // Fallback: Tìm giọng Việt bất kỳ
+          preferredVoice = cachedVoices.find(function (v) {
+            return v.lang.startsWith('vi');
+          });
+          if (preferredVoice) {
+            console.log('⚠️ Dùng giọng Việt:', preferredVoice.name);
+          }
+        }
+      }
+    }
+  }
+
+  // Load voices khi có sẵn
+  if (window.speechSynthesis) {
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+      speechSynthesis.onvoiceschanged = loadVoices;
+    }
+    loadVoices();
+    // Thử load lại sau 500ms (một số browser cần thời gian)
+    setTimeout(loadVoices, 500);
+  }
+
+  function useBrowserTTS(text, volume, callback) {
+    if (!window.speechSynthesis) {
+      console.error('Trình duyệt không hỗ trợ Web Speech API');
+      if (callback) callback();
       return;
     }
 
-    var audio = new Audio('/api/tts?text=' + encodeURIComponent(text));
-    audio.volume = vol;
-    audioCache[text] = audio;
-    currentAudio = audio;
-    audio.play().catch(function () { });
+    // ✅ Đảm bảo voices đã được load TRƯỚC
+    if (cachedVoices.length === 0) {
+      cachedVoices = window.speechSynthesis.getVoices();
+      if (cachedVoices.length > 0 && !preferredVoice) {
+        loadVoices();
+      }
+    }
+
+    // ✅ Dừng speech hiện tại để phát mới NGAY
+    window.speechSynthesis.cancel();
+
+    var utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'vi-VN';
+    utterance.rate = 0.95; // TỐC ĐỘ CHẬM HƠN MỘT CHÚT để RÕ RÀNG HƠN
+    utterance.pitch = 1.4; // Giọng nữ CAO HƠN để TO HƠN và RÕ HƠN
+    utterance.volume = 1.0; // ÂM LƯỢNG TỐI ĐA
+
+    // Sử dụng giọng đã tìm được
+    if (preferredVoice) {
+      utterance.voice = preferredVoice;
+    } else {
+      console.warn('⚠️ Không tìm thấy giọng Việt, dùng giọng mặc định');
+    }
+
+    // ✅ Callback khi đọc xong
+    if (callback) {
+      utterance.onend = function () {
+        console.log('✅ Đã đọc xong:', text);
+        callback();
+      };
+      utterance.onerror = function (e) {
+        console.error('❌ Lỗi đọc:', e);
+        callback();
+      };
+    }
+
+    // ✅ Phát NGAY không delay
+    window.speechSynthesis.speak(utterance);
   }
+
+  var letterSoundInterval = null;
+  var currentLetterUtterance = null;
 
   function startLetterSound(letter) {
     stopLetterSound();
-    var vol = gameState.settings.volume / 100;
-    letterAudioLoop = new Audio('/api/tts?text=' + encodeURIComponent(letter));
-    letterAudioLoop.volume = vol;
-    letterAudioLoop.play().catch(function () { });
-    letterAudioLoop.onended = function () {
-      if (isDragging && letterAudioLoop) {
-        letterAudioLoop.currentTime = 0;
-        letterAudioLoop.play().catch(function () { });
+
+    console.log('🔊 Bắt đầu đọc LIÊN TỤC NGAY:', letter);
+
+    // ✅ Chuyển chữ cái thành phát âm TỰ NHIÊN tiếng Việt
+    var pronunciation = getLetterPronunciation(letter);
+
+    // Đánh dấu đang phát TRƯỚC KHI bắt đầu
+    letterSoundInterval = true;
+
+    // ✅ Phát âm LIÊN TỤC NHANH với giọng cô gái
+    function speakLetterLoop() {
+      if (!window.speechSynthesis) {
+        console.log('❌ speechSynthesis không khả dụng');
+        return;
       }
+      if (!letterSoundInterval) {
+        console.log('⏹️ Đã dừng loop');
+        return;
+      }
+
+      var utterance = new SpeechSynthesisUtterance(pronunciation);
+      utterance.lang = 'vi-VN';
+      utterance.rate = 1.2; // CHẬM HƠN để RÕ RÀNG HƠN
+      utterance.pitch = 1.4; // Giọng nữ CAO HƠN để TO HƠN
+      utterance.volume = 1.0; // ÂM LƯỢNG TỐI ĐA
+
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+      }
+
+      // Khi kết thúc, phát lại NGAY KHÔNG DELAY
+      utterance.onend = function () {
+        console.log('🔄 Lặp lại:', pronunciation);
+        if (letterSoundInterval) {
+          // Phát lại NGAY LẬP TỨC không delay
+          speakLetterLoop();
+        }
+      };
+
+      utterance.onerror = function (e) {
+        console.error('❌ Lỗi phát âm:', e);
+      };
+
+      currentLetterUtterance = utterance;
+      console.log('▶️ Phát âm:', pronunciation);
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // ✅ Đảm bảo speech synthesis đang hoạt động
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+    }
+
+    // Phát âm NGAY LẬP TỨC
+    speakLetterLoop();
+  }
+
+  // ✅ Chuyển chữ cái thành cách đọc TỰ NHIÊN tiếng Việt
+  function getLetterPronunciation(letter) {
+    var upper = letter.toUpperCase();
+
+    // Bảng phát âm chữ cái tiếng Việt - RÚT NGẮN để đọc nhanh đồng đều
+    var pronunciationMap = {
+      'A': 'a', 'Ă': 'ă', 'Â': 'â',
+      'B': 'bờ', 'C': 'cờ', 'D': 'dờ', 'Đ': 'đờ',
+      'E': 'e', 'Ê': 'ê',
+      'G': 'gờ', 'H': 'hờ', 'I': 'i',  // "hát" → "hờ" để nhanh hơn
+      'K': 'cờ', 'L': 'lờ', 'M': 'mờ', 'N': 'nờ',  // "ca" → "cờ" để đồng đều
+      'O': 'o', 'Ô': 'ô', 'Ơ': 'ơ',
+      'P': 'pờ', 'Q': 'cờ', 'R': 'rờ', 'S': 'sờ', 'T': 'tờ',  // "quy" → "cờ" để nhanh
+      'U': 'u', 'Ư': 'ư',
+      'V': 'vờ', 'X': 'xờ', 'Y': 'i'  // "y" → "i" để đồng đều
     };
+
+    return pronunciationMap[upper] || letter;
   }
 
   function stopLetterSound() {
+    console.log('⏹️ Dừng đọc chữ');
+
+    // ✅ Dừng flag TRƯỚC để ngăn loop tiếp tục
+    letterSoundInterval = null;
+
+    // ✅ Clear utterance callback TRƯỚC
+    if (currentLetterUtterance) {
+      currentLetterUtterance.onend = null;
+      currentLetterUtterance = null;
+    }
+
+    // ✅ Dừng speech CUỐI CÙNG
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+
+    // ✅ Dừng audio cũ (nếu có)
     if (letterAudioLoop) {
       letterAudioLoop.pause();
       letterAudioLoop.onended = null;
@@ -160,15 +362,41 @@
     if (!speech) return;
     speech.textContent = msg;
     speech.classList.add('show');
+
+    // Thêm animation cho bee icon
+    var beeIcon = document.querySelector('.bee-character');
+    if (beeIcon) {
+      beeIcon.classList.add('icon-bounce');
+      setTimeout(function () {
+        beeIcon.classList.remove('icon-bounce');
+      }, 600);
+    }
+
     setTimeout(function () {
       speech.classList.remove('show');
     }, duration || 3000);
   }
 
+  // Hàm thêm animation cho icon
+  function animateIcon(elementId, animationClass) {
+    var element = document.getElementById(elementId);
+    if (!element) return;
+
+    // Tìm parent có class nav-info-item hoặc chính element
+    var target = element.closest('.nav-info-item') || element;
+
+    target.classList.add(animationClass);
+    setTimeout(function () {
+      target.classList.remove(animationClass);
+    }, 1500);
+  }
+
   function updateNavInfo() {
     var navStars = document.getElementById('navStars');
+    var navCoins = document.getElementById('navCoins');
     var navAvatar = document.getElementById('navAvatar');
     if (navStars) navStars.textContent = gameState.totalStars;
+    if (navCoins) navCoins.textContent = gameState.coins;
     if (navAvatar) navAvatar.textContent = gameState.playerAvatar;
   }
 
@@ -209,6 +437,55 @@
     setTimeout(function () {
       container.innerHTML = '';
     }, 3500);
+  }
+
+  // ========== HIỆU ỨNG VỖ TAY CHÚC MỪNG ==========
+  function createClappingHands(container) {
+    if (!container) return;
+
+    // Tạo 4 bàn tay vỗ ở 4 góc
+    var positions = [
+      { top: '20%', left: '15%', delay: '0s' },
+      { top: '25%', right: '15%', delay: '0.2s' },
+      { top: '60%', left: '10%', delay: '0.4s' },
+      { top: '65%', right: '10%', delay: '0.6s' }
+    ];
+
+    positions.forEach(function (pos) {
+      var hand = document.createElement('div');
+      hand.className = 'clapping-hands';
+      hand.textContent = '👏';
+      hand.style.cssText = 'position:absolute;font-size:4em;animation:clap 0.5s ease-in-out infinite;' +
+        'filter:drop-shadow(2px 2px 4px rgba(0,0,0,0.3));z-index:10;' +
+        'top:' + (pos.top || 'auto') + ';' +
+        'left:' + (pos.left || 'auto') + ';' +
+        'right:' + (pos.right || 'auto') + ';' +
+        'animation-delay:' + pos.delay + ';';
+      container.appendChild(hand);
+    });
+  }
+
+  function createFloatingClaps(container) {
+    if (!container) return;
+
+    // Tạo 3-5 emoji vỗ tay bay lên ngẫu nhiên
+    var count = Math.floor(Math.random() * 3) + 3;
+    for (var i = 0; i < count; i++) {
+      setTimeout(function () {
+        var clap = document.createElement('div');
+        clap.className = 'floating-clap';
+        clap.textContent = '👏';
+        clap.style.cssText = 'position:absolute;font-size:3em;' +
+          'animation:clapFloat 2s ease-out forwards;pointer-events:none;' +
+          'left:' + (Math.random() * 80 + 10) + '%;' +
+          'top:' + (Math.random() * 60 + 20) + '%;';
+        container.appendChild(clap);
+
+        setTimeout(function () {
+          clap.remove();
+        }, 2000);
+      }, i * 150);
+    }
   }
 
   // ========== NAVIGATION ==========
@@ -275,12 +552,17 @@
     dragClone = document.createElement('div');
     dragClone.className = 'drag-clone';
     dragClone.textContent = target.textContent;
-    dragClone.style.cssText = 'position:fixed;left:' + (pos.x - 35) + 'px;top:' + (pos.y - 35) + 'px;width:70px;height:70px;z-index:10000;pointer-events:none;';
+    // ✅ Tăng kích thước để dễ nhìn khi kéo: 70px → 90px
+    dragClone.style.cssText = 'position:fixed;left:' + (pos.x - 45) + 'px;top:' + (pos.y - 45) + 'px;width:90px;height:90px;z-index:10000;pointer-events:none;';
     document.body.appendChild(dragClone);
 
     target.classList.add('dragging-source');
     playSound('click');
-    startLetterSound(target.getAttribute('data-char'));
+
+    // ✅ ĐỌC NGAY chữ cái khi ấn vào và LẶP LẠI LIÊN TỤC khi kéo
+    var char = target.getAttribute('data-char');
+    console.log('🎯 Ấn vào chữ:', char);
+    startLetterSound(char);
   }
 
   function handleDragMove(e) {
@@ -288,20 +570,26 @@
     e.preventDefault();
 
     var pos = getClientPos(e);
-    dragClone.style.left = (pos.x - 35) + 'px';
-    dragClone.style.top = (pos.y - 35) + 'px';
+    // ✅ Cập nhật offset cho kích thước mới (90px / 2 = 45px)
+    dragClone.style.left = (pos.x - 45) + 'px';
+    dragClone.style.top = (pos.y - 45) + 'px';
 
     dragClone.style.display = 'none';
     var elemBelow = document.elementFromPoint(pos.x, pos.y);
     dragClone.style.display = '';
 
+    // ✅ Xóa highlight và scale cũ
     var highlights = document.querySelectorAll('.letter-slot.highlight');
     for (var i = 0; i < highlights.length; i++) {
       highlights[i].classList.remove('highlight');
+      highlights[i].style.transform = ''; // Reset scale
     }
 
+    // ✅ Thêm highlight và PHÓNG TO ô khi kéo vào gần
     if (elemBelow && elemBelow.classList.contains('letter-slot') && elemBelow.classList.contains('empty')) {
       elemBelow.classList.add('highlight');
+      elemBelow.style.transform = 'scale(1.3)'; // Phóng to 1.3 lần
+      elemBelow.style.transition = 'transform 0.2s ease';
     }
   }
 
@@ -309,7 +597,14 @@
     if (!isDragging) return;
     e.preventDefault();
 
+    // ✅ DỪNG GIỌNG ĐỌC CHỮ CÁI NGAY LẬP TỨC
     stopLetterSound();
+
+    // ✅ Reset scale của tất cả ô
+    var allSlots = document.querySelectorAll('.letter-slot');
+    for (var i = 0; i < allSlots.length; i++) {
+      allSlots[i].style.transform = '';
+    }
 
     var pos = getClientPos(e);
     if (dragClone) dragClone.style.display = 'none';
@@ -320,6 +615,7 @@
       var expectedChar = elemBelow.getAttribute('data-char');
 
       if (draggedChar === expectedChar) {
+        // ✅ ĐÚNG
         elemBelow.textContent = draggedChar;
         elemBelow.classList.remove('empty');
         elemBelow.classList.add('filled');
@@ -327,24 +623,45 @@
         dragElement.classList.remove('dragging-source');
 
         playSound('correct');
-        beeSay('Đúng rồi! Giỏi quá! ⭐', 2000);
-        speakVietnamese('Đúng rồi!', true);
+
+        // ✅ Khen với TÊN em bé
+        var childName = gameState.playerName || 'bé';
+        beeSay('Đúng rồi! ' + childName + ' giỏi quá! ⭐', 2000);
+
+        // ✅ Delay nhỏ để đảm bảo stopLetterSound hoàn tất
+        setTimeout(function () {
+          speakVietnamese('Đúng rồi! ' + childName + ' giỏi lắm!', true);
+        }, 100);
 
         checkWordComplete();
       } else {
+        // ✅ SAI - shake ô đích
         playSound('wrong');
-        beeSay('Sai rồi, thử lại nhé! 💪', 2000);
-        speakVietnamese('Sai rồi!', true);
+        var childName = gameState.playerName || 'bé';
+        beeSay('Sai rồi, ' + childName + ' thử lại nhé! 💪', 2000);
+
+        // ✅ Delay nhỏ để đảm bảo stopLetterSound hoàn tất
+        setTimeout(function () {
+          speakVietnamese('Sai rồi!', true);
+        }, 100);
 
         // Reset chuỗi đúng khi sai
         gameState.streak = 0;
 
+        // Animation khi sai - shake slot
+        elemBelow.classList.add('icon-shake');
+        setTimeout(function () {
+          elemBelow.classList.remove('icon-shake');
+        }, 500);
+
         if (dragElement) dragElement.classList.remove('dragging-source');
       }
     } else {
+      // ✅ THẢ NGOÀI - không làm gì
       if (dragElement) dragElement.classList.remove('dragging-source');
     }
 
+    // ✅ Cleanup
     var highlights = document.querySelectorAll('.letter-slot.highlight');
     for (var i = 0; i < highlights.length; i++) {
       highlights[i].classList.remove('highlight');
@@ -354,21 +671,197 @@
       dragClone.remove();
       dragClone = null;
     }
+
+    // ✅ Reset trạng thái
     isDragging = false;
     dragElement = null;
+  }
+
+  // ========== SMART SENTENCE BUILDER ==========
+  function getSmartSentence(word, themeData) {
+    var label = word.label.toLowerCase();
+    var prefix = themeData && themeData.prefix ? themeData.prefix : 'Đây là';
+
+    // ✅ Xử lý đặc biệt cho từng chủ đề
+    var theme = gameState.currentTheme;
+
+    // Động vật
+    if (theme === 'animals') {
+      if (label.startsWith('con ')) {
+        return 'Đây là ' + label; // "Đây là con mèo"
+      }
+      return 'Đây là con ' + label; // "Đây là con mèo"
+    }
+
+    // Đồ vật - XỬ LÝ THÔNG MINH
+    if (theme === 'objects') {
+      // Đã có classifier
+      if (label.startsWith('cái ') || label.startsWith('chiếc ') || label.startsWith('quả ') || label.startsWith('quyển ')) {
+        return 'Đây là ' + label;
+      }
+      // Phương tiện
+      if (label === 'xe') {
+        return 'Đây là chiếc ' + label;
+      }
+      // Bóng
+      if (label === 'bóng') {
+        return 'Đây là quả ' + label;
+      }
+      // Sách
+      if (label === 'sách') {
+        return 'Đây là quyển ' + label;
+      }
+      // Nhà
+      if (label === 'nhà') {
+        return 'Đây là căn ' + label;
+      }
+      // Đồ vật thông thường
+      return 'Đây là cái ' + label;
+    }
+
+    // Thức ăn - XỬ LÝ THÔNG MINH
+    if (theme === 'food') {
+      // Đã có classifier rồi
+      if (label.startsWith('quả ') || label.startsWith('trái ') || label.startsWith('bát ') || label.startsWith('ly ') || label.startsWith('bánh ')) {
+        return 'Đây là ' + label;
+      }
+
+      // Trái cây
+      var fruits = ['cam', 'chuối', 'dưa', 'táo', 'xoài', 'ổi', 'mít', 'dừa', 'nho', 'lê', 'đào', 'mận'];
+      for (var i = 0; i < fruits.length; i++) {
+        if (label.includes(fruits[i])) {
+          return 'Đây là trái ' + label;
+        }
+      }
+
+      // Đồ uống
+      if (label === 'sữa' || label === 'nước' || label.includes('nước')) {
+        return 'Đây là ly ' + label;
+      }
+
+      // Món ăn mặc định
+      return 'Đây là món ' + label;
+    }
+
+    // Giao thông - XỬ LÝ THÔNG MINH
+    if (theme === 'transport') {
+      // Đã có classifier
+      if (label.startsWith('xe ') || label.startsWith('chiếc ') || label.startsWith('con ')) {
+        return 'Đây là ' + label;
+      }
+      // Phương tiện đơn lẻ cần "chiếc"
+      if (label === 'xe' || label === 'tàu' || label === 'thuyền') {
+        return 'Đây là chiếc ' + label;
+      }
+      // Máy bay, xe đạp - không cần thêm
+      if (label === 'máy bay' || label === 'xe đạp' || label === 'xe bus' || label === 'tàu hỏa') {
+        return 'Đây là ' + label;
+      }
+      return 'Đây là ' + label;
+    }
+
+    // Thiên nhiên - XỬ LÝ THÔNG MINH
+    if (theme === 'nature') {
+      // Hoa
+      if (label.includes('hoa')) {
+        if (label.startsWith('hoa ')) return 'Đây là ' + label;
+        return 'Đây là hoa ' + label;
+      }
+      // Cây
+      if (label.includes('cây')) {
+        if (label.startsWith('cây ')) return 'Đây là ' + label;
+        return 'Đây là cây ' + label;
+      }
+      // Lá
+      if (label.includes('lá')) {
+        return 'Đây là ' + label;
+      }
+      // Thiên thể (mặt trời, mặt trăng, ngôi sao...)
+      if (label.startsWith('mặt ') || label.startsWith('ngôi ') || label.startsWith('đám ') || label.startsWith('bầu ')) {
+        return 'Đây là ' + label;
+      }
+      // Các yếu tố tự nhiên khác
+      if (label === 'đất' || label === 'nước' || label === 'lửa' || label === 'gió') {
+        return 'Đây là ' + label;
+      }
+      return prefix + ' ' + label;
+    }
+
+    // Thời tiết - XỬ LÝ THÔNG MINH
+    if (theme === 'weather') {
+      // Hiện tượng thời tiết đơn giản
+      if (label === 'nắng' || label === 'mưa' || label === 'gió') {
+        return 'Trời đang ' + label;
+      }
+      // Đã có "trời" rồi
+      if (label.startsWith('trời ')) {
+        return 'Đây là ' + label;
+      }
+      // Các hiện tượng khác
+      if (label === 'mây' || label === 'sấm') {
+        return 'Đây là ' + label;
+      }
+      if (label === 'sấm chớp' || label === 'cầu vồng') {
+        return 'Đây là ' + label;
+      }
+      if (label.includes('gió')) {
+        return 'Đây là ' + label;
+      }
+      return prefix + ' ' + label;
+    }
+
+    // Mặc định
+    return prefix + ' ' + label;
   }
 
   // ========== SMART WORD SELECTION ==========
   function selectSmartWord(words) {
     var now = Date.now();
+    var COOLDOWN_MS = 30 * 60 * 1000; // 30 phút không lặp lại
     var DAY_MS = 24 * 60 * 60 * 1000; // 1 ngày
 
-    // Phân loại từ
-    var newWords = [];
-    var oldWords = [];
+    // Lọc bỏ câu/từ đã làm trong 30 phút gần đây
+    var availableWords = [];
+    var recentWords = [];
 
     for (var i = 0; i < words.length; i++) {
       var word = words[i];
+      var wordKey = word.word || word.sentence;
+
+      // Kiểm tra xem đã làm gần đây chưa
+      var completedTime = gameState.gameMode === 'sentence'
+        ? gameState.sentencesCompleted[wordKey]
+        : gameState.wordsCompleted[wordKey];
+
+      if (completedTime && (now - completedTime) < COOLDOWN_MS) {
+        // Đã làm trong 30 phút gần đây - bỏ qua
+        recentWords.push(word);
+        continue;
+      }
+
+      availableWords.push(word);
+    }
+
+    // Nếu không còn từ nào khả dụng, reset cooldown và dùng lại
+    if (availableWords.length === 0) {
+      console.log('⚠️ Đã hết từ mới, reset cooldown...');
+      var childName = gameState.playerName || 'bé';
+      beeSay(childName + ' đã làm hết rồi! Bây giờ làm lại để ôn bài nhé! 📚', 3000);
+      availableWords = words;
+      // Xóa các câu/từ đã làm để có thể làm lại
+      if (gameState.gameMode === 'sentence') {
+        gameState.sentencesCompleted = {};
+      } else {
+        gameState.wordsCompleted = {};
+      }
+    }
+
+    // Phân loại từ khả dụng
+    var newWords = [];
+    var oldWords = [];
+
+    for (var i = 0; i < availableWords.length; i++) {
+      var word = availableWords[i];
       var wordKey = word.word || word.sentence;
       var progress = gameState.wordProgress[wordKey];
 
@@ -389,8 +882,8 @@
       return oldWords[Math.floor(Math.random() * oldWords.length)];
     }
 
-    // Nếu không có từ nào, trả về null
-    return null;
+    // Nếu không có từ nào, trả về từ đầu tiên
+    return availableWords.length > 0 ? availableWords[0] : null;
   }
 
   function markWordLearned(wordKey) {
@@ -458,12 +951,9 @@
     renderSlots();
     renderLetters();
 
-    setTimeout(function () {
-      // Tạo câu nói phù hợp với chủ đề
-      var prefix = themeData.prefix || 'Đây là';
-      var sentence = prefix + ' ' + currentWord.label.toLowerCase();
-      speakVietnamese(sentence);
-    }, 500);
+    // ✅ Phát âm NGAY LẬP TỨC với prefix THÔNG MINH
+    var sentence = getSmartSentence(currentWord, themeData);
+    speakVietnamese(sentence);
   }
 
   function loadCustomLessonWord() {
@@ -506,9 +996,8 @@
     renderSlots();
     renderLetters();
 
-    setTimeout(function () {
-      speakVietnamese(displayText);
-    }, 500);
+    // ✅ Phát âm NGAY LẬP TỨC
+    speakVietnamese(displayText);
   }
 
   function renderSlots() {
@@ -545,17 +1034,83 @@
     // Lấy text từ word hoặc sentence
     var text = currentWord.word || currentWord.sentence || '';
     var wordChars = text.replace(/\s/g, '').split('');
-    var extras = getRandomLetters(Math.min(2, wordChars.length));
+
+    // ✅ CẤP 1: KHÔNG thêm chữ phụ, chỉ đúng số chữ cần điền
+    var extras = [];
+    if (gameState.currentLevel > 1) {
+      extras = getRandomLetters(Math.min(2, wordChars.length));
+    }
+
     var allChars = shuffle(wordChars.concat(extras));
 
-    for (var i = 0; i < allChars.length; i++) {
-      var char = allChars[i];
-      var letter = document.createElement('div');
-      letter.className = 'draggable-letter';
-      letter.textContent = char;
-      letter.setAttribute('data-char', char);
-      container.appendChild(letter);
+    // ✅ Đợi container render xong để lấy kích thước chính xác
+    setTimeout(function () {
+      // ✅ RẢI RÁC chữ cái trên màn hình - TÍNH TOÁN CHÍNH XÁC
+      var containerWidth = container.clientWidth;
+      var containerHeight = container.clientHeight;
+
+      // Kích thước chữ cái (responsive)
+      var letterSize = window.innerWidth < 768 ? 50 : 60;
+      var padding = 15; // Padding an toàn từ mép
+      var usedPositions = [];
+
+      // Tính vùng an toàn - ĐẢM BẢO chữ KHÔNG BỊ CHE
+      var safeWidth = containerWidth - (padding * 2) - letterSize;
+      var safeHeight = containerHeight - (padding * 2) - letterSize - 10; // Thêm 10px an toàn
+
+      console.log('Container:', containerWidth, 'x', containerHeight, 'Letter size:', letterSize);
+
+      for (var i = 0; i < allChars.length; i++) {
+        var char = allChars[i];
+        var letter = document.createElement('div');
+        letter.className = 'draggable-letter';
+        letter.textContent = char;
+        letter.setAttribute('data-char', char);
+
+        // ✅ Tìm vị trí ngẫu nhiên không trùng lặp TRONG VÙNG AN TOÀN
+        var position = findRandomPosition(safeWidth, safeHeight, letterSize, usedPositions, padding);
+        letter.style.left = position.x + 'px';
+        letter.style.top = position.y + 'px';
+        usedPositions.push(position);
+
+        container.appendChild(letter);
+      }
+    }, 50); // Delay nhỏ để container render xong
+  }
+
+  // ✅ Tìm vị trí ngẫu nhiên - RẢI NGANG GIỐNG BAN ĐẦU
+  function findRandomPosition(maxWidth, maxHeight, size, usedPositions, padding) {
+    var attempts = 0;
+    var maxAttempts = 50;
+    var minDistance = size + 10; // Khoảng cách tối thiểu giữa các chữ
+
+    while (attempts < maxAttempts) {
+      // Tạo vị trí ngẫu nhiên - RẢI NGANG (toàn bộ chiều rộng, CHỈ 40% chiều cao)
+      var x = Math.random() * maxWidth + padding;
+      var y = Math.random() * (maxHeight * 0.4) + padding;
+
+      var valid = true;
+      for (var i = 0; i < usedPositions.length; i++) {
+        var dx = x - usedPositions[i].x;
+        var dy = y - usedPositions[i].y;
+        var distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < minDistance) {
+          valid = false;
+          break;
+        }
+      }
+
+      if (valid) {
+        return { x: x, y: y };
+      }
+      attempts++;
     }
+
+    // Fallback: vị trí ngẫu nhiên rải ngang - CHỈ 40% chiều cao
+    return {
+      x: Math.random() * maxWidth + padding,
+      y: Math.random() * (maxHeight * 0.4) + padding
+    };
   }
 
   function checkWordComplete() {
@@ -571,6 +1126,10 @@
       gameState.totalStars += 3;
       gameState.coins += 1; // Mỗi câu đúng = 1 xu
 
+      // Animation cho star icon
+      animateIcon('navStars', 'icon-pulse');
+      animateIcon('navCoins', 'icon-bounce');
+
       // Tăng chuỗi đúng
       if (!gameState.streak) gameState.streak = 0;
       gameState.streak++;
@@ -578,12 +1137,15 @@
       // Bonus xu cho chuỗi dài
       if (gameState.streak >= 5) {
         gameState.coins += 2; // Bonus 2 xu
+        animateIcon('navCoins', 'icon-glow');
         beeSay('Chuỗi 5 câu! Bonus +2 xu! 🪙🪙', 2000);
       }
 
       // Đổi sao thành xu (10 sao = 5 xu)
       if (gameState.totalStars >= 10 && gameState.totalStars % 10 === 0) {
         gameState.coins += 5;
+        animateIcon('navStars', 'icon-spin');
+        animateIcon('navCoins', 'icon-glow');
         beeSay('10 sao đổi 5 xu! 🌟→🪙', 2000);
       }
 
@@ -595,6 +1157,14 @@
         }
         // Đánh dấu tiến độ học
         markWordLearned(wordToSave);
+
+        // ✅ LƯU TIMESTAMP ĐỂ TRÁNH LẶP LẠI NGAY
+        var now = Date.now();
+        if (gameState.gameMode === 'sentence') {
+          gameState.sentencesCompleted[wordToSave] = now;
+        } else {
+          gameState.wordsCompleted[wordToSave] = now;
+        }
       }
       saveGame();
       updateNavInfo();
@@ -602,59 +1172,34 @@
       var gameStars = document.getElementById('gameStars');
       if (gameStars) gameStars.textContent = gameState.totalStars;
 
-      var successPopup = document.getElementById('successPopup');
-      var successWord = document.getElementById('successWord');
-      var successCharacter = document.getElementById('successCharacter');
-
-      // Hiển thị từ hoặc câu đã hoàn thành
-      if (successWord) successWord.textContent = currentWord.word || currentWord.sentence;
-      if (successCharacter) successCharacter.textContent = currentWord.image;
-      if (successPopup) successPopup.classList.add('show');
-
+      // ✅ KHÔNG hiển thị success popup nữa - dùng celebration overlay
       createConfetti();
       playSound('success');
 
-      // Phát âm thanh hiệu ứng
-      setTimeout(function () {
-        if (window.SoundEffects) {
-          window.SoundEffects.applause(0.3);
-          setTimeout(function () {
-            window.SoundEffects.firework(0.25);
-          }, 300);
-          setTimeout(function () {
-            window.SoundEffects.cheer(0.2);
-          }, 600);
-        }
-      }, 100);
-
-      // Tạo câu khen phù hợp với TÊN BÉ
-      var babyName = gameState.playerName || 'Bé';
-      var praisesWithName = [
-        babyName + ' giỏi lắm!',
-        'Tuyệt vời ' + babyName + '!',
-        babyName + ' thông minh quá!',
-        'Đúng rồi ' + babyName + '!',
-        babyName + ' tài giỏi quá!',
-        'Xuất sắc ' + babyName + '!',
-        babyName + ' học giỏi lắm!'
+      // ✅ Câu khen NGAY với TÊN em bé - ĐỌC TO VÀ RÕ
+      var childName = gameState.playerName || 'bé';
+      var praises = [
+        childName + ' giỏi lắm!',
+        childName + ' tuyệt vời!',
+        childName + ' làm đúng rồi!',
+        childName + ' xuất sắc!',
+        childName + ' hay lắm!'
       ];
-      var randomPraise = praisesWithName[Math.floor(Math.random() * praisesWithName.length)];
+      var randomPraise = praises[Math.floor(Math.random() * praises.length)];
 
-      // Đọc câu khen với tên bé
-      speakVietnamese(randomPraise, true);
-
-      // Sau đó đọc lại từ/câu
-      setTimeout(function () {
-        if (gameState.gameMode === 'sentence') {
-          // Chế độ câu: đọc toàn bộ câu
-          speakVietnamese(currentWord.audio || currentWord.sentence);
-        } else {
-          // Chế độ từ: đọc với prefix
-          var themeData = window.WordThemes && window.WordThemes[gameState.currentTheme];
-          var prefix = themeData && themeData.prefix ? themeData.prefix : 'Đây là';
-          speakVietnamese(prefix + ' ' + currentWord.label.toLowerCase());
-        }
-      }, 1500);
+      // Đọc câu khen và sau đó đọc lại từ/câu
+      speakVietnamese(randomPraise, true, function () {
+        // ✅ Đọc lại từ/câu SAU KHI KHEN XONG
+        setTimeout(function () {
+          if (gameState.gameMode === 'sentence') {
+            speakVietnamese(currentWord.audio || currentWord.sentence);
+          } else {
+            var themeData = window.WordThemes && window.WordThemes[gameState.currentTheme];
+            var sentence = getSmartSentence(currentWord, themeData);
+            speakVietnamese(sentence);
+          }
+        }, 500);
+      });
 
       if (window.GameAnimations) {
         window.GameAnimations.playCharacterAnimation(currentWord.image, currentWord.label);
@@ -667,8 +1212,8 @@
         }, 2500);
       }
 
-      // ĐỒNG HỒ ĐẾM NGƯỢC 4 → 3 → 2 → 1
-      startCountdown();
+      // ✅ HIỆU ỨNG CHUYỂN CÂU PHONG PHÚ
+      showCelebrationTransition();
     }
   }
 
@@ -690,17 +1235,137 @@
       var sentences = window.SentenceData && window.SentenceData[gameState.currentTheme];
       if (sentences && gameState.currentWordIndex >= sentences.length) {
         gameState.currentWordIndex = 0;
-        beeSay('Bé đã học hết câu trong chủ đề này! 🎉', 4000);
+        var childName = gameState.playerName || 'Bé';
+        beeSay(childName + ' đã học hết câu trong chủ đề này! 🎉', 4000);
       }
       loadSentence();
     } else {
       var words = wordData['level' + gameState.currentLevel];
       if (gameState.currentWordIndex >= words.length) {
         gameState.currentWordIndex = 0;
-        beeSay('Bé đã học hết cấp này! 🎉', 4000);
+        var childName = gameState.playerName || 'Bé';
+        beeSay(childName + ' đã học hết cấp này! 🎉', 4000);
       }
       loadWord();
     }
+  }
+
+  // ========== CELEBRATION TRANSITION ==========
+  function showCelebrationTransition() {
+    // ✅ ẨN success popup cũ để không bị chồng
+    var successPopup = document.getElementById('successPopup');
+    if (successPopup) successPopup.classList.remove('show');
+
+    var overlay = document.getElementById('celebrationOverlay');
+    var title = document.getElementById('celebrationTitle');
+    var animalsContainer = document.getElementById('celebrationAnimals');
+    var message = document.getElementById('celebrationMessage');
+    var timer = document.getElementById('countdownTimer');
+
+    if (!overlay) return;
+
+    // ✅ Nếu đang hiển thị, bỏ qua để không chồng
+    if (overlay.classList.contains('show')) {
+      console.log('⚠️ Celebration đang chạy, bỏ qua');
+      return;
+    }
+
+    // Danh sách con vật ngẫu nhiên
+    var animals = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🐦', '🦆', '🦅', '🦉', '🦇', '🐺', '🐗', '🐴', '🦄', '🐝', '🐛', '🦋', '🐌', '🐞', '🐜', '🦗', '🕷️', '🦂', '🐢', '🐍', '🦎', '🦖', '🦕', '🐙', '🦑', '🦐', '🦀', '🐡', '🐠', '🐟', '🐬', '🐳', '🐋', '🦈', '🐊', '🐅', '🐆', '🦓', '🦍', '🦧', '🐘', '🦛', '🦏', '🐪', '🐫', '🦒', '🦘', '🐃', '🐂', '🐄', '🐎', '🐖', '🐏', '🐑', '🦙', '🐐', '🦌', '🐕', '🐩', '🦮', '🐈'];
+
+    // Chọn 5 con vật ngẫu nhiên
+    var selectedAnimals = [];
+    for (var i = 0; i < 5; i++) {
+      selectedAnimals.push(animals[Math.floor(Math.random() * animals.length)]);
+    }
+
+    // Cập nhật tiêu đề với TÊN em bé
+    var completedWord = currentWord.word || currentWord.sentence;
+    var childName = gameState.playerName || 'bé';
+    if (title) title.textContent = '🎉 ' + completedWord + ' - ' + childName + ' giỏi lắm! 🎉';
+
+    // Tạo con vật chạy
+    animalsContainer.innerHTML = '';
+    selectedAnimals.forEach(function (animal) {
+      var animalEl = document.createElement('div');
+      animalEl.className = 'celebration-animal';
+      animalEl.textContent = animal;
+      animalsContainer.appendChild(animalEl);
+    });
+
+    // ✅ THÊM HIỆU ỨNG VỖ TAY CHÚC MỪNG
+    createClappingHands(overlay);
+
+    // Hiển thị overlay
+    overlay.classList.add('show');
+
+    // ✅ Phát âm thanh VUI NHỘN
+    if (window.SoundEffects) {
+      window.SoundEffects.applause(0.5);
+      setTimeout(function () {
+        window.SoundEffects.cheer(0.4);
+      }, 200);
+      setTimeout(function () {
+        window.SoundEffects.firework(0.4);
+      }, 400);
+      setTimeout(function () {
+        window.SoundEffects.sparkle(0.3);
+      }, 600);
+    }
+
+    // ✅ Phát tiếng động vật THẬT - nhiều lần
+    if (window.AnimalSounds) {
+      setTimeout(function () {
+        window.AnimalSounds.playRandom();
+      }, 100);
+      setTimeout(function () {
+        window.AnimalSounds.playRandom();
+      }, 800);
+    }
+
+    // ✅ ĐỌC LẠI TỪ TO RÕ NGAY LẬP TỨC VÀ ĐỢI ĐỌC XONG
+    setTimeout(function () {
+      var wordToRead = currentWord.word || currentWord.sentence;
+      var themeData = window.WordThemes && window.WordThemes[gameState.currentTheme];
+
+      // Hàm bắt đầu countdown sau khi đọc xong
+      var startCountdownAfterSpeech = function () {
+        console.log('✅ Đã đọc xong, bắt đầu countdown...');
+
+        // ✅ Đếm ngược 4 → 3 → 2 → 1 (sau khi đọc xong) - CHẬM HƠN để em bé thấy rõ
+        var countdown = 4;
+        timer.textContent = countdown;
+
+        var countdownInterval = setInterval(function () {
+          countdown--;
+          if (countdown > 0) {
+            timer.textContent = countdown;
+            playSound('click');
+
+            // Tạo hiệu ứng vỗ tay bay lên mỗi giây
+            createFloatingClaps(overlay);
+          } else {
+            clearInterval(countdownInterval);
+            // Ẩn overlay và chuyển câu
+            overlay.classList.remove('show');
+
+            // Delay nhỏ trước khi load câu mới
+            setTimeout(function () {
+              nextWord();
+            }, 400);
+          }
+        }, 1000);
+      };
+
+      if (gameState.gameMode === 'sentence') {
+        // Chế độ câu: đọc toàn bộ câu VÀ ĐỢI XONG
+        speakVietnamese(currentWord.audio || wordToRead, true, startCountdownAfterSpeech);
+      } else {
+        // Chế độ từ: đọc với prefix THÔNG MINH VÀ ĐỢI XONG
+        var sentence = getSmartSentence(currentWord, themeData);
+        speakVietnamese(sentence, true, startCountdownAfterSpeech);
+      }
+    }, 500);
   }
 
   // ========== COUNTDOWN TIMER ==========
@@ -741,14 +1406,24 @@
       return;
     }
 
-    // CHỌN CÂU THÔNG MINH: Ưu tiên câu mới
-    currentWord = selectSmartWord(sentences);
-    if (!currentWord) {
-      gameState.currentWordIndex = 0;
-      currentWord = sentences[0];
+    // LỌC CÂU THEO CẤP ĐỘ
+    var levelSentences = sentences.filter(function (s) {
+      return s.level === gameState.currentLevel;
+    });
+
+    // Nếu không có câu cho cấp độ này, lấy tất cả
+    if (levelSentences.length === 0) {
+      levelSentences = sentences;
     }
 
-    console.log('Loading sentence:', currentWord.sentence);
+    // CHỌN CÂU THÔNG MINH: Ưu tiên câu mới
+    currentWord = selectSmartWord(levelSentences);
+    if (!currentWord) {
+      gameState.currentWordIndex = 0;
+      currentWord = levelSentences[0];
+    }
+
+    console.log('Loading sentence (Level ' + gameState.currentLevel + '):', currentWord.sentence);
 
     var gameLevel = document.getElementById('gameLevel');
     var gameWordNum = document.getElementById('gameWordNum');
@@ -769,9 +1444,8 @@
     renderSentenceSlots();
     renderSentenceWords();
 
-    setTimeout(function () {
-      speakVietnamese(currentWord.audio || currentWord.sentence);
-    }, 500);
+    // ✅ Phát âm NGAY LẬP TỨC
+    speakVietnamese(currentWord.audio || currentWord.sentence);
   }
 
   function renderSentenceSlots() {
@@ -781,18 +1455,20 @@
     container.parentElement.classList.add('sentence-mode');
 
     var words = currentWord.sentence.split(' ');
-    var blankIndices = [];
+
+    // Tạo bản sao của blanks để đếm từ trùng lặp
+    var blanksToUse = currentWord.blanks.slice();
 
     for (var i = 0; i < words.length; i++) {
       var word = words[i];
       var isBlank = false;
 
-      for (var j = 0; j < currentWord.blanks.length; j++) {
-        if (word === currentWord.blanks[j]) {
-          isBlank = true;
-          blankIndices.push(i);
-          break;
-        }
+      // Kiểm tra xem từ này có trong danh sách blanks không
+      var blankIndex = blanksToUse.indexOf(word);
+      if (blankIndex !== -1) {
+        isBlank = true;
+        // Xóa từ đã dùng để xử lý từ trùng lặp đúng
+        blanksToUse.splice(blankIndex, 1);
       }
 
       if (isBlank) {
@@ -817,21 +1493,67 @@
     if (!container) return;
     container.innerHTML = '';
 
-    var blanks = shuffle(currentWord.blanks.slice());
+    // Lấy từ cần điền - GIỮ NGUYÊN TẤT CẢ KỂ CẢ TỪ TRÙNG LẶP
+    var blanks = currentWord.blanks.slice();
 
-    blanks.forEach(function (word) {
+    // Thêm từ nhiễu theo cấp độ
+    var distractors = currentWord.distractors || [];
+    var numDistractors = 0;
+
+    // Cấp 1: KHÔNG có từ nhiễu
+    if (gameState.currentLevel === 1) {
+      numDistractors = 0;
+    }
+    // Cấp 2: 1-2 từ nhiễu
+    else if (gameState.currentLevel === 2) {
+      numDistractors = Math.min(2, distractors.length);
+    }
+    // Cấp 3: Nhiều từ nhiễu hơn
+    else {
+      numDistractors = Math.min(distractors.length, blanks.length);
+    }
+
+    // Thêm từ nhiễu vào danh sách
+    var allWords = blanks.slice();
+    for (var i = 0; i < numDistractors; i++) {
+      if (distractors[i]) {
+        allWords.push(distractors[i]);
+      }
+    }
+
+    // Xáo trộn tất cả từ
+    allWords = shuffle(allWords);
+
+    // Render từng từ với index duy nhất để xử lý từ trùng lặp
+    allWords.forEach(function (word, index) {
       var wordEl = document.createElement('div');
       wordEl.className = 'draggable-letter';
       wordEl.textContent = word;
       wordEl.dataset.char = word;
+      wordEl.dataset.wordIndex = index; // Thêm index để phân biệt từ trùng lặp
+
+      // Đánh dấu từ nhiễu (để debug, có thể bỏ)
+      var isDistractor = distractors.indexOf(word) !== -1 && blanks.indexOf(word) === -1;
+      if (isDistractor) {
+        wordEl.dataset.distractor = 'true';
+      }
+
       container.appendChild(wordEl);
     });
+
+    console.log('Rendered words:', blanks.length, 'blanks +', numDistractors, 'distractors');
   }
 
   // ========== PAGE INITIALIZERS ==========
   function initHomePage() {
     console.log('Init home page');
     loadGame();
+
+    // ✅ Fix emoji icons cho level badges
+    var levelBadges = document.querySelectorAll('.level-badge');
+    if (levelBadges[0]) levelBadges[0].textContent = '🌱';
+    if (levelBadges[1]) levelBadges[1].textContent = '🌿';
+    if (levelBadges[2]) levelBadges[2].textContent = '🌳';
 
     var avatarBtns = document.querySelectorAll('.avatar-btn');
     for (var i = 0; i < avatarBtns.length; i++) {
@@ -853,6 +1575,10 @@
           gameState.playerAvatar = button.getAttribute('data-avatar');
           saveGame();
           updateNavInfo();
+
+          // Animation khi đổi avatar
+          animateIcon('navAvatar', 'icon-spin');
+          beeSay('Avatar mới đẹp quá! ' + gameState.playerAvatar, 2000);
         };
       })(btn);
     }
@@ -865,6 +1591,9 @@
         saveGame();
       };
     }
+
+    // ✅ Render themes trên trang chủ
+    renderThemesHome();
 
     updateProgressBars();
 
@@ -880,6 +1609,53 @@
           showPage('play');
         };
       })(box);
+    }
+  }
+
+  // ✅ Render themes trên trang chủ
+  function renderThemesHome() {
+    var container = document.getElementById('themesGridHome');
+    var currentThemeName = document.getElementById('currentThemeName');
+    var currentThemeIcon = document.getElementById('currentThemeIcon');
+
+    if (!container || !window.WordThemes) return;
+
+    container.innerHTML = '';
+
+    // Cập nhật tên chủ đề hiện tại
+    var currentTheme = window.WordThemes[gameState.currentTheme];
+    if (currentTheme && currentThemeName && currentThemeIcon) {
+      currentThemeName.textContent = currentTheme.name;
+      currentThemeIcon.textContent = currentTheme.icon;
+    }
+
+    // Render tất cả themes
+    for (var themeKey in window.WordThemes) {
+      var theme = window.WordThemes[themeKey];
+      var totalWords = (theme.level1 ? theme.level1.length : 0) +
+        (theme.level2 ? theme.level2.length : 0) +
+        (theme.level3 ? theme.level3.length : 0);
+
+      var card = document.createElement('div');
+      card.className = 'theme-card-home' + (gameState.currentTheme === themeKey ? ' active' : '');
+      card.setAttribute('data-theme', themeKey);
+      card.innerHTML = '<span class="theme-icon-home">' + theme.icon + '</span>' +
+        '<div class="theme-name-home">' + theme.name + '</div>' +
+        '<div class="theme-count-home">' + totalWords + ' từ</div>';
+
+      card.onclick = (function (key) {
+        return function () {
+          gameState.currentTheme = key;
+          gameState.currentWordIndex = 0;
+          saveGame();
+          playSound('click');
+          beeSay('Đã chọn chủ đề: ' + window.WordThemes[key].name + '! 🎉', 2000);
+          speakVietnamese('Chủ đề ' + window.WordThemes[key].name);
+          renderThemesHome(); // Re-render để cập nhật active
+        };
+      })(themeKey);
+
+      container.appendChild(card);
     }
   }
 
@@ -1276,6 +2052,10 @@
       saveGame();
       updateNavInfo();
 
+      // Animation khi mua
+      animateIcon('shopCoins', 'icon-shake');
+      animateIcon('navCoins', 'icon-shake');
+
       playSound('success');
       beeSay('Đã mua ' + item.name + '! 🎉 Vào Hồ sơ để đổi avatar!', 3000);
 
@@ -1339,7 +2119,8 @@
     if (btnStartGame) {
       btnStartGame.onclick = function () {
         playSound('click');
-        beeSay('Chúng ta cùng học nào! 🎉');
+        var childName = gameState.playerName || 'bé';
+        beeSay(childName + ', chúng ta cùng học nào! 🎉');
         setTimeout(function () { showPage('play'); }, 500);
       };
     }
@@ -1348,17 +2129,17 @@
     var beeMascot = document.getElementById('beeMascot');
     if (beeMascot) {
       beeMascot.onclick = function () {
-        var msgs = ['Chào bé yêu! 🌸', 'Bé giỏi lắm! ⭐', 'Cùng học chữ nào! 📚', 'Cố lên nào! 💪'];
+        var msgs = ['Chào bé!', 'Xin chào!', 'Hello!', 'Hi bé!', 'Chúc bé học vui!'];
         var msg = msgs[Math.floor(Math.random() * msgs.length)];
         beeSay(msg);
-        speakVietnamese(msg.replace(/[^\w\sàáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ]/gi, ''));
+        speakVietnamese(msg);
       };
     }
 
     // Global drag listeners
     document.addEventListener('mousemove', handleDragMove, false);
     document.addEventListener('mouseup', handleDragEnd, false);
-    document.addEventListener('touchmove', handleDragMove, false);
+    document.addEventListener('touchmove', handleDragMove, { passive: false });
     document.addEventListener('touchend', handleDragEnd, false);
     document.addEventListener('touchcancel', handleDragEnd, false);
 
@@ -1369,30 +2150,227 @@
     });
 
     document.addEventListener('touchstart', function (e) {
-      if (e.target.classList.contains('draggable-letter')) {
+      if (e.target.classList.contains('draggable-letter') && !e.target.classList.contains('used')) {
+        e.preventDefault(); // Prevent scroll while dragging
         handleDragStart(e);
       }
-    }, false);
+    }, { passive: false });
 
     console.log('Listeners ready');
   }
 
   // ========== INIT ==========
-  function init() {
+  async function init() {
     console.log('🎉 DOM loaded!');
+
+    // Check authentication TRƯỚC - BẮT BUỘC
+    try {
+      await checkAuthentication();
+      // Nếu đến đây = đã đăng nhập
+      console.log('✅ Auth passed, loading game...');
+    } catch (err) {
+      console.error('Auth check failed:', err);
+      // Redirect sang auth
+      window.location.href = 'auth.html';
+      return; // Dừng init
+    }
+
+    // ✅ PRELOAD voices NGAY để phản hồi nhanh
+    loadVoices();
+    setTimeout(loadVoices, 100);
+    setTimeout(loadVoices, 500);
 
     loadGame();
     setupGlobalListeners();
+    setupAudioUnlockButton();
+    setupAudioWelcomeModal();
     initTreasure();
     createFloatingIcons();
+    checkTTSAvailability();
     showPage('home');
 
+    // Ẩn loading screen
     setTimeout(function () {
-      beeSay('Chào bé yêu! Hôm nay mình cùng ghép chữ nào! 🌈', 4000);
-      speakVietnamese('Chào bé yêu!');
+      var loadingScreen = document.getElementById('loadingScreen');
+      if (loadingScreen) {
+        loadingScreen.classList.add('hidden');
+        setTimeout(function () {
+          loadingScreen.remove();
+        }, 500);
+      }
+    }, 500);
+
+    // Hiện modal welcome nếu chưa unlock audio
+    setTimeout(function () {
+      if (window.AudioManager && !window.AudioManager.isUnlocked()) {
+        var modal = document.getElementById('audioWelcomeModal');
+        if (modal) modal.classList.add('show');
+      } else {
+        var childName = gameState.playerName || 'bé yêu';
+        beeSay('Chào ' + childName + '! Hôm nay mình cùng ghép chữ nào! 🌈', 4000);
+        speakVietnamese('Chào ' + childName + '!');
+      }
     }, 1000);
 
     console.log('✅ Gamestva ready!');
+  }
+
+  // Check authentication - BẮT BUỘC ĐĂNG NHẬP
+  async function checkAuthentication() {
+    // Nếu Supabase chưa load, redirect ngay sang auth
+    if (!window.SupabaseConfig) {
+      console.log('⚠️ Supabase not loaded, redirecting to auth...');
+      window.location.href = 'auth.html';
+      return;
+    }
+
+    try {
+      // Wait for Supabase to initialize
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const user = await window.SupabaseConfig.getCurrentUser();
+      if (!user) {
+        // Not logged in, redirect to auth page
+        console.log('❌ Not authenticated, redirecting to auth...');
+        window.location.href = 'auth.html';
+        return; // Dừng execution
+      } else {
+        console.log('✅ User authenticated:', user.email);
+
+        // Start session tracking nếu chưa có
+        if (window.SupabaseConfig.startSession) {
+          await window.SupabaseConfig.startSession();
+          console.log('📊 Session tracking started');
+        }
+
+        // Load user progress from Supabase
+        await loadUserProgressFromSupabase(user.id);
+      }
+    } catch (error) {
+      console.error('Auth check error:', error);
+      // On error, CŨNG redirect sang auth (không cho vào)
+      console.log('❌ Auth error, redirecting to auth...');
+      window.location.href = 'auth.html';
+    }
+  }
+
+  // Load user progress from Supabase
+  async function loadUserProgressFromSupabase(userId) {
+    try {
+      const result = await window.SupabaseConfig.getUserProgress(userId);
+      if (result.success && result.data) {
+        // Map database fields to gameState
+        const dbData = result.data;
+        gameState.totalStars = dbData.total_stars || 0;
+        gameState.coins = dbData.coins || 0;
+        gameState.wordsLearned = dbData.words_learned || [];
+        gameState.ownedCharacters = dbData.owned_characters || [];
+        gameState.playerName = dbData.player_name || 'Bé';
+        gameState.playerAvatar = dbData.player_avatar || '👦';
+        gameState.currentLevel = dbData.current_level || 1;
+        gameState.streak = dbData.streak || 0;
+
+        console.log('✅ Progress loaded from Supabase:', gameState);
+        updateNavInfo();
+      }
+    } catch (error) {
+      console.error('Load progress error:', error);
+    }
+  }
+
+  // Save progress to Supabase
+  async function saveProgressToSupabase() {
+    if (!window.SupabaseConfig) {
+      console.warn('⚠️ SupabaseConfig not available, skipping cloud save');
+      return;
+    }
+
+    try {
+      const user = await window.SupabaseConfig.getCurrentUser();
+      if (user) {
+        const result = await window.SupabaseConfig.saveUserProgress(user.id, gameState);
+        if (result.success) {
+          console.log('✅ Progress saved to Supabase');
+        } else {
+          console.error('❌ Failed to save progress:', result.error);
+        }
+      } else {
+        console.warn('⚠️ No user logged in, skipping cloud save');
+      }
+    } catch (error) {
+      console.error('❌ Save progress error:', error);
+    }
+  }
+
+  // Override saveGame to also save to Supabase
+  var originalSaveGame = saveGame;
+  saveGame = function () {
+    originalSaveGame();
+    saveProgressToSupabase();
+  };
+
+  // Setup audio welcome modal
+  function setupAudioWelcomeModal() {
+    var modal = document.getElementById('audioWelcomeModal');
+    var btnEnable = document.getElementById('btnEnableAudio');
+    var btnSkip = document.getElementById('btnSkipAudio');
+
+    if (btnEnable) {
+      btnEnable.onclick = function () {
+        if (window.AudioManager) {
+          window.AudioManager.unlock().then(function () {
+            if (modal) modal.classList.remove('show');
+            playSound('success');
+            var childName = gameState.playerName || 'bé yêu';
+            beeSay('Chào ' + childName + '! Hôm nay mình cùng ghép chữ nào! 🌈', 4000);
+            speakVietnamese('Chào ' + childName + '!');
+          });
+        }
+      };
+    }
+
+    if (btnSkip) {
+      btnSkip.onclick = function () {
+        if (modal) modal.classList.remove('show');
+        var childName = gameState.playerName || 'bé yêu';
+        beeSay('Chào ' + childName + '! Hôm nay mình cùng ghép chữ nào! 🌈', 4000);
+      };
+    }
+  }
+
+  // Setup audio unlock button
+  function setupAudioUnlockButton() {
+    var btn = document.getElementById('audioUnlockBtn');
+    if (!btn) return;
+
+    // Update button state
+    function updateButtonState() {
+      if (window.AudioManager && window.AudioManager.isUnlocked()) {
+        btn.textContent = '🔊';
+        btn.classList.add('unlocked');
+        btn.title = 'Âm thanh đã bật';
+      } else {
+        btn.textContent = '🔇';
+        btn.classList.remove('unlocked');
+        btn.title = 'Nhấn để bật âm thanh';
+      }
+    }
+
+    // Click handler
+    btn.onclick = function () {
+      if (window.AudioManager) {
+        window.AudioManager.unlock().then(function () {
+          updateButtonState();
+          playSound('success');
+          beeSay('Âm thanh đã bật! 🔊', 2000);
+          speakVietnamese('Âm thanh đã bật!');
+        });
+      }
+    };
+
+    // Check every second
+    setInterval(updateButtonState, 1000);
+    updateButtonState();
   }
 
   // ========== FLOATING ICONS ==========
@@ -1403,13 +2381,23 @@
 
     var icons = ['⭐', '🌟', '✨', '💫', '🎈', '🎨', '🌈', '🦋', '🌸', '🍀'];
 
-    for (var i = 0; i < 15; i++) {
+    // ✅ Giảm số lượng icon và phân bổ đều hơn
+    for (var i = 0; i < 8; i++) {
       var icon = document.createElement('div');
       icon.className = 'floating-icon';
       icon.textContent = icons[Math.floor(Math.random() * icons.length)];
-      icon.style.left = Math.random() * 100 + '%';
-      icon.style.animationDelay = Math.random() * 15 + 's';
-      icon.style.animationDuration = (15 + Math.random() * 10) + 's';
+
+      // ✅ Phân bổ đều theo cột (8 icon = 8 cột)
+      var columnWidth = 100 / 8;
+      var minLeft = i * columnWidth;
+      var maxLeft = (i + 1) * columnWidth;
+      icon.style.left = (minLeft + Math.random() * (maxLeft - minLeft)) + '%';
+
+      // ✅ Bắt đầu từ vị trí khác nhau (không dồn ở bottom)
+      icon.style.bottom = (Math.random() * 120 - 20) + 'vh';
+
+      icon.style.animationDelay = (i * 2) + 's'; // Delay đều hơn
+      icon.style.animationDuration = (15 + Math.random() * 5) + 's';
       container.appendChild(icon);
     }
   }

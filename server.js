@@ -25,16 +25,19 @@ const mimeTypes = {
 function handleTTSProxy(req, res, text) {
   const encodedText = encodeURIComponent(text);
 
-  // Sử dụng Google Translate TTS
-  const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=${encodedText}`;
-
+  // Sử dụng Google Translate TTS với tham số tối ưu cho giọng nữ
+  // client=tw-ob: Web client (giọng tự nhiên hơn)
+  // tl=vi: Tiếng Việt
+  // ttsspeed=0.8: Tốc độ chậm hơn (phù hợp trẻ em)
   const options = {
     hostname: 'translate.google.com',
-    path: `/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=${encodedText}`,
+    path: `/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&ttsspeed=0.85&q=${encodedText}`,
     method: 'GET',
     headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-      'Referer': 'https://translate.google.com/'
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Referer': 'https://translate.google.com/',
+      'Accept': 'audio/mpeg,audio/*;q=0.9,*/*;q=0.8',
+      'Accept-Language': 'vi-VN,vi;q=0.9,en;q=0.8'
     }
   };
 

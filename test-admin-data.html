@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+
+        h2 {
+            color: #666;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        .result {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .success {
+            color: #155724;
+            background: #d4edda;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+
+        .error {
+            color: #721c24;
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+
+        .info {
+            color: #0c5460;
+            background: #d1ecf1;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #4CAF50;
+            color: white;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🔍 Test Admin Data</h1>
+        <p>Kiểm tra xem SQL đã chạy thành công và data có hiển thị đúng không</p>
+    </div>
+
+    <div class="container">
+        <h2>🎯 Quick Tests</h2>
+        <button onclick="testAll()">🚀 Test All</button>
+        <button onclick="testAdminView()">📊 Test Admin View</button>
+        <button onclick="testRPCFunction()">⚙️ Test RPC Function</button>
+        <button onclick="testProfiles()">👤 Test Profiles</button>
+        <button onclick="testUserProgress()">⭐ Test User Progress</button>
+        <button onclick="testDevices()">📱 Test Devices</button>
+        <button onclick="clearResults()">🗑️ Clear</button>
+    </div>
+
+    <div class="container">
+        <h2>📊 Results</h2>
+        <div id="results"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script>
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = message;
+            results.appendChild(div);
+            console.log(message);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function testAll() {
+            clearResults();
+            log('🚀 Starting all tests...', 'info');
+            await testAdminView();
+            await testRPCFunction();
+            await testProfiles();
+            await testUserProgress();
+            await testDevices();
+            log('✅ All tests completed!', 'success');
+        }
+
+        async function testAdminView() {
+            log('<h3>📊 Testing admin_users_view...</h3>', 'info');
+            try {
+                const { data, error } = await window.SupabaseConfig.client()
+                    .from('admin_users_view')
+                    .select('*');
+
+                if (error) {
+                    log('❌ Error: ' + error.message, 'error');
+                    log('💡 View chưa tồn tại hoặc chưa có permissions', 'info');
+                    return;
+                }
+
+                if (!data || data.length === 0) {
+                    log('⚠️ View exists but no data', 'error');
+                    return;
+                }
+
+                log('✅ Found ' + data.length + ' users in admin_users_view', 'success');
+
+                // Show table
+                let table = '<table><thead><tr><th>Email</th><th>Username</th><th>Stars</th><th>Coins</th><th>Level</th><th>Online Devices</th></tr></thead><tbody>';
+                data.forEach(user => {
+                    table += `<tr>
+                        <td>${user.email || 'N/A'}</td>
+                        <td>${user.username || 'N/A'}</td>
+                        <td>⭐ ${user.total_stars || 0}</td>
+                        <td>🪙 ${user.coins || 0}</td>
+                        <td>Level ${user.current_level || 1}</td>
+                        <td>${user.online_devices_count || 0}</td>
+                    </tr>`;
+                });
+                table += '</tbody></table>';
+                log(table, 'result');
+
+                // Show JSON
+                log('<details><summary>📄 View JSON Data</summary><pre>' + JSON.stringify(data, null, 2) + '</pre></details>', 'result');
+            } catch (error) {
+                log('❌ Exception: ' + error.message, 'error');
+            }
+        }
+
+        async function testRPCFunction() {
+            log('<h3>⚙️ Testing get_all_users_with_email() RPC...</h3>', 'info');
+            try {
+                const { data, error } = await window.SupabaseConfig.client()
+                    .rpc('get_all_users_with_email');
+
+                if (error) {
+                    log('❌ Error: ' + error.message, 'error');
+                    log('💡 Function chưa tồn tại hoặc chưa có permissions', 'info');
+                    return;
+                }
+
+                if (!data || data.length === 0) {
+                    log('⚠️ Function exists but no data', 'error');
+                    return;
+                }
+
+                log('✅ Found ' + data.length + ' users from RPC', 'success');
+
+                let table = '<table><thead><tr><th>Email</th><th>Username</th><th>Created At</th></tr></thead><tbody>';
+                data.forEach(user => {
+                    table += `<tr>
+                        <td>${user.email || 'N/A'}</td>
+                        <td>${user.username || 'N/A'}</td>
+                        <td>${new Date(user.created_at).toLocaleString('vi-VN')}</td>
+                    </tr>`;
+                });
+                table += '</tbody></table>';
+                log(table, 'result');
+            } catch (error) {
+                log('❌ Exception: ' + error.message, 'error');
+            }
+        }
+
+        async function testProfiles() {
+            log('<h3>👤 Testing profiles table...</h3>', 'info');
+            try {
+                const { data, error } = await window.SupabaseConfig.client()
+                    .from('profiles')
+                    .select('*');
+
+                if (error) {
+                    log('❌ Error: ' + error.message, 'error');
+                    return;
+                }
+
+                if (!data || data.length === 0) {
+                    log('⚠️ No profiles found', 'error');
+                    return;
+                }
+
+                log('✅ Found ' + data.length + ' profiles', 'success');
+
+                let table = '<table><thead><tr><th>Email</th><th>Username</th><th>Full Name</th><th>Role</th></tr></thead><tbody>';
+                data.forEach(profile => {
+                    table += `<tr>
+                        <td>${profile.email || 'N/A'}</td>
+                        <td>${profile.username || 'N/A'}</td>
+                        <td>${profile.full_name || 'N/A'}</td>
+                        <td>${profile.role || 'N/A'}</td>
+                    </tr>`;
+                });
+                table += '</tbody></table>';
+                log(table, 'result');
+            } catch (error) {
+                log('❌ Exception: ' + error.message, 'error');
+            }
+        }
+
+        async function testUserProgress() {
+            log('<h3>⭐ Testing user_progress table...</h3>', 'info');
+            try {
+                const { data, error } = await window.SupabaseConfig.client()
+                    .from('user_progress')
+                    .select('*');
+
+                if (error) {
+                    log('❌ Error: ' + error.message, 'error');
+                    return;
+                }
+
+                if (!data || data.length === 0) {
+                    log('⚠️ No user progress found', 'error');
+                    return;
+                }
+
+                log('✅ Found ' + data.length + ' user progress records', 'success');
+
+                let table = '<table><thead><tr><th>Player Name</th><th>Stars</th><th>Coins</th><th>Level</th><th>Streak</th><th>Words Learned</th></tr></thead><tbody>';
+                data.forEach(progress => {
+                    table += `<tr>
+                        <td>${progress.player_name || 'N/A'}</td>
+                        <td>⭐ ${progress.total_stars || 0}</td>
+                        <td>🪙 ${progress.coins || 0}</td>
+                        <td>Level ${progress.current_level || 1}</td>
+                        <td>🔥 ${progress.streak || 0}</td>
+                        <td>${progress.words_learned?.length || 0} words</td>
+                    </tr>`;
+                });
+                table += '</tbody></table>';
+                log(table, 'result');
+            } catch (error) {
+                log('❌ Exception: ' + error.message, 'error');
+            }
+        }
+
+        async function testDevices() {
+            log('<h3>📱 Testing device_tracking table...</h3>', 'info');
+            try {
+                const { data, error } = await window.SupabaseConfig.client()
+                    .from('device_tracking')
+                    .select('*')
+                    .order('last_seen', { ascending: false });
+
+                if (error) {
+                    log('❌ Error: ' + error.message, 'error');
+                    return;
+                }
+
+                if (!data || data.length === 0) {
+                    log('⚠️ No devices found', 'error');
+                    return;
+                }
+
+                const onlineCount = data.filter(d => d.is_online).length;
+                log('✅ Found ' + data.length + ' devices (' + onlineCount + ' online)', 'success');
+
+                let table = '<table><thead><tr><th>Device Type</th><th>Browser</th><th>IP</th><th>Status</th><th>Last Seen</th></tr></thead><tbody>';
+                data.forEach(device => {
+                    const status = device.is_online ? '🟢 Online' : '⚫ Offline';
+                    table += `<tr>
+                        <td>${device.device_type || 'N/A'}</td>
+                        <td>${device.browser || 'N/A'}</td>
+                        <td>${device.ip_address || 'N/A'}</td>
+                        <td>${status}</td>
+                        <td>${new Date(device.last_seen).toLocaleString('vi-VN')}</td>
+                    </tr>`;
+                });
+                table += '</tbody></table>';
+                log(table, 'result');
+            } catch (error) {
+                log('❌ Exception: ' + error.message, 'error');
+            }
+        }
+
+        // Auto run on load
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                log('🔍 Page loaded. Click "Test All" to start testing.', 'info');
+            }, 500);
+        });
+    </script>
+</body>
+
+</html>

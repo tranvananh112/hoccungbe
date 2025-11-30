@@ -99,7 +99,7 @@
             name: 'Thức ăn',
             icon: '🍎',
             color: '#FFE66D',
-            prefix: 'Đây là',
+            prefix: 'Đây là món',
             level1: [
                 { word: "CƠM", image: "🍚", label: "Cơm" },
                 { word: "SỮA", image: "🥛", label: "Sữa" },
@@ -131,7 +131,7 @@
             name: 'Thiên nhiên',
             icon: '🌳',
             color: '#96CEB4',
-            prefix: 'Đây là',
+            prefix: 'Đây là cây',
             level1: [
                 { word: "HOA", image: "🌸", label: "Hoa" },
                 { word: "CÂY", image: "🌳", label: "Cây" },
@@ -163,7 +163,7 @@
             name: 'Đồ vật',
             icon: '🎒',
             color: '#DDA0DD',
-            prefix: 'Đây là',
+            prefix: 'Đây là cái',
             level1: [
                 { word: "NHÀ", image: "🏠", label: "Nhà" },
                 { word: "XE", image: "🚗", label: "Xe" },
@@ -256,7 +256,7 @@
             name: 'Cơ thể',
             icon: '👋',
             color: '#FFEAA7',
-            prefix: 'Đây là',
+            prefix: 'Đây là cái',
             level1: [
                 { word: "ĐẦU", image: "👤", label: "Đầu" },
                 { word: "MẶT", image: "😊", label: "Mặt" },
@@ -285,7 +285,7 @@
             name: 'Thời tiết',
             icon: '🌤️',
             color: '#A29BFE',
-            prefix: 'Đây là',
+            prefix: 'Trời đang',
             level1: [
                 { word: "NẮNG", image: "☀️", label: "Nắng" },
                 { word: "MƯA", image: "🌧️", label: "Mưa" },
@@ -312,7 +312,7 @@
             name: 'Giao thông',
             icon: '🚗',
             color: '#FD79A8',
-            prefix: 'Đây là',
+            prefix: 'Đây là chiếc',
             level1: [
                 { word: "XE", image: "🚗", label: "Xe" },
                 { word: "TÀU", image: "🚂", label: "Tàu" },

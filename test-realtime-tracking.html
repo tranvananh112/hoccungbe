@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Realtime Tracking</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+
+        h2 {
+            color: #666;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .log {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 13px;
+        }
+
+        .log-entry {
+            padding: 5px;
+            margin: 2px 0;
+            border-left: 3px solid #ddd;
+            padding-left: 10px;
+        }
+
+        .log-entry.success {
+            border-left-color: #4CAF50;
+        }
+
+        .log-entry.error {
+            border-left-color: #f44336;
+        }
+
+        .log-entry.info {
+            border-left-color: #2196F3;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .info-card h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .info-card p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🔍 Test Realtime Tracking System</h1>
+        <p>Kiểm tra hệ thống tracking realtime với IP address và device detection</p>
+    </div>
+
+    <div class="container">
+        <h2>📊 Trạng Thái Hệ Thống</h2>
+        <div id="systemStatus"></div>
+    </div>
+
+    <div class="container">
+        <h2>👤 Thông Tin User</h2>
+        <div id="userInfo"></div>
+    </div>
+
+    <div class="container">
+        <h2>📱 Thông Tin Thiết Bị</h2>
+        <div id="deviceInfo"></div>
+    </div>
+
+    <div class="container">
+        <h2>🌐 Thông Tin Mạng</h2>
+        <div id="networkInfo"></div>
+    </div>
+
+    <div class="container">
+        <h2>🎮 Hành Động</h2>
+        <button onclick="testStartSession()">🚀 Start Session</button>
+        <button onclick="testHeartbeat()">💓 Send Heartbeat</button>
+        <button onclick="testMarkOffline()">🔴 Mark Offline</button>
+        <button onclick="testGetDevices()">📱 Get All Devices</button>
+        <button onclick="clearLogs()">🗑️ Clear Logs</button>
+    </div>
+
+    <div class="container">
+        <h2>📋 Logs</h2>
+        <div id="logs" class="log"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script>
+        let logCount = 0;
+
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('logs');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            const timestamp = new Date().toLocaleTimeString('vi-VN');
+            entry.textContent = `[${timestamp}] ${message}`;
+            logsDiv.insertBefore(entry, logsDiv.firstChild);
+            logCount++;
+            console.log(message);
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+            logCount = 0;
+            log('Logs cleared', 'info');
+        }
+
+        function showStatus(elementId, html) {
+            document.getElementById(elementId).innerHTML = html;
+        }
+
+        async function init() {
+            log('🚀 Initializing test system...', 'info');
+
+            // Check Supabase
+            if (!window.SupabaseConfig) {
+                log('❌ SupabaseConfig not found!', 'error');
+                showStatus('systemStatus', '<div class="status error">❌ SupabaseConfig không tải được</div>');
+                return;
+            }
+
+            window.SupabaseConfig.init();
+            log('✅ SupabaseConfig initialized', 'success');
+
+            // Check user
+            const user = await window.SupabaseConfig.getCurrentUser();
+            if (!user) {
+                log('⚠️ No user logged in', 'warning');
+                showStatus('systemStatus', '<div class="status warning">⚠️ Chưa đăng nhập. Vui lòng đăng nhập trước.</div>');
+                showStatus('userInfo', '<div class="status info">👤 Chưa đăng nhập</div>');
+            } else {
+                log('✅ User logged in: ' + user.email, 'success');
+                showStatus('systemStatus', '<div class="status success">✅ Hệ thống hoạt động bình thường</div>');
+                showStatus('userInfo', `
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <h3>📧 Email</h3>
+                            <p>${user.email}</p>
+                        </div>
+                        <div class="info-card">
+                            <h3>🆔 User ID</h3>
+                            <p>${user.id.substring(0, 20)}...</p>
+                        </div>
+                        <div class="info-card">
+                            <h3>📅 Created</h3>
+                            <p>${new Date(user.created_at).toLocaleString('vi-VN')}</p>
+                        </div>
+                    </div>
+                `);
+            }
+
+            // Get device info
+            const deviceInfo = window.SupabaseConfig.getDeviceInfo();
+            const deviceId = window.SupabaseConfig.getDeviceId();
+            log('📱 Device info retrieved', 'info');
+
+            showStatus('deviceInfo', `
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h3>🆔 Device ID</h3>
+                        <p>${deviceId}</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>📱 Type</h3>
+                        <p>${deviceInfo.deviceType}</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>🌐 Browser</h3>
+                        <p>${deviceInfo.browser}</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>💻 OS</h3>
+                        <p>${deviceInfo.os}</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>📺 Screen</h3>
+                        <p>${deviceInfo.screenResolution}</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>🌍 Language</h3>
+                        <p>${deviceInfo.language}</p>
+                    </div>
+                </div>
+            `);
+
+            // Get IP
+            log('🌐 Getting IP address...', 'info');
+            const ip = await window.SupabaseConfig.getIPAddress();
+            log('✅ IP address: ' + ip, 'success');
+
+            showStatus('networkInfo', `
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h3>🌐 IP Address</h3>
+                        <p style="font-family: monospace; font-size: 16px; font-weight: bold;">${ip}</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>🕐 Timezone</h3>
+                        <p>${deviceInfo.timezone}</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>📡 Connection</h3>
+                        <p>${deviceInfo.connection}</p>
+                    </div>
+                </div>
+            `);
+        }
+
+        async function testStartSession() {
+            log('🚀 Testing startSession...', 'info');
+            try {
+                const sessionId = await window.SupabaseConfig.startSession();
+                if (sessionId) {
+                    log('✅ Session started: ' + sessionId, 'success');
+                } else {
+                    log('⚠️ Session not started (maybe already exists)', 'warning');
+                }
+            } catch (error) {
+                log('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function testHeartbeat() {
+            log('💓 Testing heartbeat...', 'info');
+            try {
+                await window.SupabaseConfig.updateHeartbeat();
+                log('✅ Heartbeat sent successfully', 'success');
+            } catch (error) {
+                log('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function testMarkOffline() {
+            log('🔴 Testing mark offline...', 'info');
+            try {
+                await window.SupabaseConfig.markDeviceOffline();
+                log('✅ Device marked offline', 'success');
+            } catch (error) {
+                log('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function testGetDevices() {
+            log('📱 Getting all devices...', 'info');
+            try {
+                const user = await window.SupabaseConfig.getCurrentUser();
+                if (!user) {
+                    log('⚠️ No user logged in', 'warning');
+                    return;
+                }
+
+                const result = await window.SupabaseConfig.client()
+                    .from('device_tracking')
+                    .select('*')
+                    .eq('user_id', user.id);
+
+                if (result.data) {
+                    log('✅ Found ' + result.data.length + ' devices', 'success');
+                    result.data.forEach((device, index) => {
+                        log(`  Device ${index + 1}: ${device.device_type} - ${device.browser} - IP: ${device.ip_address} - Online: ${device.is_online}`, 'info');
+                    });
+                } else {
+                    log('⚠️ No devices found', 'warning');
+                }
+            } catch (error) {
+                log('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        // Auto init
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(init, 500);
+        });
+    </script>
+</body>
+
+</html>

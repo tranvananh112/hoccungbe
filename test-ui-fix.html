@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test UI Fix</title>
+    <link rel="stylesheet" href="styles.css?v=18">
+    <link rel="stylesheet" href="responsive-fix.css?v=2">
+    <style>
+        body {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="test-section">
+        <h2>Test 1: Word Slots</h2>
+        <div class="word-slots">
+            <div class="letter-slot empty">?</div>
+            <div class="letter-slot filled">B</div>
+            <div class="letter-slot filled">A</div>
+            <div class="letter-slot empty">?</div>
+        </div>
+        <p>✅ Phải thấy chữ B và A rõ ràng, nằm trong khung</p>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Draggable Letters</h2>
+        <div class="letters-pool">
+            <div class="draggable-letter" style="position: absolute; left: 20px; top: 20px;">H</div>
+            <div class="draggable-letter" style="position: absolute; left: 100px; top: 20px;">E</div>
+            <div class="draggable-letter" style="position: absolute; left: 180px; top: 20px;">L</div>
+            <div class="draggable-letter" style="position: absolute; left: 260px; top: 20px;">L</div>
+            <div class="draggable-letter" style="position: absolute; left: 340px; top: 20px;">O</div>
+        </div>
+        <p>✅ Phải thấy chữ H E L L O rõ ràng</p>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Buttons</h2>
+        <button>Click Me</button>
+        <button class="letter-btn">A</button>
+        <button class="letter-btn">B</button>
+        <p>✅ Phải thấy text trong buttons</p>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 4: Mobile View</h2>
+        <p>Resize browser window để test responsive</p>
+        <p>Desktop: Chữ lớn, rõ ràng</p>
+        <p>Mobile: Chữ nhỏ hơn nhưng vẫn rõ</p>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 5: Overflow</h2>
+        <div class="word-slots" style="border: 2px solid red;">
+            <div class="letter-slot filled">W</div>
+            <div class="letter-slot filled">O</div>
+            <div class="letter-slot filled">R</div>
+            <div class="letter-slot filled">D</div>
+        </div>
+        <p>✅ Chữ không bị crop bởi border đỏ</p>
+    </div>
+
+    <script>
+        // Log để debug
+        console.log('=== UI FIX TEST ===');
+
+        // Check CSS loaded
+        const sheets = Array.from(document.styleSheets);
+        const responsiveFix = sheets.find(s => s.href && s.href.includes('responsive-fix'));
+        console.log('responsive-fix.css loaded:', !!responsiveFix);
+
+        // Check computed styles
+        const letterSlot = document.querySelector('.letter-slot.filled');
+        if (letterSlot) {
+            const styles = window.getComputedStyle(letterSlot);
+            console.log('Letter slot styles:', {
+                fontSize: styles.fontSize,
+                fontFamily: styles.fontFamily,
+                display: styles.display,
+                alignItems: styles.alignItems,
+                justifyContent: styles.justifyContent,
+                overflow: styles.overflow,
+                width: styles.width,
+                height: styles.height
+            });
+        }
+
+        // Check draggable letter
+        const draggable = document.querySelector('.draggable-letter');
+        if (draggable) {
+            const styles = window.getComputedStyle(draggable);
+            console.log('Draggable letter styles:', {
+                fontSize: styles.fontSize,
+                fontFamily: styles.fontFamily,
+                display: styles.display,
+                position: styles.position
+            });
+        }
+
+        console.log('=== END TEST ===');
+    </script>
+</body>
+
+</html>
