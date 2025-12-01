@@ -31,10 +31,8 @@
   <link rel="stylesheet" href="mobile-scroll-fix.css?v=1">
   <link rel="stylesheet" href="snow-effect.css?v=1">
 
-  <!-- Legacy styles (fallback) -->
-  <link rel="stylesheet" href="styles.css?v=18">
-  <link rel="stylesheet" href="responsive-fix.css?v=4">
-  <link rel="stylesheet" href="layout-fix.css?v=4">
+  <!-- CRITICAL FIX: Load này cuối cùng để override tất cả -->
+  <link rel="stylesheet" href="mobile-scroll-critical-fix.css?v=1">
 </head>
 
 <body>
@@ -545,4 +543,7 @@
   <script src="animal-sounds.js?v=1"></script>
   <script src="animations.js?v=20"></script>
   <script src="main.js?v=32"></script>
+
+  <!-- CRITICAL FIX: Load này cuối cùng để override tất cả JS -->
+  <script src="mobile-scroll-critical-fix.js?v=1"></script>
 </body>

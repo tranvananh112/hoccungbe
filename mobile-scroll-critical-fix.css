@@ -1,0 +1,136 @@
+/* ========================================
+   MOBILE SCROLL CRITICAL FIX
+   Fix cuối cùng để scroll được trên mobile
+   Load file này SAU TẤT CẢ các file CSS khác
+   ======================================== */
+
+/* CRITICAL: Force scroll trên html và body */
+html {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: 100% !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain !important;
+}
+
+body {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: 100% !important;
+    min-height: 100vh !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain !important;
+    /* CHỈ chặn touch trên draggable letters, KHÔNG chặn scroll */
+    touch-action: pan-y pinch-zoom !important;
+}
+
+/* Main content PHẢI scroll được */
+.main-content {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y pinch-zoom !important;
+    height: auto !important;
+    min-height: calc(100vh - 60px) !important;
+}
+
+/* Tất cả các page PHẢI scroll được */
+.page {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y pinch-zoom !important;
+    height: auto !important;
+    min-height: 100% !important;
+}
+
+/* CHỈ chặn touch trên draggable letters khi đang kéo */
+.draggable-letter {
+    touch-action: none !important;
+}
+
+/* Tất cả element khác CHO PHÉP scroll */
+.theme-selection,
+.level-selection,
+.game-area,
+.shop-items-grid,
+.words-learned-list,
+.profile-stats,
+.home-hero,
+.shop-header,
+.profile-header,
+.container,
+.parent-tab-content,
+.custom-words-list,
+.custom-lessons-list,
+.themes-grid,
+.themes-grid-home {
+    touch-action: pan-y pinch-zoom !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+/* Fix đặc biệt cho iOS Safari */
+@supports (-webkit-touch-callout: none) {
+
+    html,
+    body {
+        position: relative !important;
+        overflow-y: auto !important;
+        height: 100% !important;
+    }
+
+    .main-content,
+    .page {
+        position: relative !important;
+        overflow-y: auto !important;
+        height: auto !important;
+    }
+}
+
+/* Fix cho Android Chrome */
+@media screen and (max-width: 768px) {
+
+    html,
+    body {
+        overflow-y: auto !important;
+        height: 100% !important;
+        min-height: 100vh !important;
+    }
+
+    body {
+        touch-action: pan-y pinch-zoom !important;
+    }
+
+    .main-content {
+        overflow-y: auto !important;
+        height: auto !important;
+        min-height: calc(100vh - 60px) !important;
+    }
+
+    .page {
+        overflow-y: auto !important;
+        height: auto !important;
+    }
+}
+
+/* Đảm bảo không có element nào chặn scroll */
+* {
+    overscroll-behavior: auto !important;
+}
+
+/* Remove any height restrictions */
+.page.active {
+    height: auto !important;
+    max-height: none !important;
+}
+
+/* Ensure content can expand */
+#pageHome,
+#pagePlay,
+#pageShop,
+#pageProfile,
+#pageParent {
+    height: auto !important;
+    min-height: calc(100vh - 60px) !important;
+    overflow-y: auto !important;
+}
