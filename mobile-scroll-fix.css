@@ -1,0 +1,72 @@
+/* ========================================
+   MOBILE SCROLL FIX - Sửa lỗi không scroll được
+   ======================================== */
+
+/* Đảm bảo body và html có thể scroll */
+html,
+body {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain;
+}
+
+/* Main content phải scroll được */
+.main-content {
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y pinch-zoom !important;
+}
+
+/* Các page phải scroll được */
+.page {
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y pinch-zoom !important;
+    height: auto !important;
+    min-height: 100%;
+}
+
+/* Chỉ chặn touch-action trên draggable letters */
+.draggable-letter {
+    touch-action: none !important;
+}
+
+/* Các element khác cho phép scroll */
+.theme-selection,
+.level-selection,
+.game-area,
+.shop-items-grid,
+.words-learned-list,
+.profile-stats {
+    touch-action: pan-y pinch-zoom !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+/* Fix cho iOS */
+@supports (-webkit-touch-callout: none) {
+    body {
+        position: relative;
+        overflow-y: scroll !important;
+    }
+
+    .main-content,
+    .page {
+        position: relative;
+        overflow-y: scroll !important;
+    }
+}
+
+/* Đảm bảo không có element nào chặn scroll */
+* {
+    overscroll-behavior: auto;
+}
+
+/* Cho phép scroll trên tất cả container */
+.container,
+.home-hero,
+.shop-header,
+.profile-header {
+    touch-action: pan-y pinch-zoom !important;
+}
