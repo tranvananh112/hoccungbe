@@ -1,0 +1,286 @@
+/* ========================================
+   MOBILE iOS ULTIMATE FIX
+   Fix toàn diện cho iPhone/iPad + Android
+   ======================================== */
+
+/* ========== 1. VIEWPORT & SAFE AREA ========== */
+/* Hỗ trợ iPhone X, 11, 12, 13, 14, 15 với notch/Dynamic Island */
+
+:root {
+    /* Safe area insets cho iPhone */
+    --safe-top: env(safe-area-inset-top);
+    --safe-bottom: env(safe-area-inset-bottom);
+    --safe-left: env(safe-area-inset-left);
+    --safe-right: env(safe-area-inset-right);
+
+    /* Navbar height + safe area */
+    --nav-height-safe: calc(60px + var(--safe-top));
+}
+
+/* HTML & Body - Cơ bản nhất */
+html {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+}
+
+body {
+    width: 100%;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+    touch-action: pan-y pinch-zoom;
+}
+
+/* ========== 2. NAVBAR - Safe Area ========== */
+.main-navbar {
+    /* Thêm padding cho notch/Dynamic Island */
+    padding-top: var(--safe-top);
+    height: var(--nav-height-safe);
+    /* Đảm bảo navbar không bị che */
+    top: 0;
+    position: fixed;
+}
+
+/* ========== 3. MAIN CONTENT - Safe Area ========== */
+.main-content {
+    /* Margin top = navbar height + safe area */
+    margin-top: var(--nav-height-safe);
+    /* Padding bottom cho home indicator */
+    padding-bottom: calc(20px + var(--safe-bottom));
+    /* Padding left/right cho iPhone landscape */
+    padding-left: max(20px, var(--safe-left));
+    padding-right: max(20px, var(--safe-right));
+
+    /* QUAN TRỌNG: Cho phép scroll */
+    overflow-x: hidden;
+    overflow-y: visible;
+    min-height: calc(100vh - var(--nav-height-safe));
+    position: relative;
+}
+
+/* ========== 4. PAGES - Scroll tự do ========== */
+.page {
+    overflow: visible;
+    height: auto;
+    min-height: auto;
+    touch-action: pan-y pinch-zoom;
+}
+
+/* ========== 5. BEE MASCOT - Safe Area ========== */
+.bee-mascot {
+    /* Tránh home indicator */
+    bottom: calc(20px + var(--safe-bottom));
+    right: calc(20px + var(--safe-right));
+}
+
+/* ========== 6. MODAL OVERLAYS - KHÔNG CHẶN SCROLL ========== */
+/* Đây là vấn đề chính! */
+
+.audio-welcome-modal,
+.success-popup,
+.treasure-modal,
+.celebration-overlay {
+    /* Modal overlay KHÔNG chặn scroll */
+    pointer-events: none !important;
+    /* Nhưng vẫn hiển thị */
+    display: none;
+}
+
+.audio-welcome-modal.show,
+.success-popup.show,
+.treasure-modal.show,
+.celebration-overlay.show {
+    display: flex;
+    pointer-events: none !important;
+}
+
+/* CHỈ nội dung modal mới có pointer events */
+.audio-welcome-box,
+.popup-content,
+.treasure-box,
+.celebration-content {
+    pointer-events: auto !important;
+}
+
+/* ========== 7. GAME AREA - Scroll tự do ========== */
+.game-area {
+    overflow: visible;
+    height: auto;
+}
+
+.slots-area,
+.letters-area,
+.game-buttons {
+    overflow: visible;
+}
+
+/* CHỈ letters pool mới chặn touch (để kéo thả) */
+.letters-pool {
+    touch-action: none;
+}
+
+.draggable-letter {
+    touch-action: none;
+}
+
+/* ========== 8. SCROLLABLE SECTIONS ========== */
+.home-hero,
+.theme-selection,
+.level-selection,
+.profile-sections,
+.parent-tab-content,
+.shop-items-grid,
+.words-learned-list {
+    overflow: visible;
+    height: auto;
+    touch-action: pan-y pinch-zoom;
+}
+
+/* ========== 9. LOADING SCREEN - Full screen với safe area ========== */
+.loading-screen {
+    padding-top: var(--safe-top);
+    padding-bottom: var(--safe-bottom);
+}
+
+/* ========== 10. RESPONSIVE - Mobile specific ========== */
+@media (max-width: 768px) {
+
+    /* Force scroll trên mobile */
+    html,
+    body {
+        overflow-y: auto !important;
+        height: auto !important;
+        position: relative !important;
+    }
+
+    /* Navbar mobile */
+    .main-navbar {
+        padding: var(--safe-top) 10px 0 10px;
+    }
+
+    .nav-menu {
+        gap: 4px;
+    }
+
+    .nav-item {
+        min-width: 50px;
+        padding: 8px 10px;
+    }
+
+    /* Main content mobile */
+    .main-content {
+        padding: 15px;
+        padding-top: 15px;
+        padding-bottom: calc(15px + var(--safe-bottom));
+        padding-left: max(15px, var(--safe-left));
+        padding-right: max(15px, var(--safe-right));
+    }
+
+    /* Game area mobile */
+    .word-slots {
+        gap: 8px;
+        padding: 15px 10px;
+    }
+
+    .letter-slot {
+        width: 50px;
+        height: 60px;
+        font-size: 2rem;
+    }
+
+    .letters-pool {
+        height: 120px;
+    }
+
+    .draggable-letter {
+        width: 50px;
+        height: 50px;
+        font-size: 1.8rem;
+    }
+}
+
+/* ========== 11. LANDSCAPE MODE ========== */
+@media (max-width: 768px) and (orientation: landscape) {
+
+    /* Navbar nhỏ hơn ở landscape */
+    .main-navbar {
+        height: calc(50px + var(--safe-top));
+    }
+
+    .nav-logo {
+        font-size: 28px;
+    }
+
+    .nav-title {
+        font-size: 1.2rem;
+    }
+
+    .main-content {
+        margin-top: calc(50px + var(--safe-top));
+    }
+
+    /* Game area compact */
+    .word-image {
+        font-size: 60px;
+    }
+
+    .letters-pool {
+        height: 100px;
+    }
+}
+
+/* ========== 12. iOS SPECIFIC FIXES ========== */
+@supports (-webkit-touch-callout: none) {
+    /* Chỉ áp dụng cho iOS */
+
+    body {
+        /* Fix iOS scroll bounce */
+        -webkit-overflow-scrolling: touch;
+        /* Fix iOS 100vh bug */
+        min-height: -webkit-fill-available;
+    }
+
+    .main-content {
+        /* Fix iOS scroll */
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Fix iOS input zoom */
+    input,
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+
+    /* Fix iOS button tap highlight */
+    button,
+    a {
+        -webkit-tap-highlight-color: transparent;
+    }
+}
+
+/* ========== 13. ANDROID SPECIFIC FIXES ========== */
+@media (max-width: 768px) {
+
+    /* Fix Android Chrome address bar */
+    .main-content {
+        min-height: calc(100vh - var(--nav-height-safe) - 56px);
+    }
+}
+
+/* ========== 14. PREVENT BODY SCROLL LOCK ========== */
+/* Đảm bảo body KHÔNG BAO GIỜ bị lock */
+body.modal-open,
+body.popup-open,
+body.no-scroll {
+    overflow: auto !important;
+    position: relative !important;
+    height: auto !important;
+}

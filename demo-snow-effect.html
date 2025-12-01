@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo - Hiệu Ứng Tuyết Rơi Premium</title>
+    <link rel="stylesheet" href="snow-effect.css?v=2">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .controls h2 {
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #fa709a, #fee140);
+            color: white;
+        }
+
+        .info-box {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h3 {
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .info-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .info-box li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .info-box li:before {
+            content: '❄️';
+            position: absolute;
+            left: 0;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .content-box {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .content-box h2 {
+            margin-bottom: 15px;
+        }
+
+        .content-box p {
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>❄️ Hiệu Ứng Tuyết Rơi Premium</h1>
+            <p>Mượt mà 60fps với GPU acceleration</p>
+        </div>
+
+        <div class="controls">
+            <h2>🎮 Điều khiển</h2>
+            <div class="button-group">
+                <button class="btn-success" onclick="SnowEffect.toggle(true)">
+                    ✅ Bật tuyết
+                </button>
+                <button class="btn-danger" onclick="SnowEffect.toggle(false)">
+                    ❌ Tắt tuyết
+                </button>
+                <button class="btn-warning" onclick="SnowEffect.pause()">
+                    ⏸️ Tạm dừng
+                </button>
+                <button class="btn-primary" onclick="SnowEffect.resume()">
+                    ▶️ Tiếp tục
+                </button>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="snowCount">-</div>
+                    <div class="stat-label">Bông tuyết</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="deviceType">-</div>
+                    <div class="stat-label">Thiết bị</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="fps">60</div>
+                    <div class="stat-label">FPS</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h3>✨ Tính năng nâng cấp</h3>
+            <ul>
+                <li>GPU acceleration với transform3d và will-change</li>
+                <li>Tự động điều chỉnh số lượng theo thiết bị (25-50 bông)</li>
+                <li>4 animation layers: rơi, lắc, xoay, fade</li>
+                <li>Text-shadow với glow effect đẹp mắt</li>
+                <li>Blur effect cho tuyết xa (chỉ desktop)</li>
+                <li>Sparkle effect cho một số bông tuyết</li>
+                <li>Tự động pause khi tab không active (tiết kiệm pin)</li>
+                <li>Responsive - tối ưu cho mobile, tablet, desktop</li>
+                <li>Hỗ trợ dark/light mode</li>
+                <li>Tôn trọng prefers-reduced-motion</li>
+            </ul>
+        </div>
+
+        <div class="content-box">
+            <h2>📱 Tối ưu cho từng thiết bị</h2>
+            <p><strong>Mobile (≤768px):</strong> 25 bông tuyết, không blur, animation chậm hơn để tiết kiệm pin</p>
+            <p><strong>Tablet (769-1024px):</strong> 35 bông tuyết, hiệu ứng vừa phải</p>
+            <p><strong>Desktop (≥1025px):</strong> 50 bông tuyết, full effect với glow và blur</p>
+        </div>
+
+        <div class="content-box">
+            <h2>🎨 Hiệu ứng đặc biệt</h2>
+            <p>Mỗi bông tuyết có:</p>
+            <ul>
+                <li>Kích thước ngẫu nhiên (0.7em - 1.5em)</li>
+                <li>Tốc độ rơi khác nhau (15-25 giây)</li>
+                <li>Độ mờ khác nhau (0.5 - 0.9)</li>
+                <li>Lắc lư qua lại tự nhiên</li>
+                <li>Xoay 360 độ mượt mà</li>
+                <li>Fade in/out ở đầu và cuối</li>
+                <li>Một số bông có sparkle effect</li>
+            </ul>
+        </div>
+
+        <div class="content-box">
+            <h2>⚡ Performance</h2>
+            <p>Hiệu ứng được tối ưu để chạy mượt mà 60fps:</p>
+            <ul>
+                <li>Sử dụng GPU acceleration (transform3d, will-change)</li>
+                <li>Tạo bông tuyết theo batch với requestAnimationFrame</li>
+                <li>Tự động pause khi tab không active</li>
+                <li>Giảm số lượng và hiệu ứng trên mobile</li>
+                <li>Không sử dụng JavaScript animation (chỉ CSS)</li>
+            </ul>
+        </div>
+
+        <div class="info-box">
+            <h3>🎯 Scroll xuống để xem thêm!</h3>
+            <p>Tuyết sẽ rơi mượt mà khi bạn scroll trang.</p>
+        </div>
+
+        <!-- Thêm content để có thể scroll -->
+        <div class="content-box">
+            <h2>🌟 Box 1</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et
+                dolore magna aliqua.</p>
+        </div>
+
+        <div class="content-box">
+            <h2>🎄 Box 2</h2>
+            <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+                consequat.</p>
+        </div>
+
+        <div class="content-box">
+            <h2>⛄ Box 3</h2>
+            <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+            </p>
+        </div>
+
+        <div class="content-box">
+            <h2>🎁 Box 4</h2>
+            <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
+                laborum.</p>
+        </div>
+    </div>
+
+    <script src="snow-effect.js?v=2"></script>
+    <script>
+        // Update stats
+        function updateStats() {
+            const container = document.getElementById('snowContainer');
+            if (container) {
+                const count = container.querySelectorAll('.snowflake').length;
+                document.getElementById('snowCount').textContent = count;
+            }
+
+            const width = window.innerWidth;
+            let device = 'Desktop';
+            if (width <= 768) device = 'Mobile';
+            else if (width <= 1024) device = 'Tablet';
+            document.getElementById('deviceType').textContent = device;
+        }
+
+        // Update stats every second
+        setInterval(updateStats, 1000);
+        setTimeout(updateStats, 500);
+
+        // FPS counter (simple)
+        let lastTime = performance.now();
+        let frames = 0;
+
+        function countFPS() {
+            frames++;
+            const currentTime = performance.now();
+
+            if (currentTime >= lastTime + 1000) {
+                document.getElementById('fps').textContent = frames;
+                frames = 0;
+                lastTime = currentTime;
+            }
+
+            requestAnimationFrame(countFPS);
+        }
+
+        countFPS();
+    </script>
+</body>
+
+</html>

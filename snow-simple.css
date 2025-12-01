@@ -1,0 +1,178 @@
+/* ========================================
+   SNOW SIMPLE - Tuyết rơi đơn giản, chắc chắn hoạt động
+   ======================================== */
+
+/* Container */
+.snow-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: hidden;
+}
+
+/* Bông tuyết */
+.snowflake {
+    position: absolute;
+    top: -50px;
+    color: white;
+    font-size: 20px;
+    opacity: 0.3;
+    /* Mờ mờ thôi, không rõ */
+    /* Animation: rơi từ trên xuống, infinite = lặp mãi */
+    animation: fall linear infinite;
+}
+
+/* Animation rơi đơn giản */
+@keyframes fall {
+    0% {
+        top: -50px;
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 0.3;
+        /* Mờ mờ thôi */
+    }
+
+    90% {
+        opacity: 0.3;
+        /* Giữ mờ */
+    }
+
+    100% {
+        top: 100vh;
+        opacity: 0;
+    }
+}
+
+/* Các bông tuyết có tốc độ khác nhau */
+.snowflake:nth-child(1) {
+    left: 10%;
+    animation-duration: 10s;
+    animation-delay: 0s;
+}
+
+.snowflake:nth-child(2) {
+    left: 20%;
+    animation-duration: 12s;
+    animation-delay: 1s;
+}
+
+.snowflake:nth-child(3) {
+    left: 30%;
+    animation-duration: 15s;
+    animation-delay: 2s;
+}
+
+.snowflake:nth-child(4) {
+    left: 40%;
+    animation-duration: 11s;
+    animation-delay: 3s;
+}
+
+.snowflake:nth-child(5) {
+    left: 50%;
+    animation-duration: 13s;
+    animation-delay: 0.5s;
+}
+
+.snowflake:nth-child(6) {
+    left: 60%;
+    animation-duration: 14s;
+    animation-delay: 1.5s;
+}
+
+.snowflake:nth-child(7) {
+    left: 70%;
+    animation-duration: 16s;
+    animation-delay: 2.5s;
+}
+
+.snowflake:nth-child(8) {
+    left: 80%;
+    animation-duration: 12s;
+    animation-delay: 3.5s;
+}
+
+.snowflake:nth-child(9) {
+    left: 90%;
+    animation-duration: 11s;
+    animation-delay: 0.8s;
+}
+
+.snowflake:nth-child(10) {
+    left: 15%;
+    animation-duration: 13s;
+    animation-delay: 1.8s;
+}
+
+.snowflake:nth-child(11) {
+    left: 25%;
+    animation-duration: 15s;
+    animation-delay: 2.8s;
+}
+
+.snowflake:nth-child(12) {
+    left: 35%;
+    animation-duration: 10s;
+    animation-delay: 3.8s;
+}
+
+.snowflake:nth-child(13) {
+    left: 45%;
+    animation-duration: 14s;
+    animation-delay: 0.3s;
+}
+
+.snowflake:nth-child(14) {
+    left: 55%;
+    animation-duration: 12s;
+    animation-delay: 1.3s;
+}
+
+.snowflake:nth-child(15) {
+    left: 65%;
+    animation-duration: 11s;
+    animation-delay: 2.3s;
+}
+
+.snowflake:nth-child(16) {
+    left: 75%;
+    animation-duration: 13s;
+    animation-delay: 3.3s;
+}
+
+.snowflake:nth-child(17) {
+    left: 85%;
+    animation-duration: 15s;
+    animation-delay: 0.6s;
+}
+
+.snowflake:nth-child(18) {
+    left: 95%;
+    animation-duration: 10s;
+    animation-delay: 1.6s;
+}
+
+.snowflake:nth-child(19) {
+    left: 5%;
+    animation-duration: 14s;
+    animation-delay: 2.6s;
+}
+
+.snowflake:nth-child(20) {
+    left: 12%;
+    animation-duration: 12s;
+    animation-delay: 3.6s;
+}
+
+/* Mobile - ít bông hơn */
+@media (max-width: 768px) {
+    .snowflake:nth-child(n+16) {
+        display: none;
+    }
+}

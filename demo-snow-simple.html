@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Tuyết Rơi Đơn Giản</title>
+
+    <!-- Load CSS tuyết đơn giản -->
+    <link rel="stylesheet" href="snow-simple.css">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .box {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .box h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .box p {
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .highlight {
+            background: rgba(255, 215, 0, 0.3);
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .success {
+            background: rgba(0, 255, 0, 0.2);
+            border: 2px solid rgba(0, 255, 0, 0.5);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+            margin: 30px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>❄️ Tuyết Rơi Tự Động</h1>
+
+        <div class="success">
+            ✅ Nếu bạn thấy được dòng này = Trang đã load!<br>
+            ❄️ Tuyết đang rơi từ trên xuống tự động!
+        </div>
+
+        <div class="box">
+            <h2>🎯 Tính năng</h2>
+            <p>✅ Tuyết rơi <span class="highlight">TỰ ĐỘNG</span> từ trên đầu màn hình</p>
+            <p>✅ Rơi xuống dưới và <span class="highlight">BIẾN MẤT</span></p>
+            <p>✅ <span class="highlight">LẶP LẠI MÃI MÃI</span> (infinite loop)</p>
+            <p>✅ Mỗi bông tuyết có tốc độ khác nhau</p>
+            <p>✅ Fade in khi xuất hiện, fade out khi biến mất</p>
+        </div>
+
+        <div class="box">
+            <h2>📱 Responsive</h2>
+            <p>Desktop: 20 bông tuyết</p>
+            <p>Mobile: 15 bông tuyết</p>
+        </div>
+
+        <div class="box">
+            <h2>🔍 Kiểm tra</h2>
+            <p>Mở Console (F12) để xem logs:</p>
+            <ul>
+                <li>❄️ SIMPLE SNOW: Loading...</li>
+                <li>✅ Container created</li>
+                <li>✅ SIMPLE SNOW: Created X snowflakes</li>
+                <li>✅ SIMPLE SNOW: Tuyết đang rơi tự động!</li>
+            </ul>
+        </div>
+
+        <div class="box">
+            <h2>📊 Thông tin kỹ thuật</h2>
+            <p><strong>Animation:</strong> CSS @keyframes với infinite loop</p>
+            <p><strong>Duration:</strong> 10-16 giây mỗi bông</p>
+            <p><strong>Delay:</strong> 0-4 giây (phân tán tự nhiên)</p>
+            <p><strong>Opacity:</strong> Fade in 0→1 (10%), fade out 1→0 (90-100%)</p>
+        </div>
+
+        <!-- Thêm nhiều box để có thể scroll -->
+        <div class="box">
+            <h2>🌟 Box 1</h2>
+            <p>Scroll xuống để xem tuyết rơi mượt mà!</p>
+        </div>
+
+        <div class="box">
+            <h2>🎄 Box 2</h2>
+            <p>Tuyết sẽ rơi liên tục, không bao giờ dừng!</p>
+        </div>
+
+        <div class="box">
+            <h2>⛄ Box 3</h2>
+            <p>Mỗi bông tuyết rơi xong sẽ tự động bắt đầu lại từ trên!</p>
+        </div>
+
+        <div class="box">
+            <h2>🎁 Box 4</h2>
+            <p>Hiệu ứng này hoạt động trên mọi thiết bị!</p>
+        </div>
+
+        <div class="box">
+            <h2>✨ Box 5 - Cuối</h2>
+            <p>Scroll lên lại để xem tuyết tiếp!</p>
+        </div>
+    </div>
+
+    <!-- Load JS tuyết đơn giản -->
+    <script src="snow-simple.js"></script>
+
+    <script>
+        // Log thông tin
+        console.log('📄 Page loaded!');
+        console.log('🌐 Screen:', window.innerWidth + 'x' + window.innerHeight);
+
+        // Check sau 2 giây
+        setTimeout(function () {
+            const container = document.getElementById('snowContainer');
+            const count = container ? container.querySelectorAll('.snowflake').length : 0;
+
+            if (count > 0) {
+                console.log('✅ SUCCESS: Có ' + count + ' bông tuyết đang rơi!');
+            } else {
+                console.error('❌ ERROR: Không có tuyết!');
+            }
+        }, 2000);
+    </script>
+</body>
+
+</html>

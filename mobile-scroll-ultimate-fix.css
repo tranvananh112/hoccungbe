@@ -1,0 +1,82 @@
+/* ========================================
+   MOBILE SCROLL ULTIMATE FIX
+   Fix cuối cùng - ĐƠN GIẢN NHẤT có thể
+   ======================================== */
+
+/* FORCE scroll trên mọi thiết bị mobile */
+@media (max-width: 768px) {
+
+    /* HTML và Body PHẢI scroll được */
+    html {
+        overflow: visible !important;
+        overflow-y: visible !important;
+        overflow-x: hidden !important;
+        height: auto !important;
+        position: static !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    body {
+        overflow: visible !important;
+        overflow-y: visible !important;
+        overflow-x: hidden !important;
+        height: auto !important;
+        min-height: 100vh !important;
+        position: static !important;
+        touch-action: pan-y pinch-zoom !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    /* Main content */
+    .main-content {
+        overflow: visible !important;
+        overflow-y: visible !important;
+        height: auto !important;
+        min-height: calc(100vh - 60px) !important;
+        touch-action: pan-y pinch-zoom !important;
+    }
+
+    /* All pages */
+    .page {
+        overflow: visible !important;
+        overflow-y: visible !important;
+        height: auto !important;
+        touch-action: pan-y pinch-zoom !important;
+    }
+
+    /* All scrollable containers */
+    .theme-selection,
+    .level-selection,
+    .level-grid,
+    .themes-grid,
+    .themes-grid-home,
+    .shop-items-grid,
+    .words-learned-list,
+    .profile-sections,
+    .parent-tab-content,
+    .home-hero {
+        overflow: visible !important;
+        touch-action: pan-y pinch-zoom !important;
+    }
+
+    /* CHỈ draggable letters mới chặn touch */
+    .draggable-letter {
+        touch-action: none !important;
+    }
+
+    /* Modal overlays KHÔNG chặn scroll */
+    .audio-welcome-modal,
+    .success-popup,
+    .treasure-modal,
+    .celebration-overlay {
+        pointer-events: none !important;
+    }
+
+    /* Chỉ modal content mới có pointer events */
+    .audio-welcome-box,
+    .popup-content,
+    .treasure-box,
+    .celebration-content {
+        pointer-events: auto !important;
+    }
+}
