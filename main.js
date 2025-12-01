@@ -242,6 +242,40 @@
     setTimeout(loadVoices, 500);
   }
 
+  // ✅ HÀM XỬ LÝ VÀ CẢI THIỆN VĂN BẢN cho trẻ em
+  function enhanceTextForKids(text) {
+    if (!text) return text;
+
+    // Loại bỏ khoảng trắng thừa
+    text = text.trim();
+
+    // Nếu là từ đơn (không có khoảng trắng), giữ nguyên
+    if (!text.includes(' ')) {
+      return text;
+    }
+
+    // Nếu là câu hoặc cụm từ, thêm khoảng dừng nhẹ giữa các từ
+    // Dùng dấu phẩy để tạo khoảng dừng tự nhiên
+    var words = text.split(' ');
+
+    // Với câu ngắn (2-3 từ): thêm dấu phẩy giữa các từ
+    if (words.length <= 3) {
+      return words.join(', ');
+    }
+
+    // Với câu dài hơn: thêm dấu phẩy sau mỗi 2 từ
+    var enhanced = [];
+    for (var i = 0; i < words.length; i++) {
+      enhanced.push(words[i]);
+      // Thêm dấu phẩy sau mỗi 2 từ (trừ từ cuối)
+      if ((i + 1) % 2 === 0 && i < words.length - 1) {
+        enhanced.push(',');
+      }
+    }
+
+    return enhanced.join(' ');
+  }
+
   function useBrowserTTS(text, volume, callback) {
     if (!window.speechSynthesis) {
       console.error('Trình duyệt không hỗ trợ Web Speech API');
@@ -260,10 +294,15 @@
     // ✅ Dừng speech hiện tại để phát mới NGAY
     window.speechSynthesis.cancel();
 
-    var utterance = new SpeechSynthesisUtterance(text);
+    // ✅ CẢI THIỆN VĂN BẢN - thêm khoảng dừng tự nhiên
+    var enhancedText = enhanceTextForKids(text);
+    console.log('🎯 Text gốc:', text);
+    console.log('✨ Text cải thiện:', enhancedText);
+
+    var utterance = new SpeechSynthesisUtterance(enhancedText);
     utterance.lang = 'vi-VN';
-    utterance.rate = 0.95; // TỐC ĐỘ CHẬM HƠN MỘT CHÚT để RÕ RÀNG HƠN
-    utterance.pitch = 1.4; // Giọng nữ CAO HƠN để TO HƠN và RÕ HƠN
+    utterance.rate = 0.9; // TỐC ĐỘ VỪA PHẢI - không quá chậm nhưng rõ ràng
+    utterance.pitch = 1.5; // GIỌNG TRẺ EM - cao hơn, dễ thương hơn
     utterance.volume = 1.0; // ÂM LƯỢNG TỐI ĐA
 
     // Sử dụng giọng đã tìm được
@@ -306,7 +345,7 @@
     // Đánh dấu đang phát TRƯỚC KHI bắt đầu
     letterSoundInterval = true;
 
-    // ✅ Phát âm LIÊN TỤC NHANH với giọng cô gái
+    // ✅ Phát âm LIÊN TỤC với giọng trẻ em
     function speakLetterLoop() {
       if (!window.speechSynthesis) {
         console.log('❌ speechSynthesis không khả dụng');
@@ -319,8 +358,8 @@
 
       var utterance = new SpeechSynthesisUtterance(pronunciation);
       utterance.lang = 'vi-VN';
-      utterance.rate = 1.2; // CHẬM HƠN để RÕ RÀNG HƠN
-      utterance.pitch = 1.4; // Giọng nữ CAO HƠN để TO HƠN
+      utterance.rate = 1.0; // TỐC ĐỘ VỪA PHẢI - rõ ràng, không quá chậm
+      utterance.pitch = 1.5; // GIỌNG TRẺ EM - cao hơn, dễ thương hơn
       utterance.volume = 1.0; // ÂM LƯỢNG TỐI ĐA
 
       if (preferredVoice) {
