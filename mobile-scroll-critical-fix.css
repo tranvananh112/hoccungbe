@@ -6,42 +6,55 @@
 
 /* CRITICAL: Force scroll trên html và body */
 html {
-    overflow-y: auto !important;
+    overflow-y: visible !important;
     overflow-x: hidden !important;
-    height: 100% !important;
+    height: auto !important;
+    min-height: 100% !important;
     -webkit-overflow-scrolling: touch !important;
-    overscroll-behavior-y: contain !important;
+    overscroll-behavior-y: auto !important;
+    position: relative !important;
 }
 
 body {
-    overflow-y: auto !important;
+    overflow-y: visible !important;
     overflow-x: hidden !important;
-    height: 100% !important;
+    height: auto !important;
     min-height: 100vh !important;
     -webkit-overflow-scrolling: touch !important;
-    overscroll-behavior-y: contain !important;
+    overscroll-behavior-y: auto !important;
     /* CHỈ chặn touch trên draggable letters, KHÔNG chặn scroll */
     touch-action: pan-y pinch-zoom !important;
+    position: relative !important;
 }
 
 /* Main content PHẢI scroll được */
 .main-content {
-    overflow-y: auto !important;
+    overflow-y: visible !important;
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch !important;
     touch-action: pan-y pinch-zoom !important;
     height: auto !important;
     min-height: calc(100vh - 60px) !important;
+    position: relative !important;
+    display: block !important;
 }
 
 /* Tất cả các page PHẢI scroll được */
 .page {
-    overflow-y: auto !important;
+    overflow-y: visible !important;
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch !important;
     touch-action: pan-y pinch-zoom !important;
     height: auto !important;
     min-height: 100% !important;
+    position: relative !important;
+    display: block !important;
+}
+
+.page.active {
+    display: block !important;
+    overflow-y: visible !important;
+    height: auto !important;
 }
 
 /* CHỈ chặn touch trên draggable letters khi đang kéo */
