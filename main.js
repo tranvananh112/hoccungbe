@@ -8,6 +8,27 @@
 
   console.log('🐝 Gamestva loading...');
 
+  // ========== GLOBAL HELPER: FORCE ENABLE SCROLL ==========
+  // Helper function để force enable scroll sau khi đóng modal
+  window.forceEnableScrollGlobal = function () {
+    try {
+      // Force enable scroll immediately
+      document.body.style.setProperty('overflow-y', 'visible', 'important');
+      document.body.style.setProperty('touch-action', 'pan-y pinch-zoom', 'important');
+      document.documentElement.style.setProperty('overflow-y', 'visible', 'important');
+
+      // Call global scroll fix if available
+      if (window.SCROLL_FIX && window.SCROLL_FIX.forceEnable) {
+        setTimeout(function () {
+          window.SCROLL_FIX.forceEnable();
+          console.log('✅ Scroll re-enabled globally');
+        }, 100);
+      }
+    } catch (e) {
+      console.error('Error forcing scroll:', e);
+    }
+  };
+
   // ========== DỮ LIỆU ==========
   var wordData = {
     level1: [
@@ -1271,6 +1292,9 @@
     var successPopup = document.getElementById('successPopup');
     if (successPopup) successPopup.classList.remove('show');
 
+    // Force enable scroll after closing popup
+    forceEnableScrollGlobal();
+
     // Custom lesson
     if (gameState.customLesson) {
       gameState.customLessonIndex = (gameState.customLessonIndex || 0) + 1;
@@ -1305,6 +1329,9 @@
     // ✅ ẨN success popup cũ để không bị chồng
     var successPopup = document.getElementById('successPopup');
     if (successPopup) successPopup.classList.remove('show');
+
+    // Force enable scroll after closing popup
+    forceEnableScrollGlobal();
 
     var overlay = document.getElementById('celebrationOverlay');
     var title = document.getElementById('celebrationTitle');
@@ -2142,6 +2169,10 @@
           beeSay('Bé nhận được ' + sticker + '! 🎉', 3000);
           var treasureModal = document.getElementById('treasureModal');
           if (treasureModal) treasureModal.classList.remove('show');
+
+          // Force enable scroll after closing modal
+          forceEnableScrollGlobal();
+
           playSound('success');
         };
       })(btn);
@@ -2365,11 +2396,28 @@
     var btnEnable = document.getElementById('btnEnableAudio');
     var btnSkip = document.getElementById('btnSkipAudio');
 
+    // Helper function to force enable scroll after modal closes
+    function forceScrollAfterModal() {
+      // Force enable scroll immediately
+      document.body.style.setProperty('overflow-y', 'visible', 'important');
+      document.body.style.setProperty('touch-action', 'pan-y pinch-zoom', 'important');
+      document.documentElement.style.setProperty('overflow-y', 'visible', 'important');
+
+      // Call global scroll fix if available
+      if (window.SCROLL_FIX && window.SCROLL_FIX.forceEnable) {
+        setTimeout(function () {
+          window.SCROLL_FIX.forceEnable();
+          console.log('✅ Scroll re-enabled after modal close');
+        }, 100);
+      }
+    }
+
     if (btnEnable) {
       btnEnable.onclick = function () {
         if (window.AudioManager) {
           window.AudioManager.unlock().then(function () {
             if (modal) modal.classList.remove('show');
+            forceScrollAfterModal(); // Force scroll after closing
             playSound('success');
             var childName = gameState.playerName || 'bé yêu';
             beeSay('Chào ' + childName + '! Hôm nay mình cùng ghép chữ nào! 🌈', 4000);
@@ -2382,6 +2430,7 @@
     if (btnSkip) {
       btnSkip.onclick = function () {
         if (modal) modal.classList.remove('show');
+        forceScrollAfterModal(); // Force scroll after closing
         var childName = gameState.playerName || 'bé yêu';
         beeSay('Chào ' + childName + '! Hôm nay mình cùng ghép chữ nào! 🌈', 4000);
       };
