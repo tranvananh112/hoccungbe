@@ -1,0 +1,24 @@
+/* ========================================
+   DISABLE ALL ANIMATIONS - DEBUG FLICKERING
+   Tắt tất cả animation để debug
+   ======================================== */
+
+* {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* Giữ lại một số animation cần thiết */
+.page {
+    animation: fadeIn 0.3s ease !important;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
