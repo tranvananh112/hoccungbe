@@ -99,6 +99,9 @@
         submitBtn.disabled = true;
         submitBtn.textContent = '⏳ Đang đăng ký...';
 
+        // Hiển thị thông báo đang xử lý
+        showInfo('⏳ Đang kết nối đến server... Vui lòng đợi.');
+
         try {
             // Kiểm tra SupabaseConfig có sẵn sàng không
             if (!window.SupabaseConfig || !window.SupabaseConfig.signUp) {
@@ -181,11 +184,19 @@
 
     // Helper functions
     function showError(message) {
+        hideMessages();
         errorMessage.textContent = message;
         errorMessage.classList.add('show');
     }
 
     function showSuccess(message) {
+        hideMessages();
+        successMessage.textContent = message;
+        successMessage.classList.add('show');
+    }
+
+    function showInfo(message) {
+        hideMessages();
         successMessage.textContent = message;
         successMessage.classList.add('show');
     }

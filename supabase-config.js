@@ -35,37 +35,99 @@
         }
     }
 
+    // Helper: Retry với exponential backoff
+    async function retryWithBackoff(fn, maxRetries = 3, baseDelay = 1000) {
+        for (let i = 0; i < maxRetries; i++) {
+            try {
+                return await fn();
+            } catch (error) {
+                const isRetryable = error.name === 'AuthRetryableFetchError' ||
+                    error.message?.includes('504') ||
+                    error.message?.includes('timeout') ||
+                    error.message?.includes('network');
+
+                const isLastRetry = i === maxRetries - 1;
+
+                if (!isRetryable || isLastRetry) {
+                    throw error;
+                }
+
+                const delay = baseDelay * Math.pow(2, i);
+                console.log(`⏳ Retry ${i + 1}/${maxRetries} sau ${delay}ms...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+        }
+    }
+
     // Auth functions
     async function signUp(email, password, userData) {
         try {
-            const { data, error } = await supabaseClient.auth.signUp({
-                email: email,
-                password: password,
-                options: {
-                    data: userData
-                }
+            const result = await retryWithBackoff(async () => {
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: userData
+                    }
+                });
+
+                if (error) throw error;
+                return { success: true, data: data };
             });
 
-            if (error) throw error;
-            return { success: true, data: data };
+            return result;
         } catch (error) {
             console.error('Sign up error:', error);
-            return { success: false, error: error.message };
+
+            // Xử lý các loại lỗi cụ thể
+            let errorMessage = error.message || 'Unknown error';
+
+            if (error.name === 'AuthRetryableFetchError' || errorMessage.includes('504')) {
+                errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra internet và thử lại.';
+            } else if (errorMessage.includes('timeout')) {
+                errorMessage = 'Kết nối quá chậm. Vui lòng thử lại.';
+            } else if (errorMessage.includes('network')) {
+                errorMessage = 'Lỗi mạng. Vui lòng kiểm tra kết nối internet.';
+            } else if (errorMessage === '{}' || errorMessage === '') {
+                errorMessage = 'Lỗi không xác định. Vui lòng thử lại sau.';
+            }
+
+            return { success: false, error: errorMessage };
         }
     }
 
     async function signIn(email, password) {
         try {
-            const { data, error } = await supabaseClient.auth.signInWithPassword({
-                email: email,
-                password: password
+            const result = await retryWithBackoff(async () => {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (error) throw error;
+                return { success: true, data: data };
             });
 
-            if (error) throw error;
-            return { success: true, data: data };
+            return result;
         } catch (error) {
             console.error('Sign in error:', error);
-            return { success: false, error: error.message };
+
+            // Xử lý các loại lỗi cụ thể
+            let errorMessage = error.message || 'Unknown error';
+
+            if (error.name === 'AuthRetryableFetchError' || errorMessage.includes('504')) {
+                errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra internet và thử lại.';
+            } else if (errorMessage.includes('Invalid login credentials')) {
+                errorMessage = 'Email hoặc mật khẩu không đúng.';
+            } else if (errorMessage.includes('timeout')) {
+                errorMessage = 'Kết nối quá chậm. Vui lòng thử lại.';
+            } else if (errorMessage.includes('network')) {
+                errorMessage = 'Lỗi mạng. Vui lòng kiểm tra kết nối internet.';
+            } else if (errorMessage === '{}' || errorMessage === '') {
+                errorMessage = 'Lỗi không xác định. Vui lòng thử lại sau.';
+            }
+
+            return { success: false, error: errorMessage };
         }
     }
 
