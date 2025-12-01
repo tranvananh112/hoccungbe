@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Người dùng - Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+            display: block;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .users-table {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        .avatar {
+            font-size: 2rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #FF9800;
+            color: white;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .refresh-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 10px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: white;
+            color: #667eea;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="admin.html" class="back-btn">← Quay lại Admin</a>
+
+        <h1>👥 Quản lý Người dùng</h1>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-value" id="totalUsers">0</span>
+                <span class="stat-label">Tổng người dùng</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" id="totalStars">0</span>
+                <span class="stat-label">Tổng sao</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" id="totalCoins">0</span>
+                <span class="stat-label">Tổng xu</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" id="activeToday">0</span>
+                <span class="stat-label">Hoạt động hôm nay</span>
+            </div>
+        </div>
+
+        <button class="refresh-btn" onclick="loadUsers()">🔄 Làm mới</button>
+
+        <div class="users-table">
+            <div id="loading" class="loading">Đang tải dữ liệu...</div>
+            <table id="usersTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Avatar</th>
+                        <th>Tên</th>
+                        <th>User ID</th>
+                        <th>⭐ Sao</th>
+                        <th>🪙 Xu</th>
+                        <th>📊 Level</th>
+                        <th>📚 Chủ đề</th>
+                        <th>🕐 Lần cuối chơi</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody id="usersBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script>
+        async function loadUsers() {
+            const loading = document.getElementById('loading');
+            const table = document.getElementById('usersTable');
+            const tbody = document.getElementById('usersBody');
+
+            loading.style.display = 'block';
+            table.style.display = 'none';
+
+            try {
+                // Init Supabase
+                if (!window.SupabaseConfig) {
+                    throw new Error('Supabase not initialized');
+                }
+
+                window.SupabaseConfig.init();
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                const client = window.SupabaseConfig.client();
+
+                // Load all users
+                const { data, error } = await client
+                    .from('user_progress')
+                    .select('*')
+                    .order('last_played', { ascending: false });
+
+                if (error) throw error;
+
+                console.log('✅ Loaded', data.length, 'users');
+
+                // Update stats
+                document.getElementById('totalUsers').textContent = data.length;
+
+                let totalStars = 0;
+                let totalCoins = 0;
+                let activeToday = 0;
+                const today = new Date().toDateString();
+
+                data.forEach(user => {
+                    totalStars += user.total_stars || 0;
+                    totalCoins += user.coins || 0;
+
+                    if (user.last_played) {
+                        const lastPlayed = new Date(user.last_played).toDateString();
+                        if (lastPlayed === today) {
+                            activeToday++;
+                        }
+                    }
+                });
+
+                document.getElementById('totalStars').textContent = totalStars;
+                document.getElementById('totalCoins').textContent = totalCoins;
+                document.getElementById('activeToday').textContent = activeToday;
+
+                // Render table
+                tbody.innerHTML = '';
+
+                data.forEach(user => {
+                    const tr = document.createElement('tr');
+
+                    const lastPlayed = user.last_played ? new Date(user.last_played) : null;
+                    const isActive = lastPlayed && (Date.now() - lastPlayed.getTime()) < 24 * 60 * 60 * 1000;
+
+                    tr.innerHTML = `
+                        <td class="avatar">${user.player_avatar || '🐝'}</td>
+                        <td><strong>${user.player_name || 'Bé'}</strong></td>
+                        <td><small>${user.user_id}</small></td>
+                        <td>${user.total_stars || 0}</td>
+                        <td>${user.coins || 0}</td>
+                        <td>${user.current_level || 1}</td>
+                        <td>${getThemeName(user.current_theme)}</td>
+                        <td>${lastPlayed ? formatDate(lastPlayed) : 'Chưa chơi'}</td>
+                        <td>
+                            <span class="badge ${isActive ? 'badge-success' : 'badge-warning'}">
+                                ${isActive ? 'Hoạt động' : 'Không hoạt động'}
+                            </span>
+                        </td>
+                    `;
+
+                    tbody.appendChild(tr);
+                });
+
+                loading.style.display = 'none';
+                table.style.display = 'table';
+
+            } catch (error) {
+                console.error('❌ Load error:', error);
+                loading.innerHTML = '❌ Lỗi: ' + error.message + '<br><button class="refresh-btn" onclick="loadUsers()">Thử lại</button>';
+            }
+        }
+
+        function getThemeName(theme) {
+            const themes = {
+                'animals': '🐾 Động vật',
+                'food': '🍎 Đồ ăn',
+                'nature': '🌳 Thiên nhiên',
+                'vehicles': '🚗 Phương tiện',
+                'family': '👨‍👩‍👧 Gia đình'
+            };
+            return themes[theme] || theme || 'Động vật';
+        }
+
+        function formatDate(date) {
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            if (minutes < 1) return 'Vừa xong';
+            if (minutes < 60) return minutes + ' phút trước';
+            if (hours < 24) return hours + ' giờ trước';
+            if (days < 7) return days + ' ngày trước';
+
+            return date.toLocaleDateString('vi-VN');
+        }
+
+        // Auto load
+        window.addEventListener('load', loadUsers);
+    </script>
+</body>
+
+</html>

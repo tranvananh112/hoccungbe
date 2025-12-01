@@ -90,6 +90,15 @@
       // Cleanup: Xóa các câu/từ đã làm quá 24 giờ để tiết kiệm bộ nhớ
       cleanupOldCompletions();
       localStorage.setItem('gamestva', JSON.stringify(gameState));
+
+      // Trigger sync lên Supabase (nếu có)
+      if (window.SyncManager && window.SyncManager.sync) {
+        // Debounce: chỉ sync sau 5 giây không có thay đổi
+        clearTimeout(window.syncTimeout);
+        window.syncTimeout = setTimeout(function () {
+          window.SyncManager.sync();
+        }, 5000);
+      }
     } catch (e) { console.error('Save error:', e); }
   }
 
