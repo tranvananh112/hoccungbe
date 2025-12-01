@@ -100,20 +100,32 @@
         submitBtn.textContent = '⏳ Đang đăng ký...';
 
         try {
+            // Kiểm tra SupabaseConfig có sẵn sàng không
+            if (!window.SupabaseConfig || !window.SupabaseConfig.signUp) {
+                showError('Hệ thống chưa sẵn sàng. Vui lòng tải lại trang.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = '📝 Đăng ký';
+                return;
+            }
+
+            console.log('📝 Đang đăng ký với email:', email);
+
             const result = await window.SupabaseConfig.signUp(email, password, {
                 full_name: name,
                 role: 'parent',
                 email: email
             });
 
+            console.log('📊 Kết quả đăng ký:', result);
+
             if (result.success) {
                 // Kiểm tra xem có cần confirm email không
                 const needsConfirmation = result.data?.user?.identities?.length === 0;
 
                 if (needsConfirmation) {
-                    showSuccess('Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.');
+                    showSuccess('✅ Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.');
                 } else {
-                    showSuccess('Đăng ký thành công! Bạn có thể đăng nhập ngay.');
+                    showSuccess('✅ Đăng ký thành công! Bạn có thể đăng nhập ngay.');
                 }
 
                 registerForm.reset();
@@ -126,18 +138,22 @@
                 }, 3000);
             } else {
                 // Xử lý các loại lỗi cụ thể
-                let errorMsg = 'Đăng ký thất bại. ';
+                let errorMsg = '❌ Đăng ký thất bại. ';
 
-                if (result.error.includes('already registered') || result.error.includes('already exists')) {
+                const errorStr = (result.error || '').toLowerCase();
+
+                if (errorStr.includes('already registered') || errorStr.includes('already exists') || errorStr.includes('user already registered')) {
                     errorMsg += 'Email này đã được đăng ký. Vui lòng đăng nhập hoặc dùng email khác.';
-                } else if (result.error.includes('invalid email')) {
+                } else if (errorStr.includes('invalid email')) {
                     errorMsg += 'Email không hợp lệ.';
-                } else if (result.error.includes('weak password')) {
-                    errorMsg += 'Mật khẩu quá yếu. Vui lòng dùng mật khẩu mạnh hơn.';
-                } else if (result.error.includes('500') || result.error.includes('Internal')) {
+                } else if (errorStr.includes('weak password') || errorStr.includes('password')) {
+                    errorMsg += 'Mật khẩu quá yếu. Vui lòng dùng mật khẩu mạnh hơn (ít nhất 6 ký tự).';
+                } else if (errorStr.includes('500') || errorStr.includes('internal')) {
                     errorMsg += 'Lỗi server. Vui lòng thử lại sau hoặc liên hệ admin.';
+                } else if (errorStr.includes('network') || errorStr.includes('fetch')) {
+                    errorMsg += 'Lỗi kết nối. Vui lòng kiểm tra internet và thử lại.';
                 } else {
-                    errorMsg += result.error;
+                    errorMsg += result.error || 'Lỗi không xác định.';
                 }
 
                 showError(errorMsg);
@@ -149,7 +165,15 @@
             }
         } catch (error) {
             console.error('❌ Signup exception:', error);
-            showError('Lỗi không xác định. Vui lòng thử lại sau.');
+
+            let errorMsg = '❌ Lỗi không xác định. ';
+            if (error.message) {
+                errorMsg += error.message;
+            } else {
+                errorMsg += 'Vui lòng thử lại sau.';
+            }
+
+            showError(errorMsg);
             submitBtn.disabled = false;
             submitBtn.textContent = '📝 Đăng ký';
         }
@@ -177,6 +201,12 @@
             // Wait for Supabase to initialize
             await new Promise(resolve => setTimeout(resolve, 500));
 
+            // Kiểm tra xem SupabaseConfig đã sẵn sàng chưa
+            if (!window.SupabaseConfig || !window.SupabaseConfig.getCurrentUser) {
+                console.warn('⚠️ SupabaseConfig not ready yet');
+                return;
+            }
+
             const user = await window.SupabaseConfig.getCurrentUser();
             if (user) {
                 // Already logged in, redirect to app
@@ -186,7 +216,10 @@
                 console.log('ℹ️ Not logged in, showing auth form');
             }
         } catch (error) {
-            console.error('Check auth error:', error);
+            // Không log error nếu là AuthSessionMissingError (bình thường)
+            if (error.name !== 'AuthSessionMissingError') {
+                console.error('Check auth error:', error);
+            }
         }
     }
 

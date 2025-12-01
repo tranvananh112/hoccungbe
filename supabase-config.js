@@ -86,11 +86,32 @@
                 console.warn('Supabase client not initialized');
                 return null;
             }
+
+            // Thử lấy session trước
+            const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+
+            // Nếu không có session, return null (không phải lỗi)
+            if (!session) {
+                console.log('ℹ️ No active session');
+                return null;
+            }
+
+            // Nếu có session, lấy user
             const { data: { user }, error } = await supabaseClient.auth.getUser();
-            if (error) throw error;
+            if (error) {
+                // Nếu lỗi là AuthSessionMissingError, không log error
+                if (error.name === 'AuthSessionMissingError') {
+                    console.log('ℹ️ No auth session');
+                    return null;
+                }
+                throw error;
+            }
             return user;
         } catch (error) {
-            console.error('Get user error:', error);
+            // Chỉ log error nếu không phải AuthSessionMissingError
+            if (error.name !== 'AuthSessionMissingError') {
+                console.error('Get user error:', error);
+            }
             return null;
         }
     }
