@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline - Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 10px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-row label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .filter-row select,
+        .filter-row input {
+            padding: 8px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .filter-row button {
+            padding: 8px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .timeline-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -52px;
+            top: 20px;
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            border: 4px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 0 3px #667eea;
+        }
+
+        .timeline-date {
+            font-size: 0.85rem;
+            color: #999;
+            margin-bottom: 5px;
+        }
+
+        .timeline-user {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .timeline-action {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .timeline-stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .stat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            background: white;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .chart-container h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .chart {
+            height: 300px;
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            padding: 20px 0;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: linear-gradient(to top, #667eea, #764ba2);
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            min-height: 20px;
+            transition: all 0.3s;
+        }
+
+        .chart-bar:hover {
+            opacity: 0.8;
+            transform: translateY(-5px);
+        }
+
+        .chart-bar-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        .chart-bar-value {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: bold;
+            color: #333;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #999;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="admin.html" class="back-btn">← Quay lại Admin</a>
+
+        <h1>📈 Timeline - Theo dõi theo thời gian</h1>
+
+        <!-- Filters -->
+        <div class="filters">
+            <div class="filter-row">
+                <label>Khoảng thời gian:</label>
+                <select id="timeRange" onchange="loadTimeline()">
+                    <option value="1">Hôm nay</option>
+                    <option value="7" selected>7 ngày qua</option>
+                    <option value="30">30 ngày qua</option>
+                    <option value="90">90 ngày qua</option>
+                </select>
+
+                <label>Loại dữ liệu:</label>
+                <select id="dataType" onchange="loadTimeline()">
+                    <option value="all">Tất cả</option>
+                    <option value="users">Người dùng mới</option>
+                    <option value="activity">Hoạt động</option>
+                    <option value="progress">Tiến độ</option>
+                </select>
+
+                <button onclick="loadTimeline()">🔄 Làm mới</button>
+            </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="chart-container">
+            <h2>📊 Biểu đồ hoạt động</h2>
+            <div class="chart" id="activityChart">
+                <div class="loading">Đang tải dữ liệu...</div>
+            </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline-container">
+            <h2 style="margin-bottom: 30px; color: #333;">🕐 Timeline hoạt động</h2>
+            <div class="timeline" id="timeline">
+                <div class="loading">Đang tải timeline...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script>
+        async function loadTimeline() {
+            const timeRange = parseInt(document.getElementById('timeRange').value);
+            const dataType = document.getElementById('dataType').value;
+
+            console.log('📊 Loading timeline:', timeRange, 'days, type:', dataType);
+
+            try {
+                // Init Supabase
+                if (!window.SupabaseConfig) {
+                    throw new Error('Supabase not initialized');
+                }
+
+                window.SupabaseConfig.init();
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                const client = window.SupabaseConfig.client();
+
+                // Calculate date range
+                const endDate = new Date();
+                const startDate = new Date();
+                startDate.setDate(startDate.getDate() - timeRange);
+
+                // Load user progress data
+                const { data, error } = await client
+                    .from('user_progress')
+                    .select('*')
+                    .gte('last_played', startDate.toISOString())
+                    .order('last_played', { ascending: false });
+
+                if (error) throw error;
+
+                console.log('✅ Loaded', data.length, 'records');
+
+                // Render chart
+                renderChart(data, timeRange);
+
+                // Render timeline
+                renderTimeline(data);
+
+            } catch (error) {
+                console.error('❌ Load error:', error);
+                document.getElementById('timeline').innerHTML =
+                    '<div class="loading">❌ Lỗi: ' + error.message + '</div>';
+            }
+        }
+
+        function renderChart(data, days) {
+            const chartContainer = document.getElementById('activityChart');
+            chartContainer.innerHTML = '';
+
+            // Group by date
+            const dateGroups = {};
+            const today = new Date();
+
+            // Initialize all dates
+            for (let i = days - 1; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                dateGroups[dateStr] = 0;
+            }
+
+            // Count activities per date
+            data.forEach(item => {
+                if (item.last_played) {
+                    const dateStr = item.last_played.split('T')[0];
+                    if (dateGroups[dateStr] !== undefined) {
+                        dateGroups[dateStr]++;
+                    }
+                }
+            });
+
+            // Find max for scaling
+            const maxCount = Math.max(...Object.values(dateGroups), 1);
+
+            // Render bars
+            Object.entries(dateGroups).forEach(([date, count]) => {
+                const bar = document.createElement('div');
+                bar.className = 'chart-bar';
+                const height = (count / maxCount) * 100;
+                bar.style.height = height + '%';
+
+                const dateObj = new Date(date);
+                const label = dateObj.getDate() + '/' + (dateObj.getMonth() + 1);
+
+                bar.innerHTML = `
+                    <div class="chart-bar-value">${count}</div>
+                    <div class="chart-bar-label">${label}</div>
+                `;
+
+                chartContainer.appendChild(bar);
+            });
+        }
+
+        function renderTimeline(data) {
+            const timeline = document.getElementById('timeline');
+            timeline.innerHTML = '';
+
+            if (data.length === 0) {
+                timeline.innerHTML = '<div class="loading">Không có dữ liệu</div>';
+                return;
+            }
+
+            data.forEach(item => {
+                const timelineItem = document.createElement('div');
+                timelineItem.className = 'timeline-item';
+
+                const date = new Date(item.last_played || item.created_at);
+                const dateStr = formatDateTime(date);
+
+                timelineItem.innerHTML = `
+                    <div class="timeline-date">${dateStr}</div>
+                    <div class="timeline-user">
+                        ${item.player_avatar || '🐝'} ${item.player_name || 'Bé'}
+                    </div>
+                    <div class="timeline-action">
+                        📚 Đã học ${Object.keys(item.words_completed || {}).length} từ
+                    </div>
+                    <div class="timeline-stats">
+                        <span class="stat-badge">⭐ ${item.total_stars || 0} sao</span>
+                        <span class="stat-badge">🪙 ${item.coins || 0} xu</span>
+                        <span class="stat-badge">📊 Level ${item.current_level || 1}</span>
+                        <span class="stat-badge">📚 ${getThemeName(item.current_theme)}</span>
+                    </div>
+                `;
+
+                timeline.appendChild(timelineItem);
+            });
+        }
+
+        function formatDateTime(date) {
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            if (minutes < 1) return 'Vừa xong';
+            if (minutes < 60) return minutes + ' phút trước';
+            if (hours < 24) return hours + ' giờ trước';
+            if (days === 1) return 'Hôm qua ' + date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+            if (days < 7) return days + ' ngày trước';
+
+            return date.toLocaleString('vi-VN');
+        }
+
+        function getThemeName(theme) {
+            const themes = {
+                'animals': 'Động vật',
+                'food': 'Đồ ăn',
+                'nature': 'Thiên nhiên',
+                'vehicles': 'Phương tiện',
+                'family': 'Gia đình'
+            };
+            return themes[theme] || theme || 'Động vật';
+        }
+
+        // Auto load
+        window.addEventListener('load', loadTimeline);
+    </script>
+</body>
+
+</html>

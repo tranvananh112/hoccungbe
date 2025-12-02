@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Hướng Dẫn Cấp Độ - GamesTVA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .level-card {
+            background: #f9f9f9;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid;
+        }
+
+        .level-card.level-1 {
+            border-color: #4caf50;
+        }
+
+        .level-card.level-2 {
+            border-color: #8bc34a;
+        }
+
+        .level-card.level-3 {
+            border-color: #ffc107;
+        }
+
+        .level-card.level-4 {
+            border-color: #ff9800;
+        }
+
+        .level-card.level-5 {
+            border-color: #f44336;
+        }
+
+        .level-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .level-icon {
+            font-size: 32px;
+        }
+
+        .level-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .level-desc {
+            color: #666;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .level-specs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .spec-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .spec-icon {
+            font-size: 20px;
+        }
+
+        .spec-text {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .examples {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+        }
+
+        .examples-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .example-words {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .example-word {
+            background: #667eea;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .age-guide {
+            background: #e3f2fd;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 24px;
+        }
+
+        .age-guide h2 {
+            color: #1976d2;
+            margin-bottom: 16px;
+        }
+
+        .age-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .age-icon {
+            font-size: 24px;
+        }
+
+        .age-text {
+            flex: 1;
+        }
+
+        .age-level {
+            font-weight: 700;
+            color: #1976d2;
+        }
+
+        .btn-back {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-top: 24px;
+        }
+
+        .btn-back:hover {
+            background: #5568d3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>📊 Hướng Dẫn Cấp Độ</h1>
+
+        <!-- Cấp 1 -->
+        <div class="level-card level-1">
+            <div class="level-header">
+                <span class="level-icon">⭐</span>
+                <span class="level-title">Cấp 1 - Siêu Dễ</span>
+            </div>
+            <div class="level-desc">Phù hợp cho bé mới bắt đầu học đọc (3-4 tuổi)</div>
+
+            <div class="level-specs">
+                <div class="spec-item">
+                    <span class="spec-icon">📏</span>
+                    <span class="spec-text">Từ 2-3 chữ cái</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-icon">🎯</span>
+                    <span class="spec-text">KHÔNG có chữ nhiễu</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-icon">💡</span>
+                    <span class="spec-text">Có gợi ý</span>
+                </div>
+            </div>
+
+            <div class="examples">
+                <div class="examples-title">Ví dụ:</div>
+                <div class="example-words">
+                    <span class="example-word">MÈO</span>
+                    <span class="example-word">CHÓ</span>
+                    <span class="example-word">GÀ</span>
+                    <span class="example-word">BA</span>
+                    <span class="example-word">MẸ</span>
+                    <span class="example-word">ĐỎ</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cấp 2 -->
+        <div class="level-card level-2">
+            <div class="level-header">
+                <span class="level-icon">⭐⭐</span>
+                <span class="level-title">Cấp 2 - Dễ</span>
+            </div>
+            <div class="level-desc">Phù hợp cho bé đã quen đọc (4-5 tuổi)</div>
+
+            <div class="level-specs">
+                <div class="spec-item">
+                    <span class="spec-icon">📏</span>
+                    <span class="spec-text">Từ 3-4 chữ cái</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-icon">🎯</span>
+                    <span class="spec-text">1 chữ nhiễu</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-icon">💡</span>
+                    <span class="spec-text">Có gợi ý</span>
+                </div>
+            </div>
+
+            <div class="examples">
+                <div class="examples-title">Ví dụ:</div>
+                <div class="example-words">
+                    <span class="example-word">NGỰA</span>
+                    <span class="example-word">GẤU</span>
+                    <span class="example-word">THỎ</span>
+                    <span class="example-word">TÁO</span>
+                    <span class="example-word">TRẮNG</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cấp 3 -->
+        <div class="level-card level-3">
+            <div class="level-header">
+                <span class="level-icon">⭐⭐⭐</span>
+                <span class="level-title">Cấp 3 - Trung Bình</span>
+            </div>
+            <div class="level-desc">Phù hợp cho bé đọc tốt (5-6 tuổi)</div>
+
+            <div class="level-specs">
+                <div class="spec-item">
+                    <span class="spec-icon">📏</span>
+                    <span class="spec-text">Cụm từ 4-5 chữ</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-icon">🎯</span>
+                    <span class="spec-text">2 chữ nhiễu</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-icon">💡</span>
+                    <span class="spec-text">Không gợi ý</span>
+                </div>
+            </div>
+
+            <div class="examples">
+                <div class="examples-title">Ví dụ:</div>
+                <div class="example-words">
+                    <span class="example-word">CON MÈO</span>
+                    <span class="example-word">CON CHÓ</span>
+                    <span class="example-word">BỐ MẸ</span>
+                    <span class="example-word">QUẢ TÁO</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cấp 4 -->
+        <div class="level-card level-4">
+            <div class="level-header">
+                <span class="level-icon">⭐⭐⭐⭐</span>
+                <span class="level-title">Cấp 4 - Khó</span>
+            </div>
+            <div class="level-desc">Phù hợp cho bé đọc thành thạo (6-7 tuổi)</div>
+
+            <div class="level-specs">
+                <div class="spec-item">
+                    <span class="spec-icon">📏</span>
+                    <span class="spec-text">Cụm từ 5-7 chữ</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-icon">🎯</span>
+                    <span class="spec-text">3 chữ nhiễu</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-icon">💡</span>
+                    <span class="spec-text">Không gợi ý</span>
+                </div>
+            </div>
+
+            <div class="examples">
+                <div class="examples-title">Ví dụ:</div>
+                <div class="example-words">
+                    <span class="example-word">MÈO TRẮNG</span>
+                    <span class="example-word">CHÓ NÂU</span>
+                    <span class="example-word">ĂN CƠM</span>
+                    <span class="example-word">BA ĐI LÀM</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cấp 5 -->
+        <div class="level-card level-5">
+            <div class="level-header">
+                <span class="level-icon">⭐⭐⭐⭐⭐</span>
+                <span class="level-title">Cấp 5 - Rất Khó</span>
+            </div>
+            <div class="level-desc">Phù hợp cho bé đọc xuất sắc (7+ tuổi)</div>
+
+            <div class="level-specs">
+                <div class="spec-item">
+                    <span class="spec-icon">📏</span>
+                    <span class="spec-text">Câu 7+ chữ</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-icon">🎯</span>
+                    <span class="spec-text">4 chữ nhiễu</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-icon">💡</span>
+                    <span class="spec-text">Không gợi ý</span>
+                </div>
+            </div>
+
+            <div class="examples">
+                <div class="examples-title">Ví dụ:</div>
+                <div class="example-words">
+                    <span class="example-word">MÈO ĂN CÁ</span>
+                    <span class="example-word">CHÓ ĂN CƠM</span>
+                    <span class="example-word">BÉ YÊU BA MẸ</span>
+                    <span class="example-word">GÀ GÁY SÁNG</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hướng dẫn theo tuổi -->
+        <div class="age-guide">
+            <h2>🎯 Gợi Ý Cấp Độ Theo Tuổi</h2>
+
+            <div class="age-item">
+                <span class="age-icon">👶</span>
+                <div class="age-text">
+                    <div><strong>3-4 tuổi:</strong> Bắt đầu với <span class="age-level">Cấp 1</span></div>
+                    <div style="font-size: 13px; color: #666;">Từ ngắn, không chữ nhiễu, có gợi ý</div>
+                </div>
+            </div>
+
+            <div class="age-item">
+                <span class="age-icon">🧒</span>
+                <div class="age-text">
+                    <div><strong>5 tuổi:</strong> Thử <span class="age-level">Cấp 2</span></div>
+                    <div style="font-size: 13px; color: #666;">Từ vừa, ít chữ nhiễu, có gợi ý</div>
+                </div>
+            </div>
+
+            <div class="age-item">
+                <span class="age-icon">👦</span>
+                <div class="age-text">
+                    <div><strong>6 tuổi:</strong> Thử <span class="age-level">Cấp 3</span></div>
+                    <div style="font-size: 13px; color: #666;">Cụm từ ngắn, vừa phải chữ nhiễu</div>
+                </div>
+            </div>
+
+            <div class="age-item">
+                <span class="age-icon">👧</span>
+                <div class="age-text">
+                    <div><strong>7+ tuổi:</strong> Thử <span class="age-level">Cấp 4-5</span></div>
+                    <div style="font-size: 13px; color: #666;">Cụm từ dài, câu đơn giản, nhiều chữ nhiễu</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="index.html" class="btn-back">← Quay lại game</a>
+        </div>
+    </div>
+</body>
+
+</html>

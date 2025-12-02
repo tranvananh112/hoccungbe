@@ -29,6 +29,21 @@
     }
   };
 
+  // ========== GLOBAL HELPER: CLOSE CELEBRATION OVERLAY ==========
+  window.closeCelebrationOverlay = function () {
+    // ⭐ DỪNG ÂM THANH khi đóng overlay
+    if (window.CelebrationSounds) {
+      window.CelebrationSounds.stopAll();
+    }
+
+    var overlay = document.getElementById('celebrationOverlay');
+    if (overlay) {
+      overlay.classList.remove('show');
+      overlay.style.display = 'none';
+      console.log('✅ Celebration overlay closed manually');
+    }
+  };
+
   // ========== DỮ LIỆU ==========
   var wordData = {
     level1: [
@@ -163,7 +178,11 @@
 
   function speakVietnamese(text, priority, callback) {
     if (!text) return;
+
+    console.log('🎤 speakVietnamese called:', text);
+
     var vol = gameState.settings.volume / 100;
+    console.log('🔊 Volume:', vol, '(', gameState.settings.volume, '%)');
 
     if (priority && currentAudio) {
       currentAudio.pause();
@@ -585,6 +604,14 @@
   function showPage(pageId) {
     console.log('Showing page:', pageId);
 
+    // 📊 ANALYTICS: End session khi rời trang play
+    var currentPage = document.querySelector('.page.active');
+    if (currentPage && currentPage.id === 'pagePlay' && pageId !== 'play') {
+      if (window.AnalyticsService && window.AnalyticsService.getCurrentSession()) {
+        window.AnalyticsService.endSession();
+      }
+    }
+
     var pages = document.querySelectorAll('.page');
     for (var i = 0; i < pages.length; i++) {
       pages[i].classList.remove('active');
@@ -704,34 +731,70 @@
     var elemBelow = document.elementFromPoint(pos.x, pos.y);
 
     if (elemBelow && elemBelow.classList.contains('letter-slot') && elemBelow.classList.contains('empty')) {
+      // ✅ Kiểm tra xem đang ghép TỪ hay CHỮ
       var draggedChar = dragElement.getAttribute('data-char');
+      var draggedWord = dragElement.getAttribute('data-word');
       var expectedChar = elemBelow.getAttribute('data-char');
+      var expectedWord = elemBelow.getAttribute('data-word');
 
-      if (draggedChar === expectedChar) {
+      var isCorrect = false;
+      if (draggedWord && expectedWord) {
+        // Ghép TỪ (cấp 1)
+        isCorrect = (draggedWord === expectedWord);
+      } else {
+        // Ghép CHỮ (cấp 2+)
+        isCorrect = (draggedChar === expectedChar);
+      }
+
+      if (isCorrect) {
         // ✅ ĐÚNG
-        elemBelow.textContent = draggedChar;
+        elemBelow.textContent = draggedWord || draggedChar;
         elemBelow.classList.remove('empty');
         elemBelow.classList.add('filled');
         dragElement.classList.add('used');
         dragElement.classList.remove('dragging-source');
 
-        playSound('correct');
+        // ⭐ PHÁT ÂM THANH "CHÍNH XÁC" NGAY LẬP TỨC (1 giây)
+        var correctAudio = new Audio('sounds/chinhxac.wav');
+        correctAudio.volume = 0.8;
+        correctAudio.play().catch(function (e) {
+          console.log('Fallback to beep sound');
+          playSound('correct');
+        });
 
         // ✅ Khen với TÊN em bé
         var childName = gameState.playerName || 'bé';
         beeSay('Đúng rồi! ' + childName + ' giỏi quá! ⭐', 2000);
 
-        // ✅ Delay nhỏ để đảm bảo stopLetterSound hoàn tất
-        setTimeout(function () {
-          speakVietnamese('Đúng rồi! ' + childName + ' giỏi lắm!', true);
-        }, 100);
+        // ✅ KHÔNG đọc giọng nữa (vì đã có âm thanh chinhxac)
+        // setTimeout(function () {
+        //   speakVietnamese('Đúng rồi! ' + childName + ' giỏi lắm!', true);
+        // }, 100);
 
         checkWordComplete();
       } else {
         // ✅ SAI - shake ô đích
-        playSound('wrong');
+
+        // ⭐ PHÁT ÂM THANH "SAI ĐÁP ÁN" NGAY LẬP TỨC (1 giây)
+        var wrongAudio = new Audio('sounds/saidapan.wav');
+        wrongAudio.volume = 0.7;
+        wrongAudio.play().catch(function (e) {
+          console.log('Fallback to beep sound');
+          playSound('wrong');
+        });
+
         var childName = gameState.playerName || 'bé';
         beeSay('Sai rồi, ' + childName + ' thử lại nhé! 💪', 2000);
+
+        // 📊 ANALYTICS: Track word practice (incorrect)
+        var wordToTrack = currentWord.word || currentWord.sentence;
+        if (window.AnalyticsService && wordToTrack) {
+          window.AnalyticsService.trackWordPractice(
+            wordToTrack,
+            gameState.currentTheme,
+            false // incorrect
+          );
+        }
 
         // ✅ Delay nhỏ để đảm bảo stopLetterSound hoàn tất
         setTimeout(function () {
@@ -1013,18 +1076,33 @@
 
     // ✅ Sử dụng requestAnimationFrame thay vì setTimeout (mượt hơn)
     requestAnimationFrame(function () {
+      // 📊 ANALYTICS: Start session khi bắt đầu chơi từ đầu tiên
+      if (window.AnalyticsService && !window.AnalyticsService.getCurrentSession()) {
+        window.AnalyticsService.startSession(
+          gameState.currentTheme,
+          gameState.currentLevel,
+          gameState.gameMode || 'word'
+        );
+      }
+
       // Kiểm tra custom lesson trước
       if (gameState.customLesson && gameState.customLesson.words) {
         loadCustomLessonWord();
         return;
       }
 
-      // Lấy từ theo chủ đề
-      var themeData = window.WordThemes && window.WordThemes[gameState.currentTheme];
-      if (!themeData) themeData = wordData;
+      // Lấy từ theo chủ đề - Ưu tiên dữ liệu tối ưu
+      var themeData = null;
+      if (window.OptimizedWordData && window.OptimizedWordData[gameState.currentTheme]) {
+        themeData = window.OptimizedWordData[gameState.currentTheme];
+      } else if (window.WordThemes && window.WordThemes[gameState.currentTheme]) {
+        themeData = window.WordThemes[gameState.currentTheme];
+      } else {
+        themeData = wordData;
+      }
 
       var words = themeData['level' + gameState.currentLevel];
-      if (!words) return;
+      if (!words || words.length === 0) return;
 
       // CHỌN TỪ THÔNG MINH: Ưu tiên từ mới, tránh lặp lại
       currentWord = selectSmartWord(words);
@@ -1108,6 +1186,17 @@
     renderSlots();
     renderLetters();
 
+    // ✨ Remove loading class sau khi render
+    requestAnimationFrame(function () {
+      var gameDisplay = document.querySelector('.game-display');
+      var wordSlots = document.getElementById('wordSlots');
+      var lettersPool = document.getElementById('lettersPool');
+
+      if (gameDisplay) gameDisplay.classList.remove('loading');
+      if (wordSlots) wordSlots.classList.remove('loading');
+      if (lettersPool) lettersPool.classList.remove('loading');
+    });
+
     // ✅ Phát âm NGAY LẬP TỨC
     speakVietnamese(displayText);
   }
@@ -1121,22 +1210,45 @@
 
     // Lấy text từ word hoặc sentence
     var text = currentWord.word || currentWord.sentence || '';
-    var chars = text.split('');
 
-    // ✅ Tạo tất cả elements trong fragment
-    for (var i = 0; i < chars.length; i++) {
-      var char = chars[i];
-      if (char === ' ') {
-        var space = document.createElement('div');
-        space.className = 'letter-slot space';
-        fragment.appendChild(space);
-      } else {
+    // ✅ CẤP 1: GHÉP TỪ (dễ hơn cho trẻ nhỏ)
+    if (gameState.currentLevel === 1 && text.indexOf(' ') > -1) {
+      // Tách thành các từ
+      var words = text.split(' ');
+      for (var i = 0; i < words.length; i++) {
+        if (i > 0) {
+          // Thêm khoảng trắng giữa các từ
+          var space = document.createElement('div');
+          space.className = 'letter-slot space';
+          fragment.appendChild(space);
+        }
+
+        // Tạo ô cho cả từ
         var slot = document.createElement('div');
-        slot.className = 'letter-slot empty';
+        slot.className = 'letter-slot empty word-slot';
         slot.setAttribute('data-index', i);
-        slot.setAttribute('data-char', char);
+        slot.setAttribute('data-word', words[i]);
         slot.textContent = '?';
+        slot.style.minWidth = (words[i].length * 30) + 'px'; // Rộng hơn cho từ
         fragment.appendChild(slot);
+      }
+    } else {
+      // CẤP 2+: GHÉP CHỮ (như cũ)
+      var chars = text.split('');
+      for (var i = 0; i < chars.length; i++) {
+        var char = chars[i];
+        if (char === ' ') {
+          var space = document.createElement('div');
+          space.className = 'letter-slot space';
+          fragment.appendChild(space);
+        } else {
+          var slot = document.createElement('div');
+          slot.className = 'letter-slot empty';
+          slot.setAttribute('data-index', i);
+          slot.setAttribute('data-char', char);
+          slot.textContent = '?';
+          fragment.appendChild(slot);
+        }
       }
     }
 
@@ -1154,15 +1266,79 @@
 
     // Lấy text từ word hoặc sentence
     var text = currentWord.word || currentWord.sentence || '';
+
+    // ✅ CẤP 1: GHÉP TỪ - Hiển thị các từ hoàn chỉnh (DỄ HƠN CHO TRẺ NHỎ)
+    if (gameState.currentLevel === 1 && text.indexOf(' ') > -1) {
+      var words = text.split(' ');
+      var allWords = shuffle(words.slice()); // Xáo trộn các từ
+
+      // DEBUG INFO
+      var debugInfo = document.getElementById('debugInfo');
+      if (debugInfo) {
+        debugInfo.innerHTML = '📊 Cấp 1 - Chế độ GHÉP TỪ: ' + words.length + ' từ cần ghép';
+        debugInfo.style.color = '#4caf50';
+      }
+
+      // Lấy kích thước
+      var containerWidth = container.clientWidth || 800;
+      var containerHeight = container.clientHeight || 140;
+      var padding = 15;
+      var usedPositions = [];
+
+      container.innerHTML = '';
+
+      // Tạo các từ để kéo
+      for (var i = 0; i < allWords.length; i++) {
+        var word = allWords[i];
+        var wordEl = document.createElement('div');
+        wordEl.className = 'draggable-letter draggable-word';
+        wordEl.textContent = word;
+        wordEl.setAttribute('data-word', word);
+
+        // Vị trí ngẫu nhiên
+        var wordWidth = Math.max(80, word.length * 25);
+        var safeWidth = containerWidth - padding * 2 - wordWidth;
+        var safeHeight = containerHeight * 0.4;
+        var position = findRandomPosition(safeWidth, safeHeight, wordWidth, usedPositions, padding);
+        wordEl.style.left = position.x + 'px';
+        wordEl.style.top = position.y + 'px';
+        wordEl.style.minWidth = wordWidth + 'px';
+        wordEl.style.padding = '12px 20px';
+        usedPositions.push(position);
+
+        fragment.appendChild(wordEl);
+      }
+
+      container.appendChild(fragment);
+      return;
+    }
+
+    // CẤP 2+: GHÉP CHỮ (như cũ)
     var wordChars = text.replace(/\s/g, '').split('');
 
-    // ✅ CẤP 1: KHÔNG thêm chữ phụ, chỉ đúng số chữ cần điền
+    // ✅ CHẾ ĐỘ DỄ CHO TRẺ NHỎ: Chỉ hiển thị đúng các chữ cái cần thiết
+    // Không thêm chữ nhiễu ở cấp độ 2, chỉ thêm từ cấp 3 trở lên
     var extras = [];
-    if (gameState.currentLevel > 1) {
-      extras = getRandomLetters(Math.min(2, wordChars.length));
+    if (gameState.currentLevel >= 3) {
+      if (window.DifficultySystem) {
+        var config = window.DifficultySystem.getDifficultyConfig(gameState.currentLevel);
+        extras = window.DifficultySystem.getSmartDistractors(text, config.distractorCount, gameState.currentTheme);
+      } else {
+        // Fallback: Logic cũ
+        extras = getRandomLetters(Math.min(2, wordChars.length));
+      }
     }
 
     var allChars = shuffle(wordChars.concat(extras));
+
+    // ✅ DEBUG INFO: Hiển thị số chữ để kiểm tra
+    var debugInfo = document.getElementById('debugInfo');
+    if (debugInfo && gameState.currentLevel === 2) {
+      debugInfo.innerHTML = '📊 Cấp 2 - Chế độ GHÉP CHỮ: ' + wordChars.length + ' chữ cần thiết, không có chữ nhiễu';
+      debugInfo.style.color = '#4caf50';
+    } else if (debugInfo && gameState.currentLevel >= 3) {
+      debugInfo.innerHTML = '';
+    }
 
     // ✅ Lấy kích thước TRƯỚC khi clear (tránh reflow)
     var containerWidth = container.clientWidth || 800;
@@ -1245,6 +1421,18 @@
       gameState.totalStars += 3;
       gameState.coins += 1; // Mỗi câu đúng = 1 xu
 
+      // 📊 ANALYTICS: Track word practice (correct)
+      var wordToSave = currentWord.word || currentWord.sentence;
+      if (window.AnalyticsService && wordToSave) {
+        window.AnalyticsService.trackWordPractice(
+          wordToSave,
+          gameState.currentTheme,
+          true // correct
+        );
+        window.AnalyticsService.addStars(3);
+        window.AnalyticsService.addCoins(1);
+      }
+
       // Animation cho star icon
       animateIcon('navStars', 'icon-pulse');
       animateIcon('navCoins', 'icon-bounce');
@@ -1258,6 +1446,11 @@
         gameState.coins += 2; // Bonus 2 xu
         animateIcon('navCoins', 'icon-glow');
         beeSay('Chuỗi 5 câu! Bonus +2 xu! 🪙🪙', 2000);
+
+        // 📊 ANALYTICS: Track bonus coins
+        if (window.AnalyticsService) {
+          window.AnalyticsService.addCoins(2);
+        }
       }
 
       // Đổi sao thành xu (10 sao = 5 xu)
@@ -1266,10 +1459,14 @@
         animateIcon('navStars', 'icon-spin');
         animateIcon('navCoins', 'icon-glow');
         beeSay('10 sao đổi 5 xu! 🌟→🪙', 2000);
+
+        // 📊 ANALYTICS: Track bonus coins
+        if (window.AnalyticsService) {
+          window.AnalyticsService.addCoins(5);
+        }
       }
 
       // Lưu từ hoặc câu đã học
-      var wordToSave = currentWord.word || currentWord.sentence;
       if (wordToSave) {
         if (gameState.wordsLearned.indexOf(wordToSave) === -1) {
           gameState.wordsLearned.push(wordToSave);
@@ -1340,6 +1537,11 @@
     var successPopup = document.getElementById('successPopup');
     if (successPopup) successPopup.classList.remove('show');
 
+    // ⭐ DỪNG TẤT CẢ ÂM THANH CHÚC MỪNG khi chuyển câu
+    if (window.CelebrationSounds) {
+      window.CelebrationSounds.stopAll();
+    }
+
     // Force enable scroll after closing popup
     forceEnableScrollGlobal();
 
@@ -1374,6 +1576,8 @@
 
   // ========== CELEBRATION TRANSITION ==========
   function showCelebrationTransition() {
+    console.log('🎉 showCelebrationTransition CALLED!');
+
     // ✅ ẨN success popup cũ để không bị chồng
     var successPopup = document.getElementById('successPopup');
     if (successPopup) successPopup.classList.remove('show');
@@ -1387,7 +1591,12 @@
     var message = document.getElementById('celebrationMessage');
     var timer = document.getElementById('countdownTimer');
 
-    if (!overlay) return;
+    if (!overlay) {
+      console.error('❌ celebrationOverlay NOT FOUND!');
+      return;
+    }
+
+    console.log('✅ Overlay element found');
 
     // ✅ Nếu đang hiển thị, bỏ qua để không chồng
     if (overlay.classList.contains('show')) {
@@ -1405,27 +1614,41 @@
     }
 
     // Cập nhật tiêu đề với TÊN em bé
-    var completedWord = currentWord.word || currentWord.sentence;
-    var childName = gameState.playerName || 'bé';
+    var completedWord = (currentWord && (currentWord.word || currentWord.sentence)) || 'Từ vựng';
+    var childName = (gameState && gameState.playerName) || 'bé';
     if (title) title.textContent = '🎉 ' + completedWord + ' - ' + childName + ' giỏi lắm! 🎉';
 
     // Tạo con vật chạy
-    animalsContainer.innerHTML = '';
-    selectedAnimals.forEach(function (animal) {
-      var animalEl = document.createElement('div');
-      animalEl.className = 'celebration-animal';
-      animalEl.textContent = animal;
-      animalsContainer.appendChild(animalEl);
-    });
+    if (animalsContainer) {
+      animalsContainer.innerHTML = '';
+      selectedAnimals.forEach(function (animal) {
+        var animalEl = document.createElement('div');
+        animalEl.className = 'celebration-animal';
+        animalEl.textContent = animal;
+        animalsContainer.appendChild(animalEl);
+      });
+    }
 
     // ✅ THÊM HIỆU ỨNG VỖ TAY CHÚC MỪNG
     createClappingHands(overlay);
 
     // Hiển thị overlay
+    console.log('🎨 Showing overlay...');
     overlay.classList.add('show');
+    overlay.style.display = 'flex';
+    overlay.style.zIndex = '999999';
+    overlay.style.opacity = '1';
 
-    // ✅ Phát âm thanh VUI NHỘN
-    if (window.SoundEffects) {
+    console.log('✅ Overlay classes:', overlay.className);
+    console.log('✅ Overlay display:', overlay.style.display);
+    console.log('✅ Overlay z-index:', overlay.style.zIndex);
+
+    // ✅ Phát âm thanh CHÚC MỪNG - Ưu tiên âm thanh thật của trẻ em
+    if (window.CelebrationSounds) {
+      // Phát combo: vỗ tay + hò reo + cười + khen
+      window.CelebrationSounds.playCombo();
+    } else if (window.SoundEffects) {
+      // Fallback: âm thanh tổng hợp
       window.SoundEffects.applause(0.5);
       setTimeout(function () {
         window.SoundEffects.cheer(0.4);
@@ -1450,6 +1673,13 @@
 
     // ✅ ĐỌC LẠI TỪ TO RÕ NGAY LẬP TỨC VÀ ĐỢI ĐỌC XONG
     setTimeout(function () {
+      if (!currentWord) {
+        console.warn('⚠️ currentWord is undefined, skipping celebration');
+        overlay.classList.remove('show');
+        nextWord();
+        return;
+      }
+
       var wordToRead = currentWord.word || currentWord.sentence;
       var themeData = window.WordThemes && window.WordThemes[gameState.currentTheme];
 
@@ -1459,20 +1689,26 @@
 
         // ✅ Đếm ngược 4 → 3 → 2 → 1 (sau khi đọc xong) - CHẬM HƠN để em bé thấy rõ
         var countdown = 4;
-        timer.textContent = countdown;
+        if (timer) timer.textContent = countdown;
 
         var countdownInterval = setInterval(function () {
           countdown--;
           if (countdown > 0) {
-            timer.textContent = countdown;
+            if (timer) timer.textContent = countdown;
             playSound('click');
 
             // Tạo hiệu ứng vỗ tay bay lên mỗi giây
             createFloatingClaps(overlay);
           } else {
             clearInterval(countdownInterval);
+
+            // ⭐ DỪNG ÂM THANH trước khi chuyển câu
+            if (window.CelebrationSounds) {
+              window.CelebrationSounds.stopAll();
+            }
+
             // Ẩn overlay và chuyển câu
-            overlay.classList.remove('show');
+            if (overlay) overlay.classList.remove('show');
 
             // Delay nhỏ trước khi load câu mới
             setTimeout(function () {
@@ -2292,6 +2528,13 @@
   async function init() {
     console.log('🎉 DOM loaded!');
 
+    // ✅ FORCE CLOSE celebration overlay nếu bị kẹt
+    var overlay = document.getElementById('celebrationOverlay');
+    if (overlay) {
+      overlay.classList.remove('show');
+      overlay.style.display = 'none';
+    }
+
     // Check authentication TRƯỚC - BẮT BUỘC
     try {
       await checkAuthentication();
@@ -2310,13 +2553,39 @@
     setTimeout(loadVoices, 500);
 
     loadGame();
+
+    // ✅ Kiểm tra URL parameter để load custom lesson
+    var urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('customLesson') === 'true') {
+      var customLessonData = localStorage.getItem('customLesson');
+      if (customLessonData) {
+        try {
+          var lesson = JSON.parse(customLessonData);
+          gameState.customLesson = lesson;
+          gameState.customLessonIndex = 0;
+          saveGame();
+          console.log('✅ Loaded custom lesson:', lesson.name);
+        } catch (e) {
+          console.error('❌ Error loading custom lesson:', e);
+        }
+      }
+      // Xóa URL parameter
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
     setupGlobalListeners();
     setupAudioUnlockButton();
     setupAudioWelcomeModal();
     initTreasure();
     createFloatingIcons();
     checkTTSAvailability();
-    showPage('home');
+
+    // Nếu có custom lesson, chuyển thẳng sang game
+    if (gameState.customLesson) {
+      showPage('game');
+    } else {
+      showPage('home');
+    }
 
     // Ẩn loading screen
     setTimeout(function () {
@@ -2553,6 +2822,13 @@
   window.showPage = showPage;
   window.saveGame = saveGame;
   window.gameState = gameState;
+
+  // 📊 ANALYTICS: End session khi user đóng trang
+  window.addEventListener('beforeunload', function () {
+    if (window.AnalyticsService && window.AnalyticsService.getCurrentSession()) {
+      window.AnalyticsService.endSession();
+    }
+  });
 
   // Start when DOM is ready
   if (document.readyState === 'loading') {

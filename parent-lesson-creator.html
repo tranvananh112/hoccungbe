@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✏️ Soạn Bài Học - GamesTVA</title>
+    <link rel="stylesheet" href="parent-lesson-creator.css">
+</head>
+
+<body>
+    <div class="creator-container">
+        <!-- Header -->
+        <header class="creator-header">
+            <button class="btn-back" onclick="window.location.href='index.html'">← Quay lại</button>
+            <h1>✏️ Soạn Bài Học Cho Bé</h1>
+            <button class="btn-preview" id="btnPreview">👁️ Xem trước</button>
+        </header>
+
+        <!-- Main Content -->
+        <div class="creator-main">
+            <!-- Left Panel: Lesson Info -->
+            <div class="panel panel-info">
+                <h2>📝 Thông tin bài học</h2>
+
+                <div class="form-group">
+                    <label>Tên bài học:</label>
+                    <input type="text" id="lessonName" placeholder="VD: Động vật yêu thích" maxlength="50">
+                </div>
+
+                <div class="form-group">
+                    <label>Mô tả:</label>
+                    <textarea id="lessonDesc" placeholder="VD: Các con vật mà bé thích" rows="3"
+                        maxlength="200"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Độ khó:</label>
+                    <select id="lessonLevel">
+                        <option value="1">⭐ Cấp 1 - Siêu dễ (2-3 chữ)</option>
+                        <option value="2">⭐⭐ Cấp 2 - Dễ (3-4 chữ)</option>
+                        <option value="3">⭐⭐⭐ Cấp 3 - Trung bình (4-5 chữ)</option>
+                        <option value="4">⭐⭐⭐⭐ Cấp 4 - Khó (5-7 chữ)</option>
+                        <option value="5">⭐⭐⭐⭐⭐ Cấp 5 - Rất khó (7+ chữ)</option>
+                    </select>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Số từ:</span>
+                        <span class="stat-value" id="wordCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Trạng thái:</span>
+                        <span class="stat-value" id="lessonStatus">Chưa lưu</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle Panel: Add Word -->
+            <div class="panel panel-add">
+                <h2>➕ Thêm từ mới</h2>
+
+                <div class="form-group">
+                    <label>Từ/Câu:</label>
+                    <input type="text" id="wordInput" placeholder="VD: CON MÈO" maxlength="30">
+                    <small>Gõ chữ IN HOA có dấu</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Chọn icon:</label>
+                    <div class="icon-selector">
+                        <button class="btn-icon-picker" id="btnIconPicker">
+                            <span id="selectedIcon" class="selected-icon">🐱</span>
+                            <span>Chọn icon</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Nhãn hiển thị:</label>
+                    <input type="text" id="labelInput" placeholder="VD: Con mèo" maxlength="30">
+                    <small>Tên hiển thị cho bé</small>
+                </div>
+
+                <button class="btn-add" id="btnAddWord">➕ Thêm vào bài học</button>
+            </div>
+
+            <!-- Right Panel: Word List -->
+            <div class="panel panel-list">
+                <h2>📚 Danh sách từ (<span id="listCount">0</span>)</h2>
+
+                <div class="word-list" id="wordList">
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <div class="empty-text">Chưa có từ nào. Hãy thêm từ đầu tiên!</div>
+                    </div>
+                </div>
+
+                <div class="list-actions">
+                    <button class="btn-clear" id="btnClear">🗑️ Xóa tất cả</button>
+                    <button class="btn-save" id="btnSave">💾 Lưu bài học</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="creator-footer">
+            <button class="btn-play" id="btnPlay">🎮 Chơi ngay</button>
+            <button class="btn-share" id="btnShare">📤 Chia sẻ</button>
+        </div>
+    </div>
+
+    <!-- Icon Picker Modal -->
+    <div class="modal" id="iconPickerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Chọn Icon</h3>
+                <button class="btn-close" onclick="closeIconPicker()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="icon-tabs">
+                    <button class="icon-tab active" data-category="animals">🐾 Động vật</button>
+                    <button class="icon-tab" data-category="food">🍎 Thức ăn</button>
+                    <button class="icon-tab" data-category="objects">🎨 Đồ vật</button>
+                    <button class="icon-tab" data-category="nature">🌳 Thiên nhiên</button>
+                    <button class="icon-tab" data-category="people">👨‍👩‍👧 Con người</button>
+                    <button class="icon-tab" data-category="symbols">⭐ Ký hiệu</button>
+                </div>
+                <div class="icon-grid" id="iconGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div class="modal" id="previewModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3>👁️ Xem trước bài học</h3>
+                <button class="btn-close" onclick="closePreview()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div id="previewContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="parent-lesson-creator.js"></script>
+</body>
+
+</html>

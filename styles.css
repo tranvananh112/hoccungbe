@@ -4676,10 +4676,14 @@ body {
       rgba(179, 157, 219, 0.95));
   background-size: 400% 400%;
   animation: gradientShift 3s ease infinite;
-  z-index: 9999;
+  z-index: 999999 !important;
   display: none;
   justify-content: center;
   align-items: center;
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 @keyframes gradientShift {
@@ -4695,7 +4699,10 @@ body {
 }
 
 .celebration-overlay.show {
-  display: flex;
+  display: flex !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .celebration-content {

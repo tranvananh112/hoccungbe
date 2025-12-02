@@ -184,6 +184,9 @@
           <div class="instruction-text" id="instructionText">
             Bé hãy ghép chữ nhé! 💪
           </div>
+          <div style="text-align: center; font-size: 12px; color: #999; margin-top: 8px;" id="debugInfo">
+            <!-- Debug info sẽ hiển thị ở đây -->
+          </div>
         </div>
 
         <!-- Ô ghép chữ -->
@@ -329,6 +332,14 @@
 
       <!-- Tab: Thống kê -->
       <div class="parent-tab-content active" id="tabStats">
+        <!-- Dashboard Button -->
+        <div style="margin-bottom: 20px; text-align: center;">
+          <a href="parent-dashboard.html" class="btn-dashboard"
+            style="display: inline-block; padding: 16px 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 12px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); transition: all 0.3s;">
+            📊 Xem Báo Cáo Chi Tiết
+          </a>
+        </div>
+
         <div class="parent-stats-grid">
           <div class="parent-stat-card">
             <span class="stat-icon">📖</span>
@@ -516,9 +527,21 @@
   <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js?v=30"></script>
-  <script src="sync-manager.js?v=1"></script>
+
+  <!-- TEMPORARY: Disable Supabase sync until schema is fixed -->
+  <!-- MUST LOAD BEFORE sync-manager.js -->
+  <script src="disable-supabase-sync.js?v=2"></script>
+
+  <!-- ⭐ TẮT sync-manager.js để tránh lỗi Supabase -->
+  <!-- <script src="sync-manager.js?v=1"></script> -->
+
+  <script src="analytics-service.js?v=1"></script>
   <script src="tracking-helper.js?v=1"></script>
   <script src="auto-tracking.js?v=1"></script>
+
+  <!-- Difficulty System -->
+  <script src="difficulty-system.js?v=2"></script>
+  <script src="word-data-optimized.js?v=1"></script>
 
   <script src="audio-manager.js?v=24"></script>
   <!-- Tuyết rơi đơn giản, chắc chắn hoạt động -->
@@ -528,6 +551,8 @@
   <!-- CELEBRATION OVERLAY - Hiệu ứng chuyển câu -->
   <div class="celebration-overlay" id="celebrationOverlay">
     <div class="celebration-content">
+      <button class="celebration-close-btn" onclick="closeCelebrationOverlay()"
+        style="position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.3); border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 24px; cursor: pointer; z-index: 10000;">✕</button>
       <div class="celebration-title" id="celebrationTitle">🎉 Giỏi lắm! 🎉</div>
       <div class="celebration-animals" id="celebrationAnimals"></div>
       <div class="celebration-message" id="celebrationMessage">Chuẩn bị câu tiếp theo...</div>
@@ -540,9 +565,10 @@
   <script src="parent-controls.js?v=20"></script>
   <script src="parent-page.js?v=20"></script>
   <script src="sound-effects.js?v=20"></script>
+  <script src="celebration-sounds.js?v=99"></script>
   <script src="animal-sounds.js?v=1"></script>
   <script src="animations.js?v=20"></script>
-  <script src="main.js?v=33"></script>
+  <script src="main.js?v=99"></script>
 
   <!-- iOS & ANDROID ULTIMATE FIX: Load cuối cùng -->
   <script src="mobile-ios-ultimate-fix.js?v=1"></script>

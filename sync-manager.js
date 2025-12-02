@@ -28,6 +28,11 @@
 
     // ========== SYNC TO SUPABASE ==========
     async function syncToSupabase() {
+        // ⭐ KIỂM TRA NẾU ĐÃ DISABLE - KHÔNG CHẠY
+        if (window.SyncManager && window.SyncManager._disabled) {
+            return;
+        }
+
         if (isSyncing) {
             console.log('⏳ Sync đang chạy, bỏ qua...');
             return;
@@ -54,7 +59,7 @@
 
             var data = JSON.parse(gameData);
 
-            // Chuẩn bị dữ liệu để sync
+            // Chuẩn bị dữ liệu để sync (bỏ device_info vì không có trong schema)
             var syncData = {
                 user_id: userId,
                 player_name: data.playerName || 'Bé',
@@ -69,21 +74,14 @@
                 badges: data.badges || [],
                 stickers: data.stickers || [],
                 settings: data.settings || {},
-                last_played: new Date().toISOString(),
-                device_info: {
-                    user_agent: navigator.userAgent,
-                    language: navigator.language,
-                    screen: screen.width + 'x' + screen.height
-                }
+                last_played: new Date().toISOString()
             };
 
             // Sync lên Supabase
             var client = window.SupabaseConfig.client();
             var { data: result, error } = await client
                 .from('user_progress')
-                .upsert(syncData, {
-                    onConflict: 'user_id'
-                });
+                .upsert(syncData);
 
             if (error) {
                 console.error('❌ Sync error:', error);
@@ -102,6 +100,11 @@
 
     // ========== LOAD FROM SUPABASE ==========
     async function loadFromSupabase() {
+        // ⭐ KIỂM TRA NẾU ĐÃ DISABLE - KHÔNG CHẠY
+        if (window.SyncManager && window.SyncManager._disabled) {
+            return null;
+        }
+
         if (!window.SupabaseConfig || !window.SupabaseConfig.client) {
             console.log('⚠️ Supabase không khả dụng');
             return null;
@@ -114,8 +117,8 @@
             var { data, error } = await client
                 .from('user_progress')
                 .select('*')
-                .eq('user_id', userId)
-                .single();
+                .filter('user_id', 'eq', userId)
+                .maybeSingle();
 
             if (error) {
                 if (error.code === 'PGRST116') {

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Báo Cáo Học Tập - GamesTVA</title>
+    <link rel="stylesheet" href="parent-dashboard.css">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <h1>📊 Báo Cáo Học Tập</h1>
+                <div class="header-actions">
+                    <button id="refreshBtn" class="btn-refresh">🔄 Làm mới</button>
+                    <button id="backBtn" class="btn-back">← Quay lại</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Loading -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Đang tải dữ liệu...</p>
+        </div>
+
+        <!-- Main Content -->
+        <main id="mainContent" class="dashboard-main" style="display: none;">
+
+            <!-- Thống kê hôm nay -->
+            <section class="stats-section">
+                <h2>📅 Hôm nay</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📚</div>
+                        <div class="stat-value" id="todayWords">0</div>
+                        <div class="stat-label">Từ đã học</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎮</div>
+                        <div class="stat-value" id="todayGames">0</div>
+                        <div class="stat-label">Trò chơi</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⏱️</div>
+                        <div class="stat-value" id="todayTime">0</div>
+                        <div class="stat-label">Phút học</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⭐</div>
+                        <div class="stat-value" id="todayStars">0</div>
+                        <div class="stat-label">Sao kiếm được</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Thống kê tuần này -->
+            <section class="stats-section">
+                <h2>📊 Tuần này (7 ngày qua)</h2>
+                <div class="stats-grid">
+                    <div class="stat-card stat-card-large">
+                        <div class="stat-icon">📖</div>
+                        <div class="stat-value" id="weekWords">0</div>
+                        <div class="stat-label">Tổng từ đã học</div>
+                    </div>
+                    <div class="stat-card stat-card-large">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-value" id="weekGames">0</div>
+                        <div class="stat-label">Tổng trò chơi</div>
+                    </div>
+                    <div class="stat-card stat-card-large">
+                        <div class="stat-icon">⏰</div>
+                        <div class="stat-value" id="weekTime">0</div>
+                        <div class="stat-label">Tổng thời gian</div>
+                    </div>
+                    <div class="stat-card stat-card-large">
+                        <div class="stat-icon">🌟</div>
+                        <div class="stat-value" id="weekStars">0</div>
+                        <div class="stat-label">Tổng sao</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Biểu đồ tiến độ 7 ngày -->
+            <section class="chart-section">
+                <h2>📈 Tiến độ 7 ngày qua</h2>
+                <div class="chart-container">
+                    <canvas id="progressChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Từ vựng đã học -->
+            <section class="words-section">
+                <h2>📚 Từ vựng đã học</h2>
+                <div class="words-summary">
+                    <div class="word-category mastered">
+                        <div class="category-header">
+                            <span class="category-icon">✅</span>
+                            <span class="category-name">Thành thạo</span>
+                        </div>
+                        <div class="category-count" id="masteredCount">0</div>
+                        <div class="category-desc">≥ 80% chính xác</div>
+                    </div>
+                    <div class="word-category learning">
+                        <div class="category-header">
+                            <span class="category-icon">📖</span>
+                            <span class="category-name">Đang học</span>
+                        </div>
+                        <div class="category-count" id="learningCount">0</div>
+                        <div class="category-desc">50-79% chính xác</div>
+                    </div>
+                    <div class="word-category practice">
+                        <div class="category-header">
+                            <span class="category-icon">💪</span>
+                            <span class="category-name">Cần luyện</span>
+                        </div>
+                        <div class="category-count" id="practiceCount">0</div>
+                        <div class="category-desc">
+                            < 50% chính xác</div>
+                        </div>
+                    </div>
+
+                    <!-- Chi tiết từ vựng -->
+                    <div class="words-detail">
+                        <h3>Chi tiết từ vựng</h3>
+                        <div class="words-tabs">
+                            <button class="word-tab active" data-tab="mastered">Thành thạo</button>
+                            <button class="word-tab" data-tab="learning">Đang học</button>
+                            <button class="word-tab" data-tab="practice">Cần luyện</button>
+                        </div>
+                        <div id="wordsList" class="words-list"></div>
+                    </div>
+            </section>
+
+            <!-- Lịch sử học tập -->
+            <section class="history-section">
+                <h2>📜 Lịch sử học tập gần đây</h2>
+                <div id="sessionsList" class="sessions-list"></div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="supabase-config.js"></script>
+    <script src="analytics-service.js"></script>
+    <script src="parent-dashboard.js"></script>
+</body>
+
+</html>

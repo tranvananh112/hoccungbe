@@ -1,0 +1,12 @@
+# Thư mục chứa file âm thanh
+
+## File hiện có:
+- celebration.wav (âm thanh chúc mừng chính)
+
+## File tùy chọn (không bắt buộc):
+Nếu không có các file này, hệ thống sẽ dùng âm thanh tổng hợp thay thế:
+- kids-clapping-1.mp3, kids-clapping-2.mp3, kids-clapping-3.mp3
+- kids-cheering-1.mp3, kids-cheering-2.mp3, kids-cheering-3.mp3
+- kids-yay.mp3, kids-hooray.mp3
+- kids-laughing-1.mp3, kids-laughing-2.mp3
+- gioi-lam.mp3, tuyet-voi.mp3, hay-qua.mp3
