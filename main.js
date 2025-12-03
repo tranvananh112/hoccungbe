@@ -258,29 +258,29 @@
     if (window.speechSynthesis) {
       cachedVoices = window.speechSynthesis.getVoices();
       if (cachedVoices.length > 0) {
-        // ✅ ƯU TIÊN 1: Microsoft Hoa (giọng cô gái Edge - TỐT NHẤT!)
+        // ✅ ƯU TIÊN 1: Google tiếng Việt (giọng chị Google - mặc định tốt nhất)
         preferredVoice = cachedVoices.find(function (v) {
-          return (v.name.includes('Microsoft Hoa') || v.name.includes('Hoa')) && v.lang.startsWith('vi');
+          return v.name.includes('Google') && v.lang.startsWith('vi');
         });
 
         if (preferredVoice) {
-          console.log('✅ Giọng chính (Microsoft Hoa):', preferredVoice.name);
+          console.log('✅ Giọng chính (Google Việt):', preferredVoice.name);
         } else {
-          // ✅ ƯU TIÊN 2: Bất kỳ giọng Microsoft tiếng Việt
+          // ✅ ƯU TIÊN 2: Microsoft Hoa (giọng cô gái Edge)
           preferredVoice = cachedVoices.find(function (v) {
-            return v.name.includes('Microsoft') && v.lang.startsWith('vi');
+            return (v.name.includes('Microsoft Hoa') || v.name.includes('Hoa')) && v.lang.startsWith('vi');
           });
 
           if (preferredVoice) {
-            console.log('✅ Giọng Microsoft:', preferredVoice.name);
+            console.log('✅ Giọng Microsoft Hoa:', preferredVoice.name);
           } else {
-            // ✅ ƯU TIÊN 3: Google tiếng Việt
+            // ✅ ƯU TIÊN 3: Bất kỳ giọng Microsoft tiếng Việt
             preferredVoice = cachedVoices.find(function (v) {
-              return v.name.includes('Google') && v.lang.startsWith('vi');
+              return v.name.includes('Microsoft') && v.lang.startsWith('vi');
             });
 
             if (preferredVoice) {
-              console.log('⚠️ Giọng Google:', preferredVoice.name);
+              console.log('✅ Giọng Microsoft:', preferredVoice.name);
             } else {
               // Fallback: Tìm giọng Việt bất kỳ
               preferredVoice = cachedVoices.find(function (v) {
