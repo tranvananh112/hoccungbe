@@ -814,13 +814,27 @@
         dragElement.classList.add('used');
         dragElement.classList.remove('dragging-source');
 
-        // ⭐ PHÁT ÂM THANH "CHÍNH XÁC" NGAY LẬP TỨC (1 giây)
-        var correctAudio = new Audio('sounds/chinhxac.wav');
-        correctAudio.volume = 0.8;
-        correctAudio.play().catch(function (e) {
-          console.log('Fallback to beep sound');
-          playSound('correct');
-        });
+        // ⭐ PHÁT ÂM THANH "CHÍNH XÁC" NGAY LẬP TỨC
+        // Sử dụng MobileAudioPlayer nếu có
+        if (window.MobileAudioPlayer) {
+          window.MobileAudioPlayer.play('sounds/chinhxac.wav', {
+            volume: 0.8,
+            onError: function () {
+              console.log('Fallback to beep sound');
+              playSound('correct');
+            }
+          }).catch(function () {
+            playSound('correct');
+          });
+        } else {
+          // Fallback: Audio element trực tiếp
+          var correctAudio = new Audio('sounds/chinhxac.wav');
+          correctAudio.volume = 0.8;
+          correctAudio.play().catch(function (e) {
+            console.log('Fallback to beep sound');
+            playSound('correct');
+          });
+        }
 
         // ✅ Khen với TÊN em bé
         var childName = gameState.playerName || 'bé';
@@ -835,13 +849,27 @@
       } else {
         // ✅ SAI - shake ô đích
 
-        // ⭐ PHÁT ÂM THANH "SAI ĐÁP ÁN" NGAY LẬP TỨC (1 giây)
-        var wrongAudio = new Audio('sounds/saidapan.wav');
-        wrongAudio.volume = 0.7;
-        wrongAudio.play().catch(function (e) {
-          console.log('Fallback to beep sound');
-          playSound('wrong');
-        });
+        // ⭐ PHÁT ÂM THANH "SAI ĐÁP ÁN" NGAY LẬP TỨC
+        // Sử dụng MobileAudioPlayer nếu có
+        if (window.MobileAudioPlayer) {
+          window.MobileAudioPlayer.play('sounds/saidapan.wav', {
+            volume: 0.7,
+            onError: function () {
+              console.log('Fallback to beep sound');
+              playSound('wrong');
+            }
+          }).catch(function () {
+            playSound('wrong');
+          });
+        } else {
+          // Fallback: Audio element trực tiếp
+          var wrongAudio = new Audio('sounds/saidapan.wav');
+          wrongAudio.volume = 0.7;
+          wrongAudio.play().catch(function (e) {
+            console.log('Fallback to beep sound');
+            playSound('wrong');
+          });
+        }
 
         var childName = gameState.playerName || 'bé';
         beeSay('Sai rồi, ' + childName + ' thử lại nhé! 💪', 2000);
