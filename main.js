@@ -181,30 +181,11 @@
 
     console.log('🎤 speakVietnamese called:', text);
 
-    // ✅ SỬ DỤNG MobileAudioEnhanced nếu có (tốt hơn cho mobile)
-    if (window.MobileAudioEnhanced && window.MobileAudioEnhanced.speak) {
-      console.log('✅ Using MobileAudioEnhanced');
-
-      window.MobileAudioEnhanced.speak(text, {
-        priority: priority,
-        volume: gameState.settings.volume / 100,
-        rate: 0.9,
-        pitch: 1.5,
-        onEnd: callback
-      }).catch(function (err) {
-        console.warn('MobileAudioEnhanced failed, fallback to browser TTS:', err);
-        // Fallback to browser TTS
-        useBrowserTTS(text, gameState.settings.volume / 100, callback);
-      });
-      return;
-    }
-
-    // ⭐ FALLBACK: Sử dụng browser TTS
-    console.log('⚠️ MobileAudioEnhanced not available, using browser TTS');
-
-    // KIỂM TRA BẮT BUỘC: Phải có giọng tiếng Việt
+    // ⭐ KIỂM TRA GIỌNG VIỆT TRƯỚC
     if (!preferredVoice) {
-      console.warn('⚠️ KHÔNG CÓ GIỌNG TIẾNG VIỆT - Không đọc (không dùng giọng nước ngoài)');
+      console.warn('⚠️ KHÔNG CÓ GIỌNG TIẾNG VIỆT - Đang load...');
+      // Thử load lại voices
+      loadVoices();
       if (callback) callback();
       return;
     }
@@ -226,7 +207,7 @@
       currentAudio = null;
     }
 
-    // ✅ CHỈ ĐỌC KHI CÓ GIỌNG VIỆT
+    // ✅ DÙNG TRỰC TIẾP BROWSER TTS (đơn giản, chắc chắn)
     useBrowserTTS(text, vol, callback);
   }
 

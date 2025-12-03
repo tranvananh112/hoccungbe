@@ -35,17 +35,29 @@
                 return;
             }
 
+            console.log('🔓 Unlocking audio for mobile...');
+
             // Khởi tạo audio context
             initAudioContext();
 
+            if (!audioContext) {
+                console.error('❌ Cannot create Audio Context');
+                resolve(); // Vẫn resolve để không block
+                return;
+            }
+
             // Resume nếu bị suspended
-            if (audioContext && audioContext.state === 'suspended') {
+            if (audioContext.state === 'suspended') {
+                console.log('⏸️ Audio Context suspended, resuming...');
                 audioContext.resume().then(function () {
-                    console.log('✅ Audio Context resumed');
+                    console.log('✅ Audio Context resumed:', audioContext.state);
                     isAudioUnlocked = true;
 
                     // Phát âm thanh im lặng để unlock hoàn toàn (iOS trick)
                     playSilentSound();
+
+                    // Load voices ngay sau khi unlock
+                    loadVietnameseVoices();
 
                     resolve();
                 }).catch(function (err) {
@@ -53,8 +65,13 @@
                     resolve(); // Vẫn resolve để không block
                 });
             } else {
+                console.log('✅ Audio Context ready:', audioContext.state);
                 isAudioUnlocked = true;
                 playSilentSound();
+
+                // Load voices ngay sau khi unlock
+                loadVietnameseVoices();
+
                 resolve();
             }
         });
@@ -192,10 +209,18 @@
                 return;
             }
 
-            // Unlock audio trước
+            // ⭐ QUAN TRỌNG: Unlock audio trước KHI đọc (bắt buộc trên iOS/Android)
             unlockAudio().then(function () {
+                // Đợi voices load xong
                 return loadVietnameseVoices();
             }).then(function (voice) {
+                // ⭐ KIỂM TRA: Phải có giọng Việt mới đọc
+                if (!voice) {
+                    console.warn('⚠️ Không có giọng Việt - bỏ qua đọc');
+                    resolve(); // Không reject để không block game
+                    return;
+                }
+
                 // Cancel speech hiện tại nếu priority = true
                 if (options.priority) {
                     window.speechSynthesis.cancel();
@@ -205,14 +230,12 @@
 
                 // Cấu hình giọng
                 utterance.lang = 'vi-VN';
-                utterance.rate = options.rate || 0.95; // Chậm hơn một chút để rõ ràng
-                utterance.pitch = options.pitch || 1.4; // Giọng nữ cao hơn
+                utterance.rate = options.rate || 0.9; // Tốc độ vừa phải
+                utterance.pitch = options.pitch || 1.5; // Giọng trẻ em cao hơn
                 utterance.volume = options.volume || 1.0; // Âm lượng tối đa
 
-                // Sử dụng giọng đã chọn
-                if (voice) {
-                    utterance.voice = voice;
-                }
+                // ⭐ SỬ DỤNG GIỌNG ĐÃ TÌM ĐƯỢC
+                utterance.voice = voice;
 
                 // Callbacks
                 utterance.onstart = function () {
@@ -227,12 +250,16 @@
                 };
 
                 utterance.onerror = function (e) {
-                    console.error('❌ Lỗi đọc:', e);
+                    // Chỉ log lỗi nghiêm trọng (không log 'interrupted')
+                    if (e.error !== 'interrupted') {
+                        console.error('❌ Lỗi đọc:', e.error);
+                    }
                     if (options.onError) options.onError(e);
                     reject(e);
                 };
 
-                // Phát âm
+                // ⭐ PHÁT ÂM NGAY
+                console.log('🎤 Đang phát:', text, '| Giọng:', voice.name);
                 window.speechSynthesis.speak(utterance);
 
             }).catch(function (err) {
