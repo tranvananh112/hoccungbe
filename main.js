@@ -181,6 +181,22 @@
 
     console.log('🎤 speakVietnamese called:', text);
 
+    // ⭐ KIỂM TRA BẮT BUỘC: Phải có giọng tiếng Việt
+    if (!preferredVoice) {
+      console.warn('⚠️ KHÔNG CÓ GIỌNG TIẾNG VIỆT - Không đọc (không dùng giọng nước ngoài)');
+      if (callback) callback();
+      return;
+    }
+
+    // Kiểm tra giọng có phải tiếng Việt không
+    if (!preferredVoice.lang.startsWith('vi')) {
+      console.warn('⚠️ Giọng không phải tiếng Việt:', preferredVoice.lang, '- Không đọc');
+      if (callback) callback();
+      return;
+    }
+
+    console.log('✅ Sử dụng giọng Việt:', preferredVoice.name);
+
     var vol = gameState.settings.volume / 100;
     console.log('🔊 Volume:', vol, '(', gameState.settings.volume, '%)');
 
@@ -189,8 +205,7 @@
       currentAudio = null;
     }
 
-    // ✅ ƯU TIÊN: Dùng Web Speech API (hoạt động trên mọi thiết bị)
-    // Giọng Microsoft Edge nữ Việt Nam sẽ được ưu tiên
+    // ✅ CHỈ ĐỌC KHI CÓ GIỌNG VIỆT
     useBrowserTTS(text, vol, callback);
   }
 

@@ -10,37 +10,10 @@
 
     // ========== DANH SÁCH ÂM THANH ==========
     var soundFiles = {
-        // ⭐ ÂM THANH CHÚC MỪNG CHÍNH (file của bạn)
-        mainCelebration: 'sounds/celebration.wav',
-
-        // Tiếng vỗ tay của trẻ em
-        clapping: [
-            'sounds/kids-clapping-1.mp3',
-            'sounds/kids-clapping-2.mp3',
-            'sounds/kids-clapping-3.mp3'
-        ],
-
-        // Tiếng hò reo của trẻ em
-        cheering: [
-            'sounds/kids-cheering-1.mp3',
-            'sounds/kids-cheering-2.mp3',
-            'sounds/kids-cheering-3.mp3',
-            'sounds/kids-yay.mp3',
-            'sounds/kids-hooray.mp3'
-        ],
-
-        // Tiếng cười vui vẻ
-        laughing: [
-            'sounds/kids-laughing-1.mp3',
-            'sounds/kids-laughing-2.mp3'
-        ],
-
-        // Tiếng "Giỏi lắm!"
-        praise: [
-            'sounds/gioi-lam.mp3',
-            'sounds/tuyet-voi.mp3',
-            'sounds/hay-qua.mp3'
-        ]
+        // ⭐ ÂM THANH CÓ SẴN (file thực tế tồn tại)
+        mainCelebration: 'sounds/celebration.wav',    // Âm thanh chúc mừng
+        correct: 'sounds/chinhxac.wav',               // Âm thanh đúng
+        wrong: 'sounds/saidapan.wav'                  // Âm thanh sai
     };
 
     // Cache âm thanh đã load
@@ -54,13 +27,10 @@
     function preloadSounds() {
         console.log('📥 Preloading celebration sounds...');
 
-        // ⭐ CHỈ preload âm thanh chúc mừng chính (file tồn tại)
+        // ⭐ Preload tất cả âm thanh có sẵn
         preloadSound(soundFiles.mainCelebration);
-
-        // KHÔNG preload các file phụ (tránh lỗi 404)
-        // preloadSound(soundFiles.clapping[0]);
-        // preloadSound(soundFiles.cheering[0]);
-        // preloadSound(soundFiles.praise[0]);
+        preloadSound(soundFiles.correct);
+        preloadSound(soundFiles.wrong);
     }
 
     function preloadSound(url) {
@@ -151,43 +121,27 @@
         }
     }
 
-    // ========== PHÁT NGẪU NHIÊN ==========
-    function playRandom(category, volume) {
-        var files = soundFiles[category];
-        if (!files || files.length === 0) return;
+    // ========== PHÁT ÂM THANH ĐÚNG/SAI ==========
+    function playCorrectSound(volume) {
+        playSound(soundFiles.correct, volume || 0.7);
+    }
 
-        var randomFile = files[Math.floor(Math.random() * files.length)];
-        playSound(randomFile, volume);
+    function playWrongSound(volume) {
+        playSound(soundFiles.wrong, volume || 0.7);
     }
 
     // ========== PHÁT COMBO CHÚC MỪNG ==========
     function playCelebrationCombo() {
         console.log('🎊 Playing celebration combo!');
 
-        // ⭐ CHỈ PHÁT ÂM THANH CHÚC MỪNG CHÍNH (không phát file phụ để tránh lỗi 404)
+        // ⭐ Phát âm thanh chúc mừng chính
         playSound(soundFiles.mainCelebration, 0.8);
 
-        // TẮT hiệu ứng phụ để tránh lỗi 404
-        // setTimeout(function () {
-        //     playRandom('clapping', 0.3);
-        // }, 500);
-        // setTimeout(function () {
-        //     playRandom('cheering', 0.3);
-        // }, 1000);
-    }
-
-    // ========== PHÁT LIÊN TỤC ==========
-    function playContinuousClapping(duration) {
-        duration = duration || 3000; // 3 giây
-        var interval = 300; // Vỗ tay mỗi 300ms
-        var count = Math.floor(duration / interval);
-
-        for (var i = 0; i < count; i++) {
-            setTimeout(function (index) {
-                return function () {
-                    playRandom('clapping', 0.4 + Math.random() * 0.2);
-                };
-            }(i), i * interval);
+        // Thêm hiệu ứng âm thanh tổng hợp (không cần file)
+        if (window.SoundEffects) {
+            setTimeout(function () {
+                window.SoundEffects.sparkle(0.3);
+            }, 300);
         }
     }
 
@@ -227,51 +181,40 @@
     function checkSoundsExist() {
         console.log('🔍 Checking celebration sounds...');
 
-        // Kiểm tra file chính (celebration.wav)
-        var mainAudio = new Audio(soundFiles.mainCelebration);
+        var soundsToCheck = [
+            { name: 'Celebration', file: soundFiles.mainCelebration },
+            { name: 'Correct', file: soundFiles.correct },
+            { name: 'Wrong', file: soundFiles.wrong }
+        ];
 
-        mainAudio.addEventListener('error', function () {
-            console.warn('⚠️ Main celebration sound not found:', soundFiles.mainCelebration);
-            console.log('💡 Add file: sounds/celebration.wav');
+        soundsToCheck.forEach(function (item) {
+            var audio = new Audio(item.file);
+
+            audio.addEventListener('error', function () {
+                console.warn('⚠️', item.name, 'sound not found:', item.file);
+            });
+
+            audio.addEventListener('canplaythrough', function () {
+                console.log('✅', item.name, 'sound ready!');
+            });
+
+            audio.load();
         });
-
-        mainAudio.addEventListener('canplaythrough', function () {
-            console.log('✅ Main celebration sound ready!');
-        });
-
-        mainAudio.load();
-
-        // Kiểm tra file phụ (không log lỗi 404 nữa)
-        var testFile = soundFiles.clapping[0];
-        var audio = new Audio(testFile);
-
-        audio.addEventListener('error', function () {
-            // Im lặng - không log lỗi 404 cho file phụ
-        });
-
-        audio.addEventListener('canplaythrough', function () {
-            console.log('✅ Additional sound effects available');
-        });
-
-        audio.load();
     }
 
     // ========== EXPORT ==========
     window.CelebrationSounds = {
-        // ⭐ Phát âm thanh chúc mừng chính (file của bạn)
+        // ⭐ Phát âm thanh chính
         playMainCelebration: function (vol) {
             playSound(soundFiles.mainCelebration, vol || 0.8);
         },
 
-        // Phát âm thanh cụ thể
-        playClapping: function (vol) { playRandom('clapping', vol); },
-        playCheering: function (vol) { playRandom('cheering', vol); },
-        playLaughing: function (vol) { playRandom('laughing', vol); },
-        playPraise: function (vol) { playRandom('praise', vol); },
+        // Phát âm thanh đúng/sai
+        playCorrect: playCorrectSound,
+        playWrong: playWrongSound,
 
-        // Phát combo (bao gồm âm thanh chính + hiệu ứng phụ)
+        // Phát combo (bao gồm âm thanh chính + hiệu ứng)
         playCombo: playCelebrationCombo,
-        playContinuousClapping: playContinuousClapping,
 
         // Quản lý
         enable: enable,
