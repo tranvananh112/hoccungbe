@@ -184,9 +184,18 @@
     // ⭐ KIỂM TRA GIỌNG VIỆT TRƯỚC
     if (!preferredVoice) {
       console.warn('⚠️ KHÔNG CÓ GIỌNG TIẾNG VIỆT - Đang load...');
-      // Thử load lại voices
-      loadVoices();
-      if (callback) callback();
+      // ⭐ Thử force load voices và retry
+      forceLoadVoices().then(function (voice) {
+        if (voice) {
+          console.log('✅ Voice loaded, retrying speak...');
+          speakVietnamese(text, priority, callback);
+        } else {
+          console.error('❌ Cannot load Vietnamese voice');
+          if (callback) callback();
+        }
+      }).catch(function () {
+        if (callback) callback();
+      });
       return;
     }
 
@@ -285,6 +294,40 @@
     loadVoices();
     // Thử load lại sau 500ms (một số browser cần thời gian)
     setTimeout(loadVoices, 500);
+    // Thử load lại sau 1000ms (mobile cần nhiều thời gian hơn)
+    setTimeout(loadVoices, 1000);
+  }
+
+  // ⭐ FORCE LOAD VOICES - Gọi sau khi unlock audio
+  function forceLoadVoices() {
+    console.log('🔄 Force loading voices...');
+
+    if (!window.speechSynthesis) {
+      console.error('❌ speechSynthesis not supported');
+      return Promise.reject('Not supported');
+    }
+
+    return new Promise(function (resolve) {
+      var attempts = 0;
+      var maxAttempts = 10;
+
+      function tryLoad() {
+        attempts++;
+        loadVoices();
+
+        if (preferredVoice) {
+          console.log('✅ Voice loaded after ' + attempts + ' attempts');
+          resolve(preferredVoice);
+        } else if (attempts < maxAttempts) {
+          setTimeout(tryLoad, 200);
+        } else {
+          console.warn('⚠️ Could not load Vietnamese voice after ' + maxAttempts + ' attempts');
+          resolve(null);
+        }
+      }
+
+      tryLoad();
+    });
   }
 
   // ✅ HÀM XỬ LÝ VÀ CẢI THIỆN VĂN BẢN cho trẻ em
@@ -2750,12 +2793,19 @@
       btnEnable.onclick = function () {
         if (window.AudioManager) {
           window.AudioManager.unlock().then(function () {
+            // ⭐ FORCE LOAD VOICES sau khi unlock
+            return forceLoadVoices();
+          }).then(function () {
             if (modal) modal.classList.remove('show');
             forceScrollAfterModal(); // Force scroll after closing
             playSound('success');
             var childName = gameState.playerName || 'bé yêu';
             beeSay('Chào ' + childName + '! Hôm nay mình cùng ghép chữ nào! 🌈', 4000);
             speakVietnamese('Chào ' + childName + '!');
+          }).catch(function (err) {
+            console.error('Audio unlock error:', err);
+            if (modal) modal.classList.remove('show');
+            forceScrollAfterModal();
           });
         }
       };
@@ -2793,10 +2843,16 @@
     btn.onclick = function () {
       if (window.AudioManager) {
         window.AudioManager.unlock().then(function () {
+          // ⭐ FORCE LOAD VOICES sau khi unlock
+          return forceLoadVoices();
+        }).then(function () {
           updateButtonState();
           playSound('success');
           beeSay('Âm thanh đã bật! 🔊', 2000);
           speakVietnamese('Âm thanh đã bật!');
+        }).catch(function (err) {
+          console.error('Audio unlock error:', err);
+          updateButtonState();
         });
       }
     };

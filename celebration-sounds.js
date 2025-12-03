@@ -58,6 +58,24 @@
 
         volume = volume || 0.7;
 
+        // ⭐ SỬ DỤNG MOBILE AUDIO PLAYER NẾU CÓ
+        if (window.MobileAudioPlayer) {
+            window.MobileAudioPlayer.play(url, {
+                volume: volume,
+                onEnd: function () {
+                    console.log('✅ Sound finished:', url);
+                },
+                onError: function (err) {
+                    console.warn('⚠️ Sound error, using fallback:', url);
+                    useFallbackSound(url);
+                }
+            }).catch(function () {
+                useFallbackSound(url);
+            });
+            return;
+        }
+
+        // ⭐ FALLBACK: Phương pháp cũ
         try {
             var audio = audioCache[url];
 
