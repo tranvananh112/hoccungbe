@@ -1,0 +1,10 @@
+[33ma9a9927[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Update code with all files
+[33m830332c[m Update code with all files
+[33m8851836[m Update code with all files
+[33m5e480aa[m[33m ([m[1;31morigin/main[m[33m)[m Update code with all files
+[33mdb1d807[m Add celebration sounds, fix overlay, improve audio feedback
+[33m993e64b[m Fix: Recreate admin.html without Git conflict markers - Clean simple version
+[33m30136e7[m Fix: Recreate admin.js without Git conflict markers
+[33m011d1b4[m Add redirect page for admin data
+[33m22feb05[m Fix: Resolve Git conflict in admin.js + Add sync manager for localStorage and Supabase
+[33m5ea15bf[m Feature: Add sync manager - Save to both localStorage and Supabase + Admin users page
