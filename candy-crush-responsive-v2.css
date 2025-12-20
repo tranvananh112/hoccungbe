@@ -1,0 +1,234 @@
+/* ========================================
+   CANDY CRUSH - RESPONSIVE V2
+   Tối ưu cho mọi thiết bị
+   ======================================== */
+
+/* ========================================
+   BASE STYLES
+   ======================================== */
+.game-canvas-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+#candyCanvas {
+    display: block;
+    border: 4px solid #667eea;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    background: linear-gradient(135deg, #FFF5E1 0%, #FFE6F0 100%);
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    cursor: pointer;
+}
+
+/* ========================================
+   DESKTOP (>= 1024px)
+   ======================================== */
+@media (min-width: 1024px) {
+    .device-desktop #candyCanvas {
+        width: 600px;
+        height: 600px;
+    }
+
+    .game-canvas-container {
+        padding: 20px;
+    }
+}
+
+/* ========================================
+   DESKTOP SMALL (768px - 1023px)
+   ======================================== */
+@media (min-width: 768px) and (max-width: 1023px) {
+
+    .device-desktop-small #candyCanvas,
+    .device-tablet #candyCanvas {
+        width: 500px;
+        height: 500px;
+    }
+
+    .game-canvas-container {
+        padding: 15px;
+    }
+}
+
+/* ========================================
+   MOBILE LARGE (480px - 767px)
+   ======================================== */
+@media (min-width: 480px) and (max-width: 767px) {
+    .device-mobile-large #candyCanvas {
+        width: min(90vw, 450px);
+        height: min(90vw, 450px);
+    }
+
+    .game-canvas-container {
+        padding: 10px;
+        padding-top: 60px;
+        /* Header height */
+    }
+
+    .game-header-mini {
+        height: 50px;
+    }
+}
+
+/* ========================================
+   MOBILE MEDIUM (375px - 479px)
+   ======================================== */
+@media (min-width: 375px) and (max-width: 479px) {
+    .device-mobile-medium #candyCanvas {
+        width: min(92vw, 400px);
+        height: min(92vw, 400px);
+    }
+
+    .game-canvas-container {
+        padding: 8px;
+        padding-top: 55px;
+    }
+
+    .game-header-mini {
+        height: 45px;
+    }
+
+    #candyCanvas {
+        border-width: 3px;
+        border-radius: 12px;
+    }
+}
+
+/* ========================================
+   MOBILE SMALL (< 375px)
+   ======================================== */
+@media (max-width: 374px) {
+    .device-mobile-small #candyCanvas {
+        width: 95vw;
+        height: 95vw;
+        min-width: 320px;
+        min-height: 320px;
+    }
+
+    .game-canvas-container {
+        padding: 5px;
+        padding-top: 50px;
+    }
+
+    .game-header-mini {
+        height: 40px;
+    }
+
+    #candyCanvas {
+        border-width: 2px;
+        border-radius: 10px;
+    }
+}
+
+/* ========================================
+   LANDSCAPE MODE (Mobile)
+   ======================================== */
+@media (max-width: 900px) and (orientation: landscape) {
+    .orientation-landscape .game-canvas-container {
+        padding: 5px;
+        padding-top: 40px;
+    }
+
+    .orientation-landscape .game-header-mini {
+        height: 35px;
+    }
+
+    .orientation-landscape #candyCanvas {
+        width: min(70vh, 90vw);
+        height: min(70vh, 90vw);
+    }
+}
+
+/* ========================================
+   TOUCH DEVICE OPTIMIZATIONS
+   ======================================== */
+.input-touch #candyCanvas {
+    /* Tăng vùng chạm */
+    cursor: default;
+}
+
+.input-touch .candy-cell {
+    /* Vùng chạm lớn hơn */
+    padding: 5px;
+}
+
+/* ========================================
+   IOS SPECIFIC
+   ======================================== */
+.platform-ios .game-canvas-container {
+    /* Safe area cho iPhone notch */
+    padding-top: max(60px, env(safe-area-inset-top));
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+    padding-left: max(10px, env(safe-area-inset-left));
+    padding-right: max(10px, env(safe-area-inset-right));
+}
+
+.platform-ios #candyCanvas {
+    /* Tối ưu rendering trên iOS */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+/* ========================================
+   ANDROID SPECIFIC
+   ======================================== */
+.platform-android .game-canvas-container {
+    /* Tránh navigation bar */
+    padding-bottom: 20px;
+}
+
+/* ========================================
+   LOADING STATE
+   ======================================== */
+#candyCanvas.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+#candyCanvas.ready {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+/* ========================================
+   HIGH DPI SCREENS
+   ======================================== */
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+    #candyCanvas {
+        /* Sharper rendering on retina */
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+}
+
+/* ========================================
+   ACCESSIBILITY
+   ======================================== */
+@media (prefers-reduced-motion: reduce) {
+    #candyCanvas {
+        /* Giảm animation cho người dùng nhạy cảm */
+        transition: none !important;
+    }
+}
+
+/* ========================================
+   DARK MODE SUPPORT
+   ======================================== */
+@media (prefers-color-scheme: dark) {
+    .game-canvas-container {
+        background: linear-gradient(135deg, #0a0a0f 0%, #0d1117 100%);
+    }
+}

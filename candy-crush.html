@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🍬 Candy Crush - Ghép Kẹo</title>
     <link rel="stylesheet" href="candy-crush.css">
+    <link rel="stylesheet" href="candy-crush-responsive-v2.css">
 </head>
 
 <body>
@@ -55,39 +56,65 @@
     </div>
 
     <script src="candy-crush-complete.js"></script>
+    <script src="candy-device-detector-v2.js"></script>
+    <script src="candy-swipe-desktop-v2.js"></script>
+    <script src="candy-swipe-mobile-v2.js"></script>
+    <script src="candy-swipe-unified-v2.js"></script>
+    <script src="game-sync.js"></script>
     <script>
         let game = null;
+        let deviceDetector = null;
 
-        // Khởi tạo game complete với special candies
+        // Khởi tạo game với responsive system V2
         window.addEventListener('load', function () {
-            if (window.CandyCrushComplete) {
+            if (window.CandyCrushComplete && window.CandyDeviceDetectorV2) {
+                // Initialize device detector V2
+                deviceDetector = new window.CandyDeviceDetectorV2();
+
+                // Apply device class
+                document.body.className = deviceDetector.getDeviceClass();
+
+                // Get canvas element
+                const canvas = document.getElementById('candyCanvas');
+                const config = deviceDetector.canvasConfig;
+
+                // Set canvas size từ device detector
+                canvas.width = config.canvasSize;
+                canvas.height = config.canvasSize;
+                canvas.classList.add('loading');
+
+                console.log(`✅ Canvas initialized: ${config.canvasSize}x${config.canvasSize}px`);
+
+                // Create game instance
                 game = new window.CandyCrushComplete();
+
+                // Pass config to game
+                game.config.CELL_SIZE = config.cellSize;
+                game.config.CANDY_SIZE = config.candySize;
+                game.config.HIT_AREA = config.hitArea;
+
+                // Init game
                 game.init('candyCanvas');
 
-                // Setup click handler
-                const canvas = document.getElementById('candyCanvas');
-                if (canvas) {
-                    canvas.onclick = function (e) {
-                        const rect = canvas.getBoundingClientRect();
-                        const x = e.clientX - rect.left;
-                        const y = e.clientY - rect.top;
-                        game.handleClick(x, y);
-                    };
+                // Mark canvas as ready
+                setTimeout(() => {
+                    canvas.classList.remove('loading');
+                    canvas.classList.add('ready');
+                }, 100);
 
-                    // Touch support
-                    canvas.ontouchstart = function (e) {
-                        e.preventDefault();
-                        const rect = canvas.getBoundingClientRect();
-                        const touch = e.touches[0];
-                        const x = touch.clientX - rect.left;
-                        const y = touch.clientY - rect.top;
-                        game.handleClick(x, y);
-                    };
-                }
+                // Setup Swipe Handler V2 (Unified)
+                const swipeHandler = new window.CandySwipeUnified(canvas, game);
+
+                // Log handler info
+                const handlerInfo = swipeHandler.getInfo();
+                console.log(`🎮 Swipe Handler: ${handlerInfo.handler}`);
+                console.log(`📱 Input Type: ${handlerInfo.type}`);
+                console.log(`📏 Threshold: ${handlerInfo.threshold}px`);
 
                 console.log('🍬 Candy Crush Complete ready!');
                 console.log('✨ Try to match 4 for Striped Candy!');
                 console.log('✨ Try to match 5 for Color Bomb!');
+                console.log('👆 Swipe to play - just like real Candy Crush!');
             }
         });
 
