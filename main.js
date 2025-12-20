@@ -662,6 +662,12 @@
 
   // ========== NAVIGATION ==========
   function showPage(pageId) {
+    // ✅ Kiểm tra pageId hợp lệ
+    if (!pageId || typeof pageId !== 'string') {
+      console.error('Invalid pageId:', pageId);
+      return;
+    }
+
     console.log('Showing page:', pageId);
 
     // 📊 ANALYTICS: End session khi rời trang play
@@ -2559,10 +2565,16 @@
     var navItems = document.querySelectorAll('.nav-item');
     for (var i = 0; i < navItems.length; i++) {
       var item = navItems[i];
+      // Skip mini-games button (has its own onclick)
+      if (item.classList.contains('nav-item-minigames')) continue;
+
       item.onclick = (function (navItem) {
         return function () {
-          playSound('click');
-          showPage(navItem.getAttribute('data-page'));
+          var page = navItem.getAttribute('data-page');
+          if (page) {
+            playSound('click');
+            showPage(page);
+          }
         };
       })(item);
     }

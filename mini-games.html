@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Trò Chơi Phần Thưởng</title>
+    <link rel="stylesheet" href="mini-games.css">
+</head>
+
+<body>
+    <div class="games-container">
+        <!-- Header -->
+        <div class="games-header">
+            <button class="back-btn" onclick="goBack()">← Quay lại</button>
+            <h1>🎮 Trò Chơi Phần Thưởng</h1>
+            <div class="player-info">
+                <span id="playerName">Bé</span>
+                <span id="totalSentences">0</span> câu
+            </div>
+        </div>
+
+        <!-- Game Selection -->
+        <div id="gameSelection" class="game-selection">
+            <h2>Chọn trò chơi</h2>
+            <div id="gamesList" class="games-list"></div>
+        </div>
+
+        <!-- Tetris Game -->
+        <div id="tetrisGame" class="game-screen" style="display: none;">
+            <div class="game-header">
+                <h2>🧱 Tetris</h2>
+                <div class="game-score">Điểm: <span id="tetrisScore">0</span></div>
+                <button onclick="closeGame()">✕</button>
+            </div>
+            <canvas id="tetrisCanvas" width="300" height="600"></canvas>
+            <div class="game-controls">
+                <button onclick="MiniGames.Tetris.moveLeft()">←</button>
+                <button onclick="MiniGames.Tetris.rotate()">↻</button>
+                <button onclick="MiniGames.Tetris.moveDown()">↓</button>
+                <button onclick="MiniGames.Tetris.moveRight()">→</button>
+            </div>
+        </div>
+
+        <!-- Block Puzzle Game -->
+        <div id="blockPuzzleGame" class="game-screen" style="display: none;">
+            <div class="game-header">
+                <h2>🔲 Xếp Khối</h2>
+                <div class="game-score">Điểm: <span id="blockPuzzleScore">0</span></div>
+                <button onclick="closeGame()">✕</button>
+            </div>
+            <canvas id="blockPuzzleCanvas" width="400" height="400"></canvas>
+            <div class="block-pieces">
+                <div class="piece" onclick="selectPiece(0)">🟥</div>
+                <div class="piece" onclick="selectPiece(1)">🟦</div>
+                <div class="piece" onclick="selectPiece(2)">🟩</div>
+                <div class="piece" onclick="selectPiece(3)">🟨</div>
+            </div>
+        </div>
+
+        <!-- Candy Match Game -->
+        <div id="candyMatchGame" class="game-screen" style="display: none;">
+            <div class="game-header">
+                <h2>🍬 Ghép Kẹo</h2>
+                <div class="game-score">Điểm: <span id="candyMatchScore">0</span></div>
+                <button onclick="closeGame()">✕</button>
+            </div>
+            <canvas id="candyMatchCanvas" width="400" height="400"></canvas>
+        </div>
+
+        <!-- Jigsaw Puzzle Game -->
+        <div id="jigsawGame" class="game-screen" style="display: none;">
+            <div class="game-header">
+                <h2>🧩 Ghép Hình</h2>
+                <button onclick="closeGame()">✕</button>
+            </div>
+            <div class="theme-selector">
+                <button onclick="changeJigsawTheme('animals')">🐶 Động Vật</button>
+                <button onclick="changeJigsawTheme('fruits')">🍎 Trái Cây</button>
+                <button onclick="changeJigsawTheme('vehicles')">🚗 Xe Cộ</button>
+                <button onclick="changeJigsawTheme('food')">🍕 Đồ Ăn</button>
+                <button onclick="changeJigsawTheme('nature')">🌸 Thiên Nhiên</button>
+            </div>
+            <canvas id="jigsawCanvas" width="500" height="350"></canvas>
+            <div class="jigsaw-instructions">
+                <p>👆 Click vào mảnh ghép bên phải, rồi click vào ô đúng bên trái!</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="mini-games.js"></script>
+    <script src="mini-games-ui.js"></script>
+</body>
+
+</html>

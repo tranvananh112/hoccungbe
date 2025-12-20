@@ -1,0 +1,302 @@
+/* ========================================
+   CANDY CRUSH SAGA - ENHANCED STYLES
+   Giao diện rõ nét, sắc sảo, chuyên nghiệp
+   ======================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Comic Sans MS', 'Arial', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.game-container {
+    background: white;
+    border-radius: 25px;
+    padding: 35px;
+    box-shadow:
+        0 25px 70px rgba(0, 0, 0, 0.4),
+        0 10px 30px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    max-width: 650px;
+    width: 100%;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Header */
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 25px;
+    border-bottom: 4px solid #f0f0f0;
+}
+
+.game-header h1 {
+    font-size: 2.2em;
+    color: #FF6B6B;
+    text-shadow:
+        3px 3px 0 rgba(0, 0, 0, 0.1),
+        0 0 20px rgba(255, 107, 107, 0.3);
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+.back-btn,
+.reset-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-size: 1.05em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow:
+        0 6px 20px rgba(102, 126, 234, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.back-btn:hover,
+.reset-btn:hover {
+    transform: translateY(-3px);
+    box-shadow:
+        0 8px 25px rgba(102, 126, 234, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.back-btn:active,
+.reset-btn:active {
+    transform: translateY(-1px);
+}
+
+/* Game Info */
+.game-info {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 25px;
+    gap: 18px;
+}
+
+.info-item {
+    background: linear-gradient(135deg, #FFE66D 0%, #FFA500 100%);
+    padding: 18px 24px;
+    border-radius: 18px;
+    text-align: center;
+    flex: 1;
+    box-shadow:
+        0 6px 20px rgba(255, 165, 0, 0.3),
+        inset 0 2px 0 rgba(255, 255, 255, 0.5),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+    border: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.info-label {
+    font-size: 0.95em;
+    color: #8B4513;
+    font-weight: 900;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.info-value {
+    font-size: 2.2em;
+    color: #FF6B6B;
+    font-weight: 900;
+    text-shadow:
+        2px 2px 0 rgba(255, 255, 255, 0.8),
+        3px 3px 0 rgba(0, 0, 0, 0.1);
+    line-height: 1;
+}
+
+/* Progress Bar */
+.progress-container {
+    margin-bottom: 25px;
+}
+
+.progress-label {
+    font-size: 1.15em;
+    color: #667eea;
+    font-weight: 900;
+    margin-bottom: 10px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bg {
+    background: #E0E0E0;
+    height: 35px;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow:
+        inset 0 3px 8px rgba(0, 0, 0, 0.2),
+        0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 3px solid rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, #4ECDC4 0%, #44A08D 100%);
+    height: 100%;
+    width: 0%;
+    transition: width 0.5s ease;
+    border-radius: 15px;
+    box-shadow:
+        0 0 20px rgba(78, 205, 196, 0.6),
+        inset 0 2px 0 rgba(255, 255, 255, 0.4);
+    position: relative;
+}
+
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), transparent);
+    border-radius: 15px 15px 0 0;
+}
+
+/* Board Container */
+.board-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 25px;
+}
+
+canvas {
+    border: 5px solid #667eea;
+    border-radius: 20px;
+    box-shadow:
+        0 15px 40px rgba(0, 0, 0, 0.3),
+        0 5px 15px rgba(0, 0, 0, 0.2),
+        inset 0 2px 0 rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    background: linear-gradient(135deg, #FFF5E1 0%, #FFE6F0 100%);
+}
+
+/* Instructions */
+.instructions {
+    background: linear-gradient(135deg, #FFF9C4 0%, #FFE082 100%);
+    padding: 22px;
+    border-radius: 18px;
+    text-align: center;
+    box-shadow:
+        0 6px 20px rgba(255, 224, 130, 0.3),
+        inset 0 2px 0 rgba(255, 255, 255, 0.5);
+    border: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.instructions p {
+    margin: 10px 0;
+    font-size: 1.15em;
+    color: #F57C00;
+    font-weight: 900;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .game-container {
+        padding: 25px;
+    }
+
+    .game-header h1 {
+        font-size: 1.6em;
+    }
+
+    .back-btn,
+    .reset-btn {
+        padding: 12px 18px;
+        font-size: 0.95em;
+    }
+
+    .game-info {
+        flex-direction: column;
+    }
+
+    .info-value {
+        font-size: 1.8em;
+    }
+
+    canvas {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .instructions p {
+        font-size: 1.05em;
+    }
+}
+
+/* Animations */
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.info-item:hover {
+    animation: pulse 0.5s ease-in-out;
+}
+
+@keyframes shine {
+    0% {
+        background-position: -100%;
+    }
+
+    100% {
+        background-position: 200%;
+    }
+}
+
+.progress-bar {
+    background-size: 200% 100%;
+    animation: shine 2s linear infinite;
+}
+
+/* Glow effects */
+@keyframes glow {
+
+    0%,
+    100% {
+        box-shadow:
+            0 6px 20px rgba(255, 165, 0, 0.3),
+            inset 0 2px 0 rgba(255, 255, 255, 0.5),
+            inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+    }
+
+    50% {
+        box-shadow:
+            0 6px 25px rgba(255, 165, 0, 0.5),
+            0 0 30px rgba(255, 165, 0, 0.3),
+            inset 0 2px 0 rgba(255, 255, 255, 0.5),
+            inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+    }
+}
+
+.info-item {
+    animation: glow 2s ease-in-out infinite;
+}

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍬 Candy Crush - Ghép Kẹo</title>
+    <link rel="stylesheet" href="candy-crush.css">
+</head>
+
+<body>
+    <div class="game-container">
+        <!-- Header -->
+        <div class="game-header">
+            <button class="back-btn" onclick="goBack()">← Quay lại</button>
+            <h1>🍬 Ghép Kẹo Ngọt</h1>
+            <button class="reset-btn" onclick="resetGame()">🔄 Chơi lại</button>
+        </div>
+
+        <!-- Game Info -->
+        <div class="game-info">
+            <div class="info-item">
+                <div class="info-label">Điểm</div>
+                <div class="info-value" id="candyScore">0</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Nước</div>
+                <div class="info-value" id="candyMoves">30</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Mục tiêu</div>
+                <div class="info-value">1000</div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-label">Tiến độ</div>
+            <div class="progress-bg">
+                <div class="progress-bar" id="candyProgress"></div>
+            </div>
+        </div>
+
+        <!-- Game Board -->
+        <div class="board-container">
+            <canvas id="candyCanvas" width="480" height="480"></canvas>
+        </div>
+
+        <!-- Instructions -->
+        <div class="instructions">
+            <p>👆 Click 2 kẹo liền kề để đổi chỗ</p>
+            <p>🎯 Ghép 3 kẹo giống nhau để nổ!</p>
+            <p>⭐ Ghép nhiều hơn = điểm cao hơn!</p>
+        </div>
+    </div>
+
+    <script src="candy-crush-complete.js"></script>
+    <script>
+        let game = null;
+
+        // Khởi tạo game complete với special candies
+        window.addEventListener('load', function () {
+            if (window.CandyCrushComplete) {
+                game = new window.CandyCrushComplete();
+                game.init('candyCanvas');
+
+                // Setup click handler
+                const canvas = document.getElementById('candyCanvas');
+                if (canvas) {
+                    canvas.onclick = function (e) {
+                        const rect = canvas.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        game.handleClick(x, y);
+                    };
+
+                    // Touch support
+                    canvas.ontouchstart = function (e) {
+                        e.preventDefault();
+                        const rect = canvas.getBoundingClientRect();
+                        const touch = e.touches[0];
+                        const x = touch.clientX - rect.left;
+                        const y = touch.clientY - rect.top;
+                        game.handleClick(x, y);
+                    };
+                }
+
+                console.log('🍬 Candy Crush Complete ready!');
+                console.log('✨ Try to match 4 for Striped Candy!');
+                console.log('✨ Try to match 5 for Color Bomb!');
+            }
+        });
+
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+
+        function resetGame() {
+            if (game) {
+                game.reset();
+            }
+        }
+    </script>
+</body>
+
+</html>
