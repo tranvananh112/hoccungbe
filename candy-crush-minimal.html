@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-fullscreen">
+    <title>🍬 Candy Crush</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: Arial, sans-serif;
+        }
+
+        #app {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Ultra Minimal Score - Góc trên */
+        #score {
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+            z-index: 10;
+        }
+
+        /* Canvas */
+        #candyCanvas {
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            background: white;
+            touch-action: none;
+        }
+
+        /* Minimal Buttons - Chỉ icon */
+        .btn {
+            position: absolute;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.9);
+        }
+
+        #btnBack {
+            top: 8px;
+            left: 8px;
+        }
+
+        #btnReset {
+            top: 8px;
+            right: 8px;
+        }
+
+        /* Game Over - Minimal */
+        #over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        #over.show {
+            display: flex;
+        }
+
+        .over-box {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            min-width: 250px;
+        }
+
+        .over-title {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .over-score {
+            font-size: 20px;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .over-btn {
+            padding: 10px 25px;
+            margin: 5px;
+            border: none;
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .over-btn.play {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .over-btn.back {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            #score {
+                font-size: 14px;
+                padding: 4px 12px;
+            }
+
+            .btn {
+                width: 32px;
+                height: 32px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <button class="btn" id="btnBack">←</button>
+        <button class="btn" id="btnReset">🔄</button>
+        <div id="score">⭐ 0 | 🎯 30</div>
+        <canvas id="candyCanvas"></canvas>
+        <div id="over">
+            <div class="over-box">
+                <div class="over-title" id="overTitle">🎉</div>
+                <div class="over-score" id="overScore">0</div>
+                <button class="over-btn play" onclick="reset()">Chơi lại</button>
+                <button class="over-btn back" onclick="back()">Thoát</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="candy-crush-complete.js"></script>
+    <script src="candy-device-detector-v2.js"></script>
+    <script src="candy-swipe-desktop-v2.js"></script>
+    <script src="candy-swipe-mobile-v2.js"></script>
+    <script src="candy-swipe-unified-v2.js"></script>
+    <script src="candy-audio-mobile-fix.js"></script>
+    <script>
+        let g, d, a;
+
+        window.addEventListener('load', () => {
+            // Init detector
+            d = new CandyDeviceDetectorV2();
+            const c = d.canvasConfig;
+
+            // Setup canvas
+            const cv = document.getElementById('candyCanvas');
+            cv.width = c.canvasSize;
+            cv.height = c.canvasSize;
+
+            // Init game
+            g = new CandyCrushComplete();
+            g.config.CELL_SIZE = c.cellSize;
+            g.config.CANDY_SIZE = c.candySize;
+            g.config.HIT_AREA = c.hitArea;
+
+            // Override UI update
+            const u = g.updateUI.bind(g);
+            g.updateUI = () => {
+                u();
+                document.getElementById('score').textContent = `⭐ ${g.score} | 🎯 ${g.moves}`;
+            };
+
+            g.init('candyCanvas');
+
+            // Audio fix
+            if (g.audioEngine && window.CandyAudioMobileFix) {
+                a = new CandyAudioMobileFix(g.audioEngine);
+            }
+
+            // Swipe
+            new CandySwipeUnified(cv, g);
+
+            // Check game over
+            setInterval(() => {
+                if (!g) return;
+                if (g.score >= g.config.TARGET_SCORE) {
+                    end('🎉 Thắng!', g.score, true);
+                } else if (g.moves <= 0 && !g.isAnimating) {
+                    end('😢 Thua!', g.score, false);
+                }
+            }, 500);
+
+            console.log('✅ Minimal mode ready');
+        });
+
+        function end(t, s, w) {
+            const o = document.getElementById('over');
+            if (o.classList.contains('show')) return;
+            document.getElementById('overTitle').textContent = t;
+            document.getElementById('overScore').textContent = `Điểm: ${s}`;
+            o.classList.add('show');
+            if (g && g.audioEngine) {
+                w ? g.audioEngine.playVictorySound() : g.audioEngine.playErrorSound();
+            }
+        }
+
+        function reset() {
+            document.getElementById('over').classList.remove('show');
+            if (g) {
+                g.reset();
+                document.getElementById('score').textContent = `⭐ 0 | 🎯 30`;
+            }
+        }
+
+        function back() {
+            if (confirm('Thoát game?')) location.href = 'index.html';
+        }
+
+        document.getElementById('btnBack').onclick = back;
+        document.getElementById('btnReset').onclick = reset;
+
+        // Resize
+        let rt;
+        window.addEventListener('resize', () => {
+            clearTimeout(rt);
+            rt = setTimeout(() => {
+                if (d) {
+                    const nc = d.update();
+                    const cv = document.getElementById('candyCanvas');
+                    cv.width = nc.canvasSize;
+                    cv.height = nc.canvasSize;
+                    if (g) {
+                        g.config.CELL_SIZE = nc.cellSize;
+                        g.config.CANDY_SIZE = nc.candySize;
+                        g.config.HIT_AREA = nc.hitArea;
+                    }
+                }
+            }, 300);
+        });
+    </script>
+</body>
+
+</html>

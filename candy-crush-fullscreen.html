@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-fullscreen">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>🍬 Candy Crush</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Arial', sans-serif;
+        }
+
+        #gameContainer {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Compact Score Bar - Chỉ hiện điểm và nước */
+        #scoreBar {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px 20px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .score-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+        }
+
+        .score-icon {
+            font-size: 20px;
+        }
+
+        .score-value {
+            font-size: 18px;
+            color: #333;
+            min-width: 50px;
+        }
+
+        /* Canvas Container - Tối ưu không gian */
+        #canvasWrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #candyCanvas {
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            background: white;
+            touch-action: none;
+        }
+
+        /* Floating Buttons - Nhỏ gọn ở góc */
+        .floating-btn {
+            position: absolute;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 100;
+        }
+
+        .floating-btn:active {
+            transform: scale(0.9);
+        }
+
+        #backBtn {
+            top: 10px;
+            left: 10px;
+        }
+
+        #resetBtn {
+            top: 10px;
+            right: 10px;
+        }
+
+        /* Game Over Overlay - Compact */
+        #gameOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+
+        #gameOverlay.show {
+            display: flex;
+        }
+
+        .overlay-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .overlay-title {
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+
+        .overlay-score {
+            font-size: 24px;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .overlay-btn {
+            padding: 12px 30px;
+            margin: 5px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .overlay-btn.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .overlay-btn.secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .overlay-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            #scoreBar {
+                top: 5px;
+                padding: 6px 15px;
+                gap: 15px;
+            }
+
+            .score-icon {
+                font-size: 18px;
+            }
+
+            .score-value {
+                font-size: 16px;
+                min-width: 40px;
+            }
+
+            .floating-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+
+            #backBtn {
+                top: 5px;
+                left: 5px;
+            }
+
+            #resetBtn {
+                top: 5px;
+                right: 5px;
+            }
+
+            .overlay-content {
+                padding: 25px;
+            }
+
+            .overlay-title {
+                font-size: 28px;
+            }
+
+            .overlay-score {
+                font-size: 20px;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .loading {
+            animation: pulse 1s infinite;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="gameContainer">
+        <!-- Floating Back Button -->
+        <button class="floating-btn" id="backBtn" onclick="goBack()">←</button>
+
+        <!-- Floating Reset Button -->
+        <button class="floating-btn" id="resetBtn" onclick="resetGame()">🔄</button>
+
+        <!-- Compact Score Bar -->
+        <div id="scoreBar">
+            <div class="score-item">
+                <span class="score-icon">⭐</span>
+                <span class="score-value" id="scoreDisplay">0</span>
+            </div>
+            <div class="score-item">
+                <span class="score-icon">🎯</span>
+                <span class="score-value" id="movesDisplay">30</span>
+            </div>
+        </div>
+
+        <!-- Canvas Wrapper -->
+        <div id="canvasWrapper">
+            <canvas id="candyCanvas" width="480" height="480"></canvas>
+        </div>
+
+        <!-- Game Over Overlay -->
+        <div id="gameOverlay">
+            <div class="overlay-content">
+                <div class="overlay-title" id="overlayTitle">🎉</div>
+                <div class="overlay-score" id="overlayScore">Điểm: 0</div>
+                <button class="overlay-btn primary" onclick="resetGame()">🔄 Chơi lại</button>
+                <button class="overlay-btn secondary" onclick="goBack()">← Quay lại</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="candy-crush-complete.js"></script>
+    <script src="candy-device-detector-v2.js"></script>
+    <script src="candy-swipe-desktop-v2.js"></script>
+    <script src="candy-swipe-mobile-v2.js"></script>
+    <script src="candy-swipe-unified-v2.js"></script>
+    <script src="candy-audio-mobile-fix.js"></script>
+    <script>
+        let game = null;
+        let deviceDetector = null;
+        let audioFix = null;
+
+        window.addEventListener('load', function () {
+            console.log('🍬 Candy Crush Fullscreen Mode');
+
+            // Initialize device detector
+            deviceDetector = new window.CandyDeviceDetectorV2();
+            const config = deviceDetector.canvasConfig;
+
+            console.log('📱 Device:', deviceDetector.device.category);
+            console.log('📐 Canvas:', config.canvasSize + 'px');
+            console.log('🍬 Candy:', config.candySize + 'px');
+
+            // Setup canvas
+            const canvas = document.getElementById('candyCanvas');
+            canvas.width = config.canvasSize;
+            canvas.height = config.canvasSize;
+            canvas.classList.add('loading');
+
+            // Create game
+            game = new window.CandyCrushComplete();
+
+            // Pass config
+            game.config.CELL_SIZE = config.cellSize;
+            game.config.CANDY_SIZE = config.candySize;
+            game.config.HIT_AREA = config.hitArea;
+
+            // Override updateUI to update our custom display
+            const originalUpdateUI = game.updateUI.bind(game);
+            game.updateUI = function () {
+                originalUpdateUI();
+                updateCustomUI();
+            };
+
+            // Init game
+            game.init('candyCanvas');
+
+            // Setup audio fix
+            if (game.audioEngine && window.CandyAudioMobileFix) {
+                audioFix = new window.CandyAudioMobileFix(game.audioEngine);
+                console.log('🎵 Audio fix ready');
+            }
+
+            // Setup swipe handler
+            const swipeHandler = new window.CandySwipeUnified(canvas, game);
+            console.log('🎮 Swipe:', swipeHandler.getInfo().handler);
+
+            // Remove loading
+            setTimeout(() => {
+                canvas.classList.remove('loading');
+            }, 100);
+
+            // Check game over periodically
+            setInterval(checkGameOver, 500);
+
+            console.log('✅ Fullscreen mode ready!');
+        });
+
+        function updateCustomUI() {
+            if (!game) return;
+
+            // Update score and moves display
+            document.getElementById('scoreDisplay').textContent = game.score || 0;
+            document.getElementById('movesDisplay').textContent = game.moves || 0;
+        }
+
+        function checkGameOver() {
+            if (!game) return;
+
+            const overlay = document.getElementById('gameOverlay');
+
+            // Check win condition
+            if (game.score >= game.config.TARGET_SCORE) {
+                showGameOver('🎉 Chiến thắng!', game.score, true);
+            }
+            // Check lose condition
+            else if (game.moves <= 0 && !game.isAnimating) {
+                showGameOver('😢 Hết nước!', game.score, false);
+            }
+        }
+
+        function showGameOver(title, score, isWin) {
+            const overlay = document.getElementById('gameOverlay');
+            if (overlay.classList.contains('show')) return; // Already showing
+
+            document.getElementById('overlayTitle').textContent = title;
+            document.getElementById('overlayScore').textContent = `Điểm: ${score}`;
+            overlay.classList.add('show');
+
+            // Play sound
+            if (game && game.audioEngine) {
+                if (isWin) {
+                    game.audioEngine.playVictorySound();
+                } else {
+                    game.audioEngine.playErrorSound();
+                }
+            }
+        }
+
+        function hideGameOver() {
+            document.getElementById('gameOverlay').classList.remove('show');
+        }
+
+        function resetGame() {
+            hideGameOver();
+            if (game) {
+                game.reset();
+                updateCustomUI();
+            }
+        }
+
+        function goBack() {
+            if (confirm('Bạn có muốn thoát game không?')) {
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Prevent accidental back navigation
+        window.addEventListener('beforeunload', function (e) {
+            if (game && game.score > 0) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        // Handle window resize
+        let resizeTimeout;
+        window.addEventListener('resize', function () {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(function () {
+                if (deviceDetector) {
+                    const newConfig = deviceDetector.update();
+                    const canvas = document.getElementById('candyCanvas');
+                    canvas.width = newConfig.canvasSize;
+                    canvas.height = newConfig.canvasSize;
+
+                    if (game) {
+                        game.config.CELL_SIZE = newConfig.cellSize;
+                        game.config.CANDY_SIZE = newConfig.candySize;
+                        game.config.HIT_AREA = newConfig.hitArea;
+                    }
+
+                    console.log('🔄 Resized:', newConfig.canvasSize + 'px');
+                }
+            }, 300);
+        });
+    </script>
+</body>
+
+</html>

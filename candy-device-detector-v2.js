@@ -115,9 +115,9 @@ class CandyDeviceDetectorV2 {
         if (category === 'desktop' || category === 'desktop-small') {
             candyRatio = 0.65; // Desktop: 65% (gần nhau hơn)
         } else if (category === 'tablet') {
-            candyRatio = 0.60; // Tablet: 60% (giãn vừa)
+            candyRatio = 0.58; // Tablet: 58% (giãn vừa)
         } else {
-            candyRatio = 0.55; // Mobile: 55% (giãn nhiều, dễ chạm)
+            candyRatio = 0.50; // Mobile: 50% (giãn nhiều hơn, dễ chạm)
         }
 
         candySize = Math.floor(cellSize * candyRatio);

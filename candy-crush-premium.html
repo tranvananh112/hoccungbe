@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>🍬 Candy Crush Premium</title>
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            font-family: 'Poppins', sans-serif;
+            /* Gradient đẹp hơn */
+            background: linear-gradient(135deg,
+                    #667eea 0%,
+                    #764ba2 25%,
+                    #f093fb 50%,
+                    #4facfe 75%,
+                    #00f2fe 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        #app {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        /* Score Bar - Glassmorphism */
+        #scoreBar {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 25px;
+            border-radius: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .score-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .score-icon {
+            font-size: 20px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        .score-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            min-width: 50px;
+        }
+
+        /* Canvas - KHÔNG CÓ NỀN TRẮNG, KHÔNG BO TRÒN */
+        #candyCanvas {
+            /* Bỏ background trắng */
+            background: transparent !important;
+            /* Bỏ border-radius */
+            border-radius: 0 !important;
+            /* Shadow nhẹ để nổi bật */
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+            /* Smooth rendering */
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+
+        /* Floating Buttons - Glassmorphism */
+        .btn {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.1);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        #btnBack {
+            top: 15px;
+            left: 15px;
+        }
+
+        #btnReset {
+            top: 15px;
+            right: 15px;
+        }
+
+        /* Game Over - Premium */
+        #gameOver {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        #gameOver.show {
+            display: flex;
+        }
+
+        .over-box {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 25px;
+            text-align: center;
+            min-width: 300px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .over-title {
+            font-size: 48px;
+            margin-bottom: 15px;
+            animation: bounce 0.6s ease;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+        }
+
+        .over-score {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 25px;
+        }
+
+        .over-btn {
+            padding: 12px 30px;
+            margin: 8px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .over-btn.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .over-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .over-btn.secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .over-btn.secondary:hover {
+            background: #e0e0e0;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            #scoreBar {
+                top: 10px;
+                padding: 8px 20px;
+                gap: 12px;
+            }
+
+            .score-icon {
+                font-size: 18px;
+            }
+
+            .score-value {
+                font-size: 16px;
+                min-width: 40px;
+            }
+
+            .btn {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+            }
+
+            #btnBack,
+            #btnReset {
+                top: 10px;
+            }
+
+            #btnBack {
+                left: 10px;
+            }
+
+            #btnReset {
+                right: 10px;
+            }
+
+            .over-box {
+                padding: 30px;
+                min-width: 280px;
+            }
+
+            .over-title {
+                font-size: 40px;
+            }
+
+            .over-score {
+                font-size: 20px;
+            }
+        }
+
+        /* Loading State */
+        .loading {
+            opacity: 0;
+            animation: fadeInCanvas 0.5s ease forwards;
+        }
+
+        @keyframes fadeInCanvas {
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <!-- Floating Buttons with Icons -->
+        <button class="btn" id="btnBack" title="Quay lại">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <button class="btn" id="btnReset" title="Chơi lại">
+            <i class="fas fa-redo-alt"></i>
+        </button>
+
+        <!-- Score Bar with Icons -->
+        <div id="scoreBar">
+            <div class="score-item">
+                <i class="fas fa-star score-icon" style="color: #FFD700;"></i>
+                <span class="score-value" id="score">0</span>
+            </div>
+            <div class="score-item">
+                <i class="fas fa-bullseye score-icon" style="color: #FF6B9D;"></i>
+                <span class="score-value" id="moves">30</span>
+            </div>
+        </div>
+
+        <!-- Canvas - NO WHITE BACKGROUND -->
+        <canvas id="candyCanvas" class="loading"></canvas>
+
+        <!-- Game Over Overlay -->
+        <div id="gameOver">
+            <div class="over-box">
+                <div class="over-title" id="overTitle">🎉</div>
+                <div class="over-score" id="overScore">Điểm: 0</div>
+                <button class="over-btn primary" onclick="reset()">
+                    <i class="fas fa-redo-alt"></i> Chơi lại
+                </button>
+                <button class="over-btn secondary" onclick="back()">
+                    <i class="fas fa-home"></i> Trang chủ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dùng candy-crush-complete.js đã được nâng cấp -->
+    <script src="candy-crush-complete.js"></script>
+    <script src="candy-device-detector-v2.js"></script>
+    <script src="candy-swipe-desktop-v2.js"></script>
+    <script src="candy-swipe-mobile-v2.js"></script>
+    <script src="candy-swipe-unified-v2.js"></script>
+    <script src="candy-audio-mobile-fix.js"></script>
+    <script>
+        let g, d, a;
+
+        window.addEventListener('load', () => {
+            console.log('🍬 Candy Crush Premium Loading...');
+
+            // Init detector
+            d = new CandyDeviceDetectorV2();
+            const c = d.canvasConfig;
+
+            // Setup canvas
+            const cv = document.getElementById('candyCanvas');
+            cv.width = c.canvasSize;
+            cv.height = c.canvasSize;
+
+            console.log('📱 Device:', d.device.category);
+            console.log('📐 Canvas:', c.canvasSize + 'px');
+            console.log('🍬 Candy:', c.candySize + 'px');
+
+            // Init game (CandyCrushComplete từ candy-crush-complete.js)
+            g = new CandyCrushComplete();
+            g.config.CELL_SIZE = c.cellSize;
+            g.config.CANDY_SIZE = c.candySize;
+            g.config.HIT_AREA = c.hitArea;
+
+            // Override UI update
+            const u = g.updateUI.bind(g);
+            g.updateUI = () => {
+                u();
+                document.getElementById('score').textContent = g.score;
+                document.getElementById('moves').textContent = g.moves;
+            };
+
+            g.init('candyCanvas');
+
+            // Audio fix
+            if (g.audioEngine && window.CandyAudioMobileFix) {
+                a = new CandyAudioMobileFix(g.audioEngine);
+            }
+
+            // Swipe
+            new CandySwipeUnified(cv, g);
+
+            // Remove loading
+            setTimeout(() => {
+                cv.classList.remove('loading');
+            }, 300);
+
+            // Check game over
+            setInterval(() => {
+                if (!g) return;
+                if (g.score >= g.config.TARGET_SCORE) {
+                    end('🎉', g.score, true);
+                } else if (g.moves <= 0 && !g.isAnimating) {
+                    end('😢', g.score, false);
+                }
+            }, 500);
+
+            console.log('✅ Premium mode ready!');
+        });
+
+        function end(icon, s, w) {
+            const o = document.getElementById('gameOver');
+            if (o.classList.contains('show')) return;
+            document.getElementById('overTitle').textContent = icon;
+            document.getElementById('overScore').textContent = `Điểm: ${s}`;
+            o.classList.add('show');
+            if (g && g.audioEngine) {
+                w ? g.audioEngine.playVictorySound() : g.audioEngine.playErrorSound();
+            }
+        }
+
+        function reset() {
+            document.getElementById('gameOver').classList.remove('show');
+            if (g) {
+                g.reset();
+                document.getElementById('score').textContent = '0';
+                document.getElementById('moves').textContent = '30';
+            }
+        }
+
+        function back() {
+            if (confirm('Thoát game?')) location.href = 'index.html';
+        }
+
+        document.getElementById('btnBack').onclick = back;
+        document.getElementById('btnReset').onclick = reset;
+
+        // Resize handler
+        let rt;
+        window.addEventListener('resize', () => {
+            clearTimeout(rt);
+            rt = setTimeout(() => {
+                if (d) {
+                    const nc = d.update();
+                    const cv = document.getElementById('candyCanvas');
+                    cv.width = nc.canvasSize;
+                    cv.height = nc.canvasSize;
+                    if (g) {
+                        g.config.CELL_SIZE = nc.cellSize;
+                        g.config.CANDY_SIZE = nc.candySize;
+                        g.config.HIT_AREA = nc.hitArea;
+                    }
+                }
+            }, 300);
+        });
+    </script>
+</body>
+
+</html>

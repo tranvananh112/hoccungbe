@@ -893,7 +893,7 @@
             this.ctx.scale(scale * squashX, scale * squashY);
             this.ctx.globalAlpha = alpha;
 
-            const size = 25;
+            const size = this.config.CANDY_SIZE || 25;
 
             // Shadow - đơn giản hơn
             this.ctx.fillStyle = 'rgba(0,0,0,0.15)';
@@ -944,7 +944,7 @@
             this.ctx.globalAlpha = alpha;
 
             // Draw base candy
-            const size = 25;
+            const size = this.config.CANDY_SIZE || 25;
 
             // OPTIMIZED: Cache gradient
             const gradientKey = `candy_${candy.color}`;
@@ -1005,7 +1005,7 @@
             this.ctx.scale(scale * squashX, scale * squashY);
             this.ctx.globalAlpha = alpha;
 
-            const size = 25;
+            const size = this.config.CANDY_SIZE || 25;
 
             // Base candy
             this.ctx.shadowColor = design.colors.glow;
@@ -1064,7 +1064,7 @@
             this.ctx.scale(scale * squashX, scale * squashY);
             this.ctx.globalAlpha = alpha;
 
-            const size = 25;
+            const size = this.config.CANDY_SIZE || 25;
             const colors = ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#8B00FF'];
 
             // Rainbow sphere
