@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>🍬 Candy Crush Saga</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
@@ -118,15 +117,17 @@
         .star-icon {
             font-size: 24px;
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+            display: inline-block;
         }
 
         .star-icon.earned {
-            color: #FFD700;
+            filter: drop-shadow(0 2px 8px rgba(255, 215, 0, 0.8));
             animation: starPulse 1s ease-in-out infinite;
         }
 
         .star-icon.locked {
-            color: rgba(255, 255, 255, 0.4);
+            opacity: 0.3;
+            filter: grayscale(100%);
         }
 
         @keyframes starPulse {
@@ -552,7 +553,7 @@
     <div class="game-wrapper">
         <!-- Back Button -->
         <button class="back-btn-float" onclick="goBack()" title="Quay lại">
-            <i class="fas fa-chevron-left"></i>
+            <span style="font-size: 20px;">←</span>
         </button>
 
         <!-- Header Candy Crush Style -->
@@ -563,16 +564,16 @@
                     <div class="level-text">Level</div>
                 </div>
                 <div class="lives-container">
-                    <i class="fas fa-heart heart-icon"></i>
+                    <span class="heart-icon">❤️</span>
                     <span class="lives-count" id="livesCount">5</span>
                 </div>
             </div>
 
             <div class="header-center">
                 <div class="progress-stars">
-                    <i class="fas fa-star star-icon" id="star1"></i>
-                    <i class="fas fa-star star-icon" id="star2"></i>
-                    <i class="fas fa-star star-icon" id="star3"></i>
+                    <span class="star-icon" id="star1">⭐</span>
+                    <span class="star-icon" id="star2">⭐</span>
+                    <span class="star-icon" id="star3">⭐</span>
                 </div>
                 <div class="progress-bar-container">
                     <div class="progress-bar-fill" id="progressBar"></div>
@@ -585,7 +586,7 @@
                     <div class="moves-count" id="movesCount">30</div>
                 </div>
                 <div class="avatar-circle">
-                    <i class="fas fa-user"></i>
+                    <span style="font-size: 24px;">👤</span>
                 </div>
             </div>
         </div>
@@ -623,10 +624,10 @@
                 <div class="over-level" id="overLevel"></div>
                 <div class="over-stars" id="overStars"></div>
                 <button class="over-btn primary" id="overPrimaryBtn">
-                    <i class="fas fa-play"></i> Level tiếp theo
+                    ▶️ Level tiếp theo
                 </button>
                 <button class="over-btn secondary" onclick="goBack()">
-                    <i class="fas fa-home"></i> Trang chủ
+                    🏠 Trang chủ
                 </button>
             </div>
         </div>
@@ -1218,9 +1219,9 @@
                     const star1 = document.getElementById('star1');
                     const star2 = document.getElementById('star2');
                     const star3 = document.getElementById('star3');
-                    if (star1) star1.className = percent >= 33 ? 'fas fa-star star-icon earned' : 'fas fa-star star-icon locked';
-                    if (star2) star2.className = percent >= 66 ? 'fas fa-star star-icon earned' : 'fas fa-star star-icon locked';
-                    if (star3) star3.className = percent >= 100 ? 'fas fa-star star-icon earned' : 'fas fa-star star-icon locked';
+                    if (star1) star1.className = percent >= 33 ? 'star-icon earned' : 'star-icon locked';
+                    if (star2) star2.className = percent >= 66 ? 'star-icon earned' : 'star-icon locked';
+                    if (star3) star3.className = percent >= 100 ? 'star-icon earned' : 'star-icon locked';
                 }
             }
 
@@ -1545,7 +1546,7 @@
                     starsDiv.appendChild(star);
                 }
 
-                primaryBtn.innerHTML = '<i class="fas fa-play"></i> Level tiếp theo';
+                primaryBtn.innerHTML = '▶️ Level tiếp theo';
                 primaryBtn.onclick = nextLevel;
 
                 if (game && game.audioEngine) {
@@ -1561,11 +1562,11 @@
                 document.getElementById('livesCount').textContent = lives;
 
                 if (lives <= 0) {
-                    primaryBtn.innerHTML = '<i class="fas fa-home"></i> Về trang chủ';
+                    primaryBtn.innerHTML = '🏠 Về trang chủ';
                     primaryBtn.onclick = goBack;
                     levelText.textContent = 'Hết mạng! Game Over';
                 } else {
-                    primaryBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Thử lại';
+                    primaryBtn.innerHTML = '🔄 Thử lại';
                     primaryBtn.onclick = resetGame;
                 }
 
